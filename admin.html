@@ -3,316 +3,573 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>後台管理 — 動物保護資訊查詢系統</title>
+  <title>後台管理 · 動物保護資訊系統</title>
   <link rel="stylesheet" href="style.css">
 </head>
-<body>
+<body class="admin-body">
 
-<!-- PASSWORD GATE -->
-<div class="password-gate" id="passwordGate">
-  <div class="password-box">
-    <div class="icon">🔐</div>
-    <h2>後台管理</h2>
-    <p>請輸入管理員密碼以繼續</p>
-    <input type="password" id="pwdInput" placeholder="密碼" maxlength="20"
-           onkeydown="if(event.key==='Enter')checkPwd()">
-    <div class="err" id="pwdErr"></div>
-    <button class="btn btn-primary" style="width:100%" onclick="checkPwd()">進入管理</button>
+<!-- Login Screen -->
+<div class="admin-login" id="login-screen">
+  <div class="login-card">
+    <div class="login-icon">🔐</div>
+    <div class="login-title">後台管理</div>
+    <div class="login-sub">動物保護資訊查詢系統</div>
+    <div class="form-group">
+      <label>管理密碼</label>
+      <input type="password" id="pw-input" placeholder="輸入密碼" autocomplete="current-password">
+      <div class="error-msg" id="pw-error">密碼錯誤，請重試</div>
+    </div>
+    <button class="btn btn-primary btn-block" onclick="doLogin()">登入</button>
+    <div style="margin-top:16px">
+      <a href="index.html" style="font-size:0.85rem;color:var(--text-light)">← 回查詢首頁</a>
+    </div>
   </div>
 </div>
 
-<!-- ADMIN CONTENT (hidden until auth) -->
-<div id="adminContent" style="display:none;">
-  <div class="admin-page">
-    <!-- HEADER -->
-    <div class="admin-header">
-      <h1>⚙ 後台管理</h1>
-      <div style="display:flex;gap:8px;flex-wrap:wrap;">
-        <a href="index.html" class="btn btn-secondary">← 返回首頁</a>
-        <button class="btn btn-success" onclick="exportData()">📥 匯出 JSON</button>
-        <label class="btn btn-secondary" style="cursor:pointer;">
-          📤 匯入 JSON
-          <input type="file" accept=".json" style="display:none" onchange="importData(event)">
-        </label>
-        <button class="btn btn-primary" onclick="saveAll()">💾 儲存所有變更</button>
-      </div>
+<!-- Admin Panel (hidden until login) -->
+<div id="admin-panel" style="display:none">
+
+  <!-- Header -->
+  <header class="admin-header">
+    <div class="admin-title">⚙ 後台管理 · 動物保護資訊系統</div>
+    <div class="admin-actions">
+      <button class="btn btn-success" onclick="exportJSON()">📥 匯出 JSON</button>
+      <label class="btn btn-secondary" style="cursor:pointer">
+        📤 匯入 JSON
+        <input type="file" id="import-file" accept=".json" style="display:none" onchange="importJSON(this)">
+      </label>
+      <button class="btn btn-secondary" onclick="clearStorage()">🗑 清除暫存</button>
+      <a href="index.html" class="btn btn-secondary">← 回首頁</a>
+      <button class="btn btn-danger" onclick="doLogout()">登出</button>
+    </div>
+  </header>
+
+  <!-- Layout -->
+  <div class="admin-layout">
+
+    <!-- Sidebar: County Select -->
+    <div class="admin-sidebar">
+      <div class="admin-sidebar-title">縣市</div>
+      <div id="admin-county-nav"></div>
     </div>
 
-    <div id="saveMsg" style="display:none;background:#E8F4E8;border-radius:8px;padding:10px 16px;margin-bottom:16px;color:#2E7D32;font-weight:700;"></div>
+    <!-- Main Content -->
+    <div class="admin-content">
 
-    <!-- LAYOUT -->
-    <div class="admin-layout">
-      <!-- TREE SIDEBAR -->
-      <div class="admin-sidebar">
-        <div style="font-size:13px;font-weight:700;color:var(--text-light);margin-bottom:12px;text-transform:uppercase;letter-spacing:.08em;">資料樹狀結構</div>
-        <div id="adminTree"></div>
-      </div>
-
-      <!-- MAIN EDITOR -->
-      <div class="admin-main" id="adminMain">
-        <div class="admin-card" style="text-align:center;padding:48px 20px;color:var(--text-light);">
-          <div style="font-size:40px;margin-bottom:12px;">👈</div>
-          <div>請從左側選擇縣市或主題開始編輯</div>
+      <!-- Marquee Edit -->
+      <div class="admin-section">
+        <div class="admin-section-title">📢 跑馬燈文字</div>
+        <div class="marquee-edit">
+          <textarea id="marquee-input" placeholder="輸入跑馬燈公告文字…"></textarea>
+          <button class="btn btn-primary" onclick="saveMarquee()">儲存</button>
         </div>
       </div>
+
+      <!-- Topic & Items -->
+      <div class="admin-section">
+        <div class="admin-section-title" style="justify-content:space-between">
+          <span>📚 主題與資料管理</span>
+          <button class="btn btn-success" style="font-size:0.85rem;padding:6px 14px" onclick="openAddTopic()">＋ 新增主題</button>
+        </div>
+        <div class="topic-tree" id="admin-topic-tree"></div>
+      </div>
+
     </div>
   </div>
 </div>
+
+<!-- Modal: Add/Edit Topic -->
+<div class="modal-overlay hidden" id="modal-topic">
+  <div class="modal">
+    <div class="modal-title" id="modal-topic-title">新增主題</div>
+    <div class="form-group">
+      <label>主題名稱</label>
+      <input type="text" id="topic-name-input" placeholder="例：服務時間與聯繫">
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="closeModal('modal-topic')">取消</button>
+      <button class="btn btn-primary" onclick="saveTopic()">儲存</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Add/Edit Item -->
+<div class="modal-overlay hidden" id="modal-item">
+  <div class="modal">
+    <div class="modal-title" id="modal-item-title">新增資料</div>
+    <div class="form-group">
+      <label>問題 / 標題</label>
+      <input type="text" id="item-question-input" placeholder="問題或標題">
+    </div>
+    <div class="form-group">
+      <label>回答 / 內容</label>
+      <textarea id="item-answer-input" rows="6" placeholder="詳細回答或說明…"></textarea>
+    </div>
+    <div class="form-group">
+      <label>電話（選填）</label>
+      <input type="text" id="item-phone-input" placeholder="04-1234567">
+    </div>
+    <div class="form-group">
+      <label>連結（選填）</label>
+      <input type="url" id="item-link-input" placeholder="https://…">
+    </div>
+    <div class="form-group">
+      <label>圖片（選填，上傳後以 base64 儲存）</label>
+      <input type="file" id="item-image-input" accept="image/*" onchange="previewImage(this)">
+      <div id="image-preview-wrap" style="margin-top:8px;display:none">
+        <img id="image-preview" style="max-width:100%;max-height:200px;border-radius:8px;display:block">
+        <button class="btn btn-danger" style="margin-top:6px;font-size:0.82rem;padding:4px 10px" onclick="clearImage()">移除圖片</button>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="closeModal('modal-item')">取消</button>
+      <button class="btn btn-primary" onclick="saveItem()">儲存</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Confirm Delete -->
+<div class="modal-overlay hidden" id="modal-confirm">
+  <div class="modal" style="max-width:420px">
+    <div class="modal-title">⚠ 確認刪除</div>
+    <p id="confirm-msg" style="color:var(--text-sub);font-size:0.95rem;margin-bottom:10px"></p>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="closeModal('modal-confirm')">取消</button>
+      <button class="btn btn-danger" id="confirm-ok-btn">確認刪除</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
 
 <script>
-let data = null;
-let currentCountyIdx = null;
-let currentTopicIdx = null;
+(function() {
+  let appData = null;
+  let currentCountyId = null;
+  // Edit state
+  let editingTopicIdx = null;   // null=add, number=edit
+  let editingItemState = null;  // {topicIdx, itemIdx} or {topicIdx, itemIdx:null}
+  let pendingImageBase64 = null;
+  let confirmCallback = null;
 
-// ── Auth ──
-function checkPwd() {
-  const v = document.getElementById('pwdInput').value;
-  const correct = (data && data.settings && data.settings.admin_password) ? data.settings.admin_password : '1959';
-  if (v === correct) {
-    document.getElementById('passwordGate').style.display = 'none';
-    document.getElementById('adminContent').style.display = '';
-  } else {
-    document.getElementById('pwdErr').textContent = '密碼錯誤，請再試一次';
-    document.getElementById('pwdInput').value = '';
-    document.getElementById('pwdInput').focus();
-  }
-}
-
-// ── Load data ──
-async function loadData() {
-  const saved = localStorage.getItem('animalData');
-  if (saved) { try { return JSON.parse(saved); } catch(e) {} }
-  const res = await fetch('data.json');
-  return await res.json();
-}
-
-(async () => {
-  try {
-    data = await loadData();
-  } catch(e) {
-    alert('資料載入失敗：' + e.message);
-    return;
-  }
-  buildTree();
-})();
-
-// ── Tree ──
-function buildTree() {
-  const tree = document.getElementById('adminTree');
-  tree.innerHTML = '';
-  data.counties.forEach((county, ci) => {
-    const wrap = document.createElement('div');
-    wrap.className = 'tree-county';
-    const cBtn = document.createElement('button');
-    cBtn.className = 'tree-county-btn';
-    cBtn.textContent = county.name;
-    cBtn.onclick = () => {
-      currentCountyIdx = ci;
-      currentTopicIdx = null;
-      document.querySelectorAll('.tree-county-btn').forEach(b => b.classList.remove('active'));
-      cBtn.classList.add('active');
-      const topics = wrap.querySelector('.tree-topics');
-      document.querySelectorAll('.tree-topics').forEach(t => t !== topics && t.classList.remove('show'));
-      topics.classList.toggle('show');
-      renderCountyEditor(ci);
-    };
-    const topicsDiv = document.createElement('div');
-    topicsDiv.className = 'tree-topics';
-    county.topics.forEach((topic, ti) => {
-      const tBtn = document.createElement('button');
-      tBtn.className = 'tree-topic-btn';
-      tBtn.textContent = topic.title;
-      tBtn.onclick = (e) => {
-        e.stopPropagation();
-        currentCountyIdx = ci;
-        currentTopicIdx = ti;
-        document.querySelectorAll('.tree-topic-btn').forEach(b => b.classList.remove('active'));
-        tBtn.classList.add('active');
-        renderTopicEditor(ci, ti);
-      };
-      topicsDiv.appendChild(tBtn);
+  /* ════════════════════════
+     LOGIN
+  ════════════════════════ */
+  window.doLogin = function() {
+    const pw = document.getElementById('pw-input').value;
+    loadData(() => {
+      const expected = (appData.settings && appData.settings.admin_password) || '1959';
+      if (pw === expected) {
+        document.getElementById('login-screen').style.display = 'none';
+        document.getElementById('admin-panel').style.display = 'block';
+        document.getElementById('pw-error').classList.remove('show');
+      } else {
+        document.getElementById('pw-error').classList.add('show');
+        document.getElementById('pw-input').value = '';
+        document.getElementById('pw-input').focus();
+      }
     });
-    wrap.appendChild(cBtn);
-    wrap.appendChild(topicsDiv);
-    tree.appendChild(wrap);
-  });
-}
-
-// ── County editor (marquee) ──
-function renderCountyEditor(ci) {
-  const county = data.counties[ci];
-  const main = document.getElementById('adminMain');
-  main.innerHTML = `
-    <div class="admin-card">
-      <h2>${county.name} — 縣市設定</h2>
-      <h3>跑馬燈文字</h3>
-      <div class="marquee-editor">
-        <input type="text" id="marqueeInput_${ci}" value="${escAttr(county.marquee || '')}" placeholder="請輸入跑馬燈文字…">
-        <button class="btn btn-primary btn-sm" onclick="saveMarquee(${ci})">儲存跑馬燈</button>
-      </div>
-      <p style="font-size:12px;color:var(--text-light);margin-top:8px;">提示：儲存後請點擊「儲存所有變更」使其生效。</p>
-    </div>`;
-}
-
-function saveMarquee(ci) {
-  const val = document.getElementById(`marqueeInput_${ci}`).value;
-  data.counties[ci].marquee = val;
-  showMsg('跑馬燈已更新，請按「儲存所有變更」儲存。');
-}
-
-// ── Topic editor ──
-function renderTopicEditor(ci, ti) {
-  const county = data.counties[ci];
-  const topic = county.topics[ti];
-  const main = document.getElementById('adminMain');
-  main.innerHTML = `
-    <div class="admin-card">
-      <h2>${county.name} › ${topic.title}</h2>
-      <div id="itemList"></div>
-      <button class="btn btn-primary" onclick="addItem(${ci},${ti})">＋ 新增項目</button>
-    </div>`;
-  renderItems(ci, ti);
-}
-
-function renderItems(ci, ti) {
-  const topic = data.counties[ci].topics[ti];
-  const list = document.getElementById('itemList');
-  list.innerHTML = '';
-  topic.items.forEach((item, ii) => {
-    const div = document.createElement('div');
-    div.className = 'item-editor';
-    div.id = `item_${ii}`;
-    div.innerHTML = `
-      <div class="item-editor-header" onclick="toggleItemEditor(${ii})">
-        <span style="flex:1">${escHtml(item.question) || '（未命名）'}</span>
-        <button class="btn btn-danger btn-sm" onclick="event.stopPropagation();deleteItem(${ci},${ti},${ii})">🗑 刪除</button>
-        <span style="font-size:12px;color:var(--text-light)">▼</span>
-      </div>
-      <div class="item-editor-body" id="body_${ii}">
-        <div class="form-group">
-          <label>問題</label>
-          <input type="text" id="q_${ii}" value="${escAttr(item.question||'')}" oninput="updateItem(${ci},${ti},${ii},'question',this.value)">
-        </div>
-        <div class="form-group">
-          <label>答案</label>
-          <textarea id="a_${ii}" oninput="updateItem(${ci},${ti},${ii},'answer',this.value)">${escHtml(item.answer||'')}</textarea>
-        </div>
-        <div class="form-group">
-          <label>電話（可用 / 分隔多組）</label>
-          <input type="text" value="${escAttr(item.phone||'')}" oninput="updateItem(${ci},${ti},${ii},'phone',this.value)">
-        </div>
-        <div class="form-group">
-          <label>連結 URL</label>
-          <input type="url" value="${escAttr(item.link||'')}" oninput="updateItem(${ci},${ti},${ii},'link',this.value)">
-        </div>
-        <div class="form-group">
-          <label>圖片上傳</label>
-          <input type="file" accept="image/*" onchange="handleImage(event,${ci},${ti},${ii})">
-          ${item.image ? `<img src="${item.image}" class="image-preview" id="img_${ii}">` : `<img src="" class="image-preview" id="img_${ii}" style="display:none">`}
-        </div>
-      </div>`;
-    list.appendChild(div);
-  });
-}
-
-function toggleItemEditor(ii) {
-  const body = document.getElementById(`body_${ii}`);
-  body.classList.toggle('show');
-}
-
-function updateItem(ci, ti, ii, field, value) {
-  data.counties[ci].topics[ti].items[ii][field] = value || null;
-  // Update header text if question changed
-  if (field === 'question') {
-    const hdr = document.querySelector(`#item_${ii} .item-editor-header span:first-child`);
-    if (hdr) hdr.textContent = value || '（未命名）';
-  }
-}
-
-function handleImage(event, ci, ti, ii) {
-  const file = event.target.files[0];
-  if (!file) return;
-  const reader = new FileReader();
-  reader.onload = e => {
-    const b64 = e.target.result;
-    data.counties[ci].topics[ti].items[ii].image = b64;
-    const img = document.getElementById(`img_${ii}`);
-    if (img) { img.src = b64; img.style.display = 'block'; }
   };
-  reader.readAsDataURL(file);
-}
 
-function addItem(ci, ti) {
-  const newItem = {
-    id: 'item_' + Date.now(),
-    question: '新問題',
-    answer: '請填寫答案',
-    phone: null,
-    link: null,
-    image: null
+  document.getElementById('pw-input').addEventListener('keydown', e => {
+    if (e.key === 'Enter') doLogin();
+  });
+
+  window.doLogout = function() {
+    document.getElementById('admin-panel').style.display = 'none';
+    document.getElementById('login-screen').style.display = 'flex';
+    document.getElementById('pw-input').value = '';
   };
-  data.counties[ci].topics[ti].items.push(newItem);
-  renderItems(ci, ti);
-  // open last
-  const last = data.counties[ci].topics[ti].items.length - 1;
-  setTimeout(() => {
-    const body = document.getElementById(`body_${last}`);
-    if (body) body.classList.add('show');
-  }, 50);
-}
 
-function deleteItem(ci, ti, ii) {
-  if (!confirm('確定要刪除這個項目嗎？')) return;
-  data.counties[ci].topics[ti].items.splice(ii, 1);
-  renderItems(ci, ti);
-}
-
-// ── Save / Export / Import ──
-function saveAll() {
-  localStorage.setItem('animalData', JSON.stringify(data));
-  showMsg('✅ 已成功儲存到瀏覽器本機儲存！');
-}
-
-function exportData() {
-  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = 'data.json';
-  a.click();
-  URL.revokeObjectURL(a.href);
-}
-
-function importData(event) {
-  const file = event.target.files[0];
-  if (!file) return;
-  const reader = new FileReader();
-  reader.onload = e => {
-    try {
-      const imported = JSON.parse(e.target.result);
-      if (!imported.counties) throw new Error('無效的資料格式');
-      data = imported;
-      localStorage.setItem('animalData', JSON.stringify(data));
-      buildTree();
-      document.getElementById('adminMain').innerHTML = '<div class="admin-card" style="text-align:center;padding:48px 20px;color:var(--text-light);"><div style="font-size:40px;margin-bottom:12px;">✅</div><div>匯入成功！請從左側選擇要編輯的內容。</div></div>';
-      showMsg('✅ 資料匯入成功！');
-    } catch(err) {
-      alert('匯入失敗：' + err.message);
+  /* ════════════════════════
+     DATA LOAD / SAVE
+  ════════════════════════ */
+  function loadData(cb) {
+    if (appData) { cb && cb(); return; }
+    const saved = localStorage.getItem('animalData');
+    if (saved) {
+      try { appData = JSON.parse(saved); cb && cb(); return; } catch(e) {}
     }
+    fetch('data.json')
+      .then(r => r.json())
+      .then(d => { appData = d; cb && cb(); })
+      .catch(() => {
+        toast('無法載入資料', 'err');
+        appData = { counties: [], settings: { admin_password: '1959', site_title: '動物保護資訊查詢系統' } };
+        cb && cb();
+      });
+  }
+
+  function saveData() {
+    localStorage.setItem('animalData', JSON.stringify(appData));
+    toast('已儲存至瀏覽器暫存', 'ok');
+  }
+
+  window.exportJSON = function() {
+    if (!appData) return;
+    const blob = new Blob([JSON.stringify(appData, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'data.json';
+    a.click();
+    URL.revokeObjectURL(url);
+    toast('已匯出 data.json', 'ok');
   };
-  reader.readAsText(file);
-  event.target.value = '';
-}
 
-function showMsg(msg) {
-  const el = document.getElementById('saveMsg');
-  el.textContent = msg;
-  el.style.display = 'block';
-  clearTimeout(el._t);
-  el._t = setTimeout(() => el.style.display = 'none', 3500);
-}
+  window.importJSON = function(input) {
+    const file = input.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = e => {
+      try {
+        appData = JSON.parse(e.target.result);
+        saveData();
+        buildAdminUI();
+        toast('匯入成功', 'ok');
+      } catch(err) {
+        toast('JSON 格式錯誤', 'err');
+      }
+    };
+    reader.readAsText(file);
+    input.value = '';
+  };
 
-function escHtml(s) { return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
-function escAttr(s) { return (s||'').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
+  window.clearStorage = function() {
+    if (!confirm('確定清除瀏覽器暫存？清除後將重新讀取 data.json。')) return;
+    localStorage.removeItem('animalData');
+    appData = null;
+    loadData(() => { buildAdminUI(); toast('已清除暫存', 'ok'); });
+  };
+
+  /* ════════════════════════
+     BUILD UI
+  ════════════════════════ */
+  function buildAdminUI() {
+    buildCountyNav();
+    if (appData.counties && appData.counties.length > 0) {
+      selectAdminCounty(currentCountyId || appData.counties[0].id);
+    }
+  }
+
+  function buildCountyNav() {
+    const nav = document.getElementById('admin-county-nav');
+    nav.innerHTML = '';
+    (appData.counties || []).forEach(c => {
+      const btn = document.createElement('button');
+      btn.className = 'admin-county-btn';
+      btn.dataset.id = c.id;
+      btn.style.backgroundColor = c.color || '#888';
+      btn.textContent = c.name;
+      btn.addEventListener('click', () => selectAdminCounty(c.id));
+      nav.appendChild(btn);
+    });
+  }
+
+  function selectAdminCounty(id) {
+    currentCountyId = id;
+    document.querySelectorAll('.admin-county-btn').forEach(b => {
+      b.classList.toggle('active', b.dataset.id === id);
+    });
+    const county = getCounty();
+    if (!county) return;
+
+    // Marquee
+    document.getElementById('marquee-input').value = county.marquee || '';
+
+    // Topics
+    renderAdminTopics();
+  }
+
+  function getCounty() {
+    return (appData.counties || []).find(c => c.id === currentCountyId);
+  }
+
+  function renderAdminTopics() {
+    const county = getCounty();
+    if (!county) return;
+    const tree = document.getElementById('admin-topic-tree');
+    tree.innerHTML = '';
+
+    (county.topics || []).forEach((topic, ti) => {
+      const node = document.createElement('div');
+      node.className = 'topic-node';
+      node.dataset.ti = ti;
+
+      const hd = document.createElement('div');
+      hd.className = 'topic-node-hd';
+      hd.innerHTML = `
+        <span class="topic-node-title">${escHtml(topic.title)}</span>
+        <span class="topic-node-count">${(topic.items||[]).length} 則</span>
+        <span class="topic-node-arrow">▼</span>
+        <div class="topic-node-actions">
+          <button class="icon-btn edit" title="編輯主題名稱" onclick="event.stopPropagation();openEditTopic(${ti})">✏</button>
+          <button class="icon-btn del" title="刪除主題" onclick="event.stopPropagation();deleteTopic(${ti})">🗑</button>
+        </div>
+      `;
+
+      const itemList = document.createElement('div');
+      itemList.className = 'item-list';
+      itemList.id = 'topic-items-' + ti;
+
+      (topic.items || []).forEach((item, ii) => {
+        const row = document.createElement('div');
+        row.className = 'item-entry';
+        row.innerHTML = `
+          <span class="item-entry-q">${escHtml(item.question)}</span>
+          <div class="item-entry-actions">
+            <button class="icon-btn edit" title="編輯" onclick="openEditItem(${ti},${ii})">✏</button>
+            <button class="icon-btn del" title="刪除" onclick="deleteItem(${ti},${ii})">🗑</button>
+          </div>
+        `;
+        itemList.appendChild(row);
+      });
+
+      // Add item button
+      const addRow = document.createElement('div');
+      addRow.className = 'add-topic-row';
+      addRow.innerHTML = `<button class="btn btn-success" style="font-size:0.83rem;padding:6px 14px" onclick="openAddItem(${ti})">＋ 新增資料</button>`;
+      itemList.appendChild(addRow);
+
+      hd.addEventListener('click', () => {
+        hd.classList.toggle('open');
+        itemList.classList.toggle('open');
+      });
+
+      node.appendChild(hd);
+      node.appendChild(itemList);
+      tree.appendChild(node);
+    });
+  }
+
+  /* ════════════════════════
+     MARQUEE
+  ════════════════════════ */
+  window.saveMarquee = function() {
+    const county = getCounty();
+    if (!county) return;
+    county.marquee = document.getElementById('marquee-input').value;
+    saveData();
+  };
+
+  /* ════════════════════════
+     TOPIC CRUD
+  ════════════════════════ */
+  window.openAddTopic = function() {
+    editingTopicIdx = null;
+    document.getElementById('modal-topic-title').textContent = '新增主題';
+    document.getElementById('topic-name-input').value = '';
+    openModal('modal-topic');
+    setTimeout(() => document.getElementById('topic-name-input').focus(), 80);
+  };
+
+  window.openEditTopic = function(ti) {
+    const county = getCounty();
+    editingTopicIdx = ti;
+    document.getElementById('modal-topic-title').textContent = '編輯主題名稱';
+    document.getElementById('topic-name-input').value = county.topics[ti].title;
+    openModal('modal-topic');
+    setTimeout(() => document.getElementById('topic-name-input').focus(), 80);
+  };
+
+  window.saveTopic = function() {
+    const name = document.getElementById('topic-name-input').value.trim();
+    if (!name) { toast('請輸入主題名稱', 'err'); return; }
+    const county = getCounty();
+    if (editingTopicIdx === null) {
+      // Add
+      county.topics = county.topics || [];
+      const id = currentCountyId + '_topic_' + Date.now();
+      county.topics.push({ id, title: name, items: [] });
+    } else {
+      county.topics[editingTopicIdx].title = name;
+    }
+    saveData();
+    renderAdminTopics();
+    closeModal('modal-topic');
+  };
+
+  window.deleteTopic = function(ti) {
+    const county = getCounty();
+    const topic = county.topics[ti];
+    openConfirm(`確定刪除主題「${topic.title}」及其所有 ${(topic.items||[]).length} 筆資料？`, () => {
+      county.topics.splice(ti, 1);
+      saveData();
+      renderAdminTopics();
+    });
+  };
+
+  /* ════════════════════════
+     ITEM CRUD
+  ════════════════════════ */
+  function resetItemModal() {
+    document.getElementById('item-question-input').value = '';
+    document.getElementById('item-answer-input').value = '';
+    document.getElementById('item-phone-input').value = '';
+    document.getElementById('item-link-input').value = '';
+    document.getElementById('item-image-input').value = '';
+    document.getElementById('image-preview-wrap').style.display = 'none';
+    document.getElementById('image-preview').src = '';
+    pendingImageBase64 = null;
+  }
+
+  window.openAddItem = function(ti) {
+    editingItemState = { topicIdx: ti, itemIdx: null };
+    document.getElementById('modal-item-title').textContent = '新增資料';
+    resetItemModal();
+    openModal('modal-item');
+    setTimeout(() => document.getElementById('item-question-input').focus(), 80);
+  };
+
+  window.openEditItem = function(ti, ii) {
+    const county = getCounty();
+    const item = county.topics[ti].items[ii];
+    editingItemState = { topicIdx: ti, itemIdx: ii };
+    document.getElementById('modal-item-title').textContent = '編輯資料';
+    resetItemModal();
+    document.getElementById('item-question-input').value = item.question || '';
+    document.getElementById('item-answer-input').value = item.answer || '';
+    document.getElementById('item-phone-input').value = item.phone || '';
+    document.getElementById('item-link-input').value = item.link || '';
+    if (item.image) {
+      pendingImageBase64 = item.image;
+      document.getElementById('image-preview').src = item.image;
+      document.getElementById('image-preview-wrap').style.display = 'block';
+    }
+    openModal('modal-item');
+    setTimeout(() => document.getElementById('item-question-input').focus(), 80);
+  };
+
+  window.saveItem = function() {
+    const question = document.getElementById('item-question-input').value.trim();
+    if (!question) { toast('請輸入問題/標題', 'err'); return; }
+    const answer = document.getElementById('item-answer-input').value.trim();
+    const phone = document.getElementById('item-phone-input').value.trim() || null;
+    const link = document.getElementById('item-link-input').value.trim() || null;
+    const image = pendingImageBase64 || null;
+
+    const county = getCounty();
+    const { topicIdx, itemIdx } = editingItemState;
+    const topic = county.topics[topicIdx];
+
+    if (itemIdx === null) {
+      // Add
+      topic.items = topic.items || [];
+      topic.items.push({
+        id: currentCountyId + '_item_' + Date.now(),
+        question, answer, phone, link, image
+      });
+    } else {
+      const item = topic.items[itemIdx];
+      item.question = question;
+      item.answer = answer;
+      item.phone = phone;
+      item.link = link;
+      item.image = image;
+    }
+
+    saveData();
+    renderAdminTopics();
+    closeModal('modal-item');
+
+    // Re-open the topic
+    setTimeout(() => {
+      const hd = document.querySelector(`#admin-topic-tree .topic-node:nth-child(${topicIdx+1}) .topic-node-hd`);
+      const list = document.getElementById('topic-items-' + topicIdx);
+      if (hd && list) { hd.classList.add('open'); list.classList.add('open'); }
+    }, 50);
+  };
+
+  window.deleteItem = function(ti, ii) {
+    const county = getCounty();
+    const item = county.topics[ti].items[ii];
+    openConfirm(`確定刪除「${item.question}」？`, () => {
+      county.topics[ti].items.splice(ii, 1);
+      saveData();
+      renderAdminTopics();
+      // Re-open
+      setTimeout(() => {
+        const hd = document.querySelector(`#admin-topic-tree .topic-node:nth-child(${ti+1}) .topic-node-hd`);
+        const list = document.getElementById('topic-items-' + ti);
+        if (hd && list) { hd.classList.add('open'); list.classList.add('open'); }
+      }, 50);
+    });
+  };
+
+  /* ════════════════════════
+     IMAGE
+  ════════════════════════ */
+  window.previewImage = function(input) {
+    const file = input.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = e => {
+      pendingImageBase64 = e.target.result;
+      document.getElementById('image-preview').src = e.target.result;
+      document.getElementById('image-preview-wrap').style.display = 'block';
+    };
+    reader.readAsDataURL(file);
+  };
+
+  window.clearImage = function() {
+    pendingImageBase64 = null;
+    document.getElementById('item-image-input').value = '';
+    document.getElementById('image-preview-wrap').style.display = 'none';
+    document.getElementById('image-preview').src = '';
+  };
+
+  /* ════════════════════════
+     MODAL
+  ════════════════════════ */
+  window.openModal = function(id) {
+    document.getElementById(id).classList.remove('hidden');
+  };
+  window.closeModal = function(id) {
+    document.getElementById(id).classList.add('hidden');
+  };
+
+  // Close modal on overlay click
+  document.querySelectorAll('.modal-overlay').forEach(overlay => {
+    overlay.addEventListener('click', e => {
+      if (e.target === overlay) overlay.classList.add('hidden');
+    });
+  });
+
+  // Confirm modal
+  function openConfirm(msg, cb) {
+    confirmCallback = cb;
+    document.getElementById('confirm-msg').textContent = msg;
+    document.getElementById('confirm-ok-btn').onclick = () => {
+      closeModal('modal-confirm');
+      if (confirmCallback) confirmCallback();
+    };
+    openModal('modal-confirm');
+  }
+
+  /* ════════════════════════
+     TOAST
+  ════════════════════════ */
+  let toastTimer;
+  function toast(msg, type) {
+    const el = document.getElementById('toast');
+    el.textContent = msg;
+    el.className = 'toast show ' + (type || '');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => el.classList.remove('show'), 2500);
+  }
+
+  /* ════════════════════════
+     HELPERS
+  ════════════════════════ */
+  function escHtml(s) {
+    return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  // Expose for inline handlers
+  window._adminToast = toast;
+
+})();
 </script>
 </body>
 </html>

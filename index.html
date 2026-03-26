@@ -8,221 +8,317 @@
 </head>
 <body>
 
-<!-- HEADER -->
+<!-- Header -->
 <header class="site-header">
-  <h1>🐾 動物保護資訊查詢系統</h1>
-  <div class="header-center">
+  <div class="header-inner">
+    <div class="site-title">🐾 <span>動物保護</span>資訊查詢</div>
     <div class="search-wrap">
       <span class="search-icon">🔍</span>
-      <input type="text" id="searchInput" placeholder="關鍵字搜尋（跨縣市）…" autocomplete="off">
+      <input type="text" id="search-input" placeholder="搜尋問題、電話、關鍵字…（跨縣市）" autocomplete="off">
     </div>
+    <a href="admin.html" class="btn-admin">⚙ 後台管理</a>
   </div>
-  <a href="admin.html" class="admin-btn">⚙ 管理</a>
 </header>
 
-<!-- MARQUEE -->
-<div class="marquee-bar" id="marqueeBar">
-  <div class="marquee-track" id="marqueeTrack">
-    <span id="marqueeText1"></span>
-    <span id="marqueeText2"></span>
-  </div>
-</div>
-
-<!-- MAIN -->
+<!-- Main -->
 <div class="main-layout">
-  <!-- SIDEBAR -->
-  <nav class="sidebar">
-    <h2>選擇縣市</h2>
-    <div id="countyList"></div>
+
+  <!-- Sidebar -->
+  <nav class="sidebar" id="sidebar">
+    <div class="sidebar-label">縣市選擇</div>
+    <div id="county-nav"></div>
+    <div class="sidebar-footer">
+      <a href="admin.html">⚙ 後台管理</a>
+    </div>
   </nav>
 
-  <!-- CONTENT -->
-  <main class="content" id="mainContent">
-    <div id="topicArea"></div>
-    <div id="searchArea" class="search-results" style="display:none;"></div>
+  <!-- Content -->
+  <main class="content-area">
+    <!-- Loading -->
+    <div class="loading" id="loading">
+      <div class="spinner"></div>
+      <span>載入中…</span>
+    </div>
+
+    <!-- Search Results -->
+    <div id="search-results-area">
+      <div class="search-header">
+        <div class="search-title" id="search-title">搜尋結果</div>
+        <div class="search-badge" id="search-count"></div>
+      </div>
+      <div id="search-results-list"></div>
+    </div>
+
+    <!-- County View -->
+    <div id="county-view">
+      <!-- Marquee -->
+      <div class="marquee-wrap" id="marquee-wrap" style="display:none">
+        <span class="marquee-label">📢 公告</span>
+        <div class="marquee-track">
+          <div class="marquee-inner" id="marquee-inner">
+            <span id="marquee-text-a"></span>
+            <span id="marquee-text-b"></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- County Header -->
+      <div class="county-header" id="county-header" style="display:none">
+        <div class="county-color-bar" id="county-color-bar"></div>
+        <div class="county-name-h" id="county-name-h"></div>
+        <div class="county-meta" id="county-meta"></div>
+      </div>
+
+      <!-- Topics -->
+      <div class="topics-list" id="topics-list"></div>
+    </div>
   </main>
+
 </div>
 
 <footer class="site-footer">
-  © 動物保護資訊查詢系統｜資料僅供參考，請以各縣市主管機關公告為準
+  動物保護資訊查詢系統 · 資料來源：各縣市動物保護機關
 </footer>
 
 <script>
-(async () => {
-  let data = null;
+(function() {
+  let appData = null;
   let currentCountyId = null;
 
-  // ── Load data ──
+  /* ── Load data ── */
   async function loadData() {
+    // 1. Try localStorage
     const saved = localStorage.getItem('animalData');
     if (saved) {
-      try { return JSON.parse(saved); } catch(e) {}
+      try {
+        appData = JSON.parse(saved);
+        init();
+        return;
+      } catch(e) {}
     }
-    const res = await fetch('data.json');
-    return await res.json();
+    // 2. Fetch data.json
+    try {
+      const r = await fetch('data.json');
+      appData = await r.json();
+      init();
+    } catch(e) {
+      document.getElementById('loading').innerHTML = '<span style="color:#c62828">⚠ 資料載入失敗，請確認 data.json 存在。</span>';
+    }
   }
 
-  try {
-    data = await loadData();
-  } catch(e) {
-    document.getElementById('mainContent').innerHTML = '<p style="padding:40px;color:red;">資料載入失敗，請確認 data.json 是否存在。</p>';
-    return;
+  /* ── Init ── */
+  function init() {
+    document.getElementById('loading').style.display = 'none';
+    buildCountyNav();
+    // Select first county
+    if (appData.counties && appData.counties.length > 0) {
+      selectCounty(appData.counties[0].id);
+    }
+    // Update title
+    const title = appData.settings && appData.settings.site_title;
+    if (title) document.title = title;
   }
 
-  // ── Build county buttons ──
-  const countyList = document.getElementById('countyList');
-  data.counties.forEach(county => {
-    const btn = document.createElement('button');
-    btn.className = 'county-btn';
-    btn.dataset.id = county.id;
-    btn.innerHTML = `<span class="dot" style="background:${county.color}"></span>${county.name}`;
-    btn.addEventListener('click', () => selectCounty(county.id));
-    countyList.appendChild(btn);
-  });
+  /* ── Build county nav ── */
+  function buildCountyNav() {
+    const nav = document.getElementById('county-nav');
+    nav.innerHTML = '';
+    (appData.counties || []).forEach(c => {
+      const btn = document.createElement('button');
+      btn.className = 'county-btn';
+      btn.dataset.id = c.id;
+      btn.style.backgroundColor = c.color || '#888';
+      btn.textContent = c.name;
+      btn.addEventListener('click', () => selectCounty(c.id));
+      nav.appendChild(btn);
+    });
+  }
 
-  // ── Select county ──
-  function selectCounty(countyId) {
-    currentCountyId = countyId;
+  /* ── Select county ── */
+  function selectCounty(id) {
+    currentCountyId = id;
     // Clear search
-    document.getElementById('searchInput').value = '';
-    document.getElementById('searchArea').style.display = 'none';
-    document.getElementById('topicArea').style.display = '';
+    document.getElementById('search-input').value = '';
+    hideSearch();
 
-    // Update active button
+    // Update nav active
     document.querySelectorAll('.county-btn').forEach(b => {
-      b.classList.toggle('active', b.dataset.id === countyId);
+      b.classList.toggle('active', b.dataset.id === id);
     });
 
-    const county = data.counties.find(c => c.id === countyId);
+    const county = appData.counties.find(c => c.id === id);
     if (!county) return;
 
-    // Update marquee
-    updateMarquee(county.marquee);
+    // Marquee
+    const mq = county.marquee || '';
+    if (mq.trim()) {
+      document.getElementById('marquee-text-a').textContent = mq;
+      document.getElementById('marquee-text-b').textContent = mq;
+      document.getElementById('marquee-wrap').style.display = 'flex';
+    } else {
+      document.getElementById('marquee-wrap').style.display = 'none';
+    }
 
-    // Render topics
+    // County header
+    document.getElementById('county-color-bar').style.backgroundColor = county.color || '#888';
+    document.getElementById('county-name-h').textContent = county.name;
+    const totalItems = (county.topics || []).reduce((s, t) => s + (t.items || []).length, 0);
+    document.getElementById('county-meta').textContent = (county.topics || []).length + ' 個主題 · ' + totalItems + ' 筆資料';
+    document.getElementById('county-header').style.display = 'flex';
+
+    // Topics
     renderTopics(county);
   }
 
-  // ── Marquee ──
-  function updateMarquee(text) {
-    document.getElementById('marqueeText1').textContent = text;
-    document.getElementById('marqueeText2').textContent = text;
-  }
-
-  // ── Render topics ──
+  /* ── Render topics ── */
   function renderTopics(county) {
-    const area = document.getElementById('topicArea');
-    area.innerHTML = '';
-    county.topics.forEach(topic => {
-      const card = document.createElement('div');
-      card.className = 'topic-card';
-      card.innerHTML = `
-        <div class="topic-header" style="background:${county.color}">
-          🐾 ${topic.title}
+    const container = document.getElementById('topics-list');
+    container.innerHTML = '';
+    (county.topics || []).forEach(topic => {
+      const section = document.createElement('div');
+      section.className = 'topic-section';
+      section.innerHTML = `
+        <div class="topic-header" data-topic="${escHtml(topic.id)}">
+          <div class="topic-dot" style="background:${escHtml(county.color || '#888')}"></div>
+          <div class="topic-title">${escHtml(topic.title)}</div>
+          <div class="topic-count">${(topic.items || []).length} 則</div>
+          <div class="topic-chevron">▼</div>
         </div>
-        <div class="accordion-list">
-          ${topic.items.map(item => renderItem(item)).join('')}
-        </div>`;
-      area.appendChild(card);
+        <div class="topic-body" id="body-${escHtml(topic.id)}">
+          ${renderItems(topic.items || [])}
+        </div>
+      `;
+      container.appendChild(section);
     });
-    bindAccordions(area);
-  }
 
-  // ── Render single item ──
-  function renderItem(item, extraTag) {
-    const infoRows = [];
-    if (item.phone) {
-      const phones = item.phone.split(/[/／]/).map(p => p.trim()).filter(Boolean);
-      const links = phones.map(p => `<a href="tel:${p.replace(/[^0-9+]/g,'')}" class="phone-link">📞 ${p}</a>`).join(' ');
-      infoRows.push(links);
-    }
-    if (item.link) {
-      infoRows.push(`<a href="${item.link}" target="_blank" rel="noopener" class="ext-link">🔗 前往連結</a>`);
-    }
-    const imgHtml = item.image ? `<img src="${item.image}" alt="圖片" class="item-image">` : '';
-    const tagHtml = extraTag ? `<span class="search-tag" style="background:${extraTag.color}">${extraTag.county} › ${extraTag.topic}</span>` : '';
+    // Topic header click
+    container.querySelectorAll('.topic-header').forEach(hd => {
+      hd.addEventListener('click', () => {
+        const tid = hd.dataset.topic;
+        const body = document.getElementById('body-' + tid);
+        hd.classList.toggle('open');
+        body.classList.toggle('open');
+      });
+    });
 
-    return `<div class="accordion-item">
-      <button class="accordion-btn" type="button">
-        <span>${tagHtml}${item.question}</span>
-        <span class="accordion-arrow">▼</span>
-      </button>
-      <div class="accordion-body">
-        <pre>${escapeHtml(item.answer)}</pre>
-        ${imgHtml}
-        ${infoRows.length ? `<div class="info-row">${infoRows.join('')}</div>` : ''}
-      </div>
-    </div>`;
-  }
-
-  function escapeHtml(str) {
-    return (str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-  }
-
-  // ── Accordion binding ──
-  function bindAccordions(root) {
-    root.querySelectorAll('.accordion-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const body = btn.nextElementSibling;
-        const isOpen = btn.classList.contains('open');
-        // close all in same card
-        const card = btn.closest('.accordion-list') || btn.closest('.search-results');
-        if (card) {
-          card.querySelectorAll('.accordion-btn.open').forEach(b => {
-            b.classList.remove('open');
-            b.nextElementSibling.classList.remove('show');
-          });
-        }
-        if (!isOpen) {
-          btn.classList.add('open');
-          body.classList.add('show');
-        }
+    // Item question click
+    container.querySelectorAll('.item-question').forEach(q => {
+      q.addEventListener('click', () => {
+        const aid = q.dataset.answer;
+        const ans = document.getElementById('ans-' + aid);
+        q.classList.toggle('open');
+        ans.classList.toggle('open');
       });
     });
   }
 
-  // ── Search ──
-  document.getElementById('searchInput').addEventListener('input',e => {
-    const q = e.target.value.trim();
-    if (!q) {
-      document.getElementById('searchArea').style.display = 'none';
-      document.getElementById('topicArea').style.display = '';
-      return;
-    }
-    document.getElementById('topicArea').style.display = 'none';
-    document.getElementById('searchArea').style.display = '';
-    const kw = q.toLowerCase();
+  /* ── Render items HTML ── */
+  function renderItems(items, highlight) {
+    return items.map((item, i) => {
+      const q = highlight ? hlText(item.question, highlight) : escHtml(item.question);
+      const a = highlight ? hlText(item.answer || '', highlight) : escHtml(item.answer || '');
+      let meta = '';
+      if (item.phone) meta += `<a class="meta-chip phone" href="tel:${encodeURI(item.phone)}">📞 ${escHtml(item.phone)}</a>`;
+      if (item.link) meta += `<a class="meta-chip link" href="${escHtml(item.link)}" target="_blank" rel="noopener">🔗 連結</a>`;
+      if (item.image) meta += `<img class="answer-image" src="${escHtml(item.image)}" alt="圖片">`;
+      return `
+        <div class="item-row">
+          <div class="item-question" data-answer="${escHtml(item.id || String(i))}">
+            <div class="item-q-badge">Q</div>
+            <div class="item-q-text">${q}</div>
+            <div class="item-chevron">▼</div>
+          </div>
+          <div class="item-answer" id="ans-${escHtml(item.id || String(i))}">
+            <div class="answer-text">${a}</div>
+            ${meta ? `<div class="answer-meta">${meta}</div>` : ''}
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  /* ── Search ── */
+  let searchTimer;
+  document.getElementById('search-input').addEventListener('input', function() {
+    clearTimeout(searchTimer);
+    const q = this.value.trim();
+    searchTimer = setTimeout(() => {
+      if (!q || !appData) {
+        hideSearch();
+      } else {
+        doSearch(q);
+      }
+    }, 180);
+  });
+
+  function doSearch(query) {
+    const kw = query.toLowerCase();
     const results = [];
-    data.counties.forEach(county => {
-      county.topics.forEach(topic => {
-        topic.items.forEach(item => {
-          const haystack = (item.question + ' ' + item.answer + ' ' + (item.phone||'')).toLowerCase();
-          if (haystack.includes(kw)) {
-            results.push({ item, county, topic });
+    (appData.counties || []).forEach(county => {
+      (county.topics || []).forEach(topic => {
+        (topic.items || []).forEach(item => {
+          const text = (item.question + ' ' + (item.answer || '') + ' ' + (item.phone || '')).toLowerCase();
+          if (text.includes(kw)) {
+            results.push({ county, topic, item });
           }
         });
       });
     });
 
-    const area = document.getElementById('searchArea');
-    if (!results.length) {
-      area.innerHTML = `<div class="no-results"><span class="emoji">🔍</span>找不到「${escapeHtml(q)}」的相關資料</div>`;
+    // Show search results
+    document.getElementById('search-results-area').classList.add('active');
+    document.getElementById('county-view').classList.add('hidden');
+    document.getElementById('search-title').textContent = `「${query}」 搜尋結果`;
+    document.getElementById('search-count').textContent = results.length + ' 筆';
+
+    const list = document.getElementById('search-results-list');
+    if (results.length === 0) {
+      list.innerHTML = `<div class="no-results"><div class="big">🔍</div>找不到「${escHtml(query)}」的相關資料</div>`;
       return;
     }
-    area.innerHTML = `<p style="margin-bottom:16px;color:var(--text-light);font-size:14px;">找到 <strong>${results.length}</strong> 筆結果</p>
-      <div class="topic-card">
-        <div class="accordion-list">
-          ${results.map(r => renderItem(r.item, { county: r.county.name, topic: r.topic.title, color: r.county.color })).join('')}
-        </div>
-      </div>`;
-    bindAccordions(area);
-  });
 
-  // ── Init: select first county ──
-  if (data.counties.length) {
-    selectCounty(data.counties[0].id);
+    list.innerHTML = results.map(({ county, topic, item }) => {
+      const q = hlText(item.question, query);
+      const a = hlText((item.answer || '').substring(0, 200) + ((item.answer || '').length > 200 ? '…' : ''), query);
+      let meta = '';
+      if (item.phone) meta += `<a class="meta-chip phone" href="tel:${encodeURI(item.phone)}" style="margin-right:6px">📞 ${escHtml(item.phone)}</a>`;
+      if (item.link) meta += `<a class="meta-chip link" href="${escHtml(item.link)}" target="_blank" rel="noopener">🔗 連結</a>`;
+      return `
+        <div class="search-result-card">
+          <div class="src-meta">
+            <span class="county-tag" style="background:${escHtml(county.color || '#888')}">${escHtml(county.name)}</span>
+            <span class="topic-tag">› ${escHtml(topic.title)}</span>
+          </div>
+          <div class="src-q">${q}</div>
+          <div class="src-a">${a}</div>
+          ${meta ? `<div style="padding:0 14px 12px">${meta}</div>` : ''}
+        </div>
+      `;
+    }).join('');
   }
 
+  function hideSearch() {
+    document.getElementById('search-results-area').classList.remove('active');
+    document.getElementById('county-view').classList.remove('hidden');
+  }
+
+  /* ── Helpers ── */
+  function escHtml(s) {
+    return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  function hlText(text, query) {
+    if (!query || !text) return escHtml(text);
+    const escaped = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const reSplit = new RegExp('(' + escaped + ')', 'gi');
+    const reTest  = new RegExp('^' + escaped + '$', 'i');
+    return text.split(reSplit).map(part =>
+      reTest.test(part) ? `<mark class="hl">${escHtml(part)}</mark>` : escHtml(part)
+    ).join('');
+  }
+
+  // Start
+  loadData();
 })();
 </script>
 </body>
