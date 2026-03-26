@@ -178,13 +178,13 @@
       const section = document.createElement('div');
       section.className = 'topic-section';
       section.innerHTML = `
-        <div class="topic-header" data-topic="${escHtml(topic.id)}">
+        <div class="topic-header open" data-topic="${escHtml(topic.id)}">
           <div class="topic-dot" style="background:${escHtml(county.color || '#888')}"></div>
           <div class="topic-title">${escHtml(topic.title)}</div>
           <div class="topic-count">${(topic.items || []).length} 則</div>
           <div class="topic-chevron">▼</div>
         </div>
-        <div class="topic-body" id="body-${escHtml(topic.id)}">
+        <div class="topic-body open" id="body-${escHtml(topic.id)}">
           ${renderItems(topic.items || [])}
         </div>
       `;
@@ -227,12 +227,12 @@
       imgs.forEach(src => { meta += `<img class="answer-image" src="${escHtml(src)}" alt="圖片">`; });
       return `
         <div class="item-row">
-          <div class="item-question" data-answer="${escHtml(item.id || String(i))}">
+          <div class="item-question open" data-answer="${escHtml(item.id || String(i))}">
             <div class="item-q-badge">Q</div>
             <div class="item-q-text">${q}</div>
             <div class="item-chevron">▼</div>
           </div>
-          <div class="item-answer" id="ans-${escHtml(item.id || String(i))}">
+          <div class="item-answer open" id="ans-${escHtml(item.id || String(i))}">
             <div class="answer-text">${a}</div>
             ${meta ? `<div class="answer-meta">${meta}</div>` : ''}
           </div>
