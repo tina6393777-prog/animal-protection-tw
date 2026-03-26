@@ -93,41 +93,6 @@
   </div>
 </div>
 
-<!-- Modal: Add/Edit Item -->
-<div class="modal-overlay hidden" id="modal-item">
-  <div class="modal">
-    <div class="modal-title" id="modal-item-title">新增資料</div>
-    <div class="form-group">
-      <label>問題 / 標題</label>
-      <input type="text" id="item-question-input" placeholder="問題或標題">
-    </div>
-    <div class="form-group">
-      <label>回答 / 內容</label>
-      <textarea id="item-answer-input" rows="6" placeholder="詳細回答或說明…"></textarea>
-    </div>
-    <div class="form-group">
-      <label>電話（選填）</label>
-      <input type="text" id="item-phone-input" placeholder="04-1234567">
-    </div>
-    <div class="form-group">
-      <label>連結（選填）</label>
-      <input type="url" id="item-link-input" placeholder="https://…">
-    </div>
-    <div class="form-group">
-      <label>圖片（選填，上傳後以 base64 儲存）</label>
-      <input type="file" id="item-image-input" accept="image/*" onchange="previewImage(this)">
-      <div id="image-preview-wrap" style="margin-top:8px;display:none">
-        <img id="image-preview" style="max-width:100%;max-height:200px;border-radius:8px;display:block">
-        <button class="btn btn-danger" style="margin-top:6px;font-size:0.82rem;padding:4px 10px" onclick="clearImage()">移除圖片</button>
-      </div>
-    </div>
-    <div class="modal-actions">
-      <button class="btn btn-secondary" onclick="closeModal('modal-item')">取消</button>
-      <button class="btn btn-primary" onclick="saveItem()">儲存</button>
-    </div>
-  </div>
-</div>
-
 <!-- Modal: Confirm Delete -->
 <div class="modal-overlay hidden" id="modal-confirm">
   <div class="modal" style="max-width:420px">
@@ -147,10 +112,7 @@
 (function() {
   let appData = null;
   let currentCountyId = null;
-  // Edit state
-  let editingTopicIdx = null;   // null=add, number=edit
-  let editingItemState = null;  // {topicIdx, itemIdx} or {topicIdx, itemIdx:null}
-  let pendingImageBase64 = null;
+  let editingTopicIdx = null;
   let confirmCallback = null;
 
   /* ════════════════════════
@@ -164,6 +126,7 @@
         document.getElementById('login-screen').style.display = 'none';
         document.getElementById('admin-panel').style.display = 'block';
         document.getElementById('pw-error').classList.remove('show');
+        buildAdminUI();
       } else {
         document.getElementById('pw-error').classList.add('show');
         document.getElementById('pw-input').value = '';
@@ -274,11 +237,7 @@
     });
     const county = getCounty();
     if (!county) return;
-
-    // Marquee
     document.getElementById('marquee-input').value = county.marquee || '';
-
-    // Topics
     renderAdminTopics();
   }
 
@@ -286,6 +245,19 @@
     return (appData.counties || []).find(c => c.id === currentCountyId);
   }
 
+  /* ════════════════════════
+     NORMALIZE IMAGES
+     向下相容: image string → images array
+  ════════════════════════ */
+  function getImages(item) {
+    if (item.images && Array.isArray(item.images)) return item.images;
+    if (item.image && typeof item.image === 'string') return [item.image];
+    return [];
+  }
+
+  /* ════════════════════════
+     RENDER ADMIN TOPICS
+  ════════════════════════ */
   function renderAdminTopics() {
     const county = getCounty();
     if (!county) return;
@@ -298,7 +270,8 @@
       node.dataset.ti = ti;
 
       const hd = document.createElement('div');
-      hd.className = 'topic-node-hd';
+      // Default open
+      hd.className = 'topic-node-hd open';
       hd.innerHTML = `
         <span class="topic-node-title">${escHtml(topic.title)}</span>
         <span class="topic-node-count">${(topic.items||[]).length} 則</span>
@@ -310,26 +283,19 @@
       `;
 
       const itemList = document.createElement('div');
-      itemList.className = 'item-list';
+      // Default open
+      itemList.className = 'item-list open';
       itemList.id = 'topic-items-' + ti;
 
       (topic.items || []).forEach((item, ii) => {
-        const row = document.createElement('div');
-        row.className = 'item-entry';
-        row.innerHTML = `
-          <span class="item-entry-q">${escHtml(item.question)}</span>
-          <div class="item-entry-actions">
-            <button class="icon-btn edit" title="編輯" onclick="openEditItem(${ti},${ii})">✏</button>
-            <button class="icon-btn del" title="刪除" onclick="deleteItem(${ti},${ii})">🗑</button>
-          </div>
-        `;
-        itemList.appendChild(row);
+        itemList.appendChild(buildItemEntry(ti, ii, item));
       });
 
-      // Add item button
+      // Add item button row (with inline form placeholder)
       const addRow = document.createElement('div');
       addRow.className = 'add-topic-row';
-      addRow.innerHTML = `<button class="btn btn-success" style="font-size:0.83rem;padding:6px 14px" onclick="openAddItem(${ti})">＋ 新增資料</button>`;
+      addRow.id = 'add-row-' + ti;
+      addRow.innerHTML = `<button class="btn btn-success" style="font-size:0.83rem;padding:6px 14px" onclick="openInlineAdd(${ti})">＋ 新增資料</button>`;
       itemList.appendChild(addRow);
 
       hd.addEventListener('click', () => {
@@ -343,6 +309,235 @@
     });
   }
 
+  /* ────────────────────────
+     Build single item entry
+  ──────────────────────── */
+  function buildItemEntry(ti, ii, item) {
+    const row = document.createElement('div');
+    row.className = 'item-entry';
+    row.id = `item-entry-${ti}-${ii}`;
+    row.innerHTML = `
+      <div class="item-entry-main">
+        <span class="item-entry-q">${escHtml(item.question)}</span>
+      </div>
+      <div class="item-entry-actions">
+        <button class="icon-btn edit" title="編輯" onclick="openInlineEdit(${ti},${ii})">✏</button>
+        <button class="icon-btn del" title="刪除" onclick="deleteItem(${ti},${ii})">🗑</button>
+      </div>
+    `;
+    return row;
+  }
+
+  /* ════════════════════════
+     INLINE EDIT FORM
+  ════════════════════════ */
+  // pendingImages: { zoneId → [base64...] }
+  const pendingImagesMap = {};
+
+  function buildInlineForm(zoneId, item) {
+    // item = null for add, object for edit
+    const images = item ? getImages(item) : [];
+    pendingImagesMap[zoneId] = [...images];
+
+    const thumbsHtml = images.map((src, idx) =>
+      `<div class="img-thumb-wrap" id="thumb-${zoneId}-${idx}">
+        <img class="img-thumb" src="${escHtml(src)}" alt="圖片${idx+1}">
+        <button type="button" class="img-thumb-del" onclick="removeInlineImage('${zoneId}',${idx})" title="移除">✕</button>
+      </div>`
+    ).join('');
+
+    const zone = document.createElement('div');
+    zone.className = 'inline-edit-zone';
+    zone.id = zoneId;
+    zone.innerHTML = `
+      <div class="inline-edit-fields">
+        <div class="form-group">
+          <label>問題 / 標題</label>
+          <input type="text" class="iez-question" placeholder="問題或標題" value="${escHtml(item ? item.question : '')}">
+        </div>
+        <div class="form-group">
+          <label>回答 / 內容</label>
+          <textarea class="iez-answer" rows="5" placeholder="詳細回答或說明…">${escHtml(item ? (item.answer || '') : '')}</textarea>
+        </div>
+        <div class="form-group">
+          <label>電話（選填）</label>
+          <input type="text" class="iez-phone" placeholder="04-1234567" value="${escHtml(item ? (item.phone || '') : '')}">
+        </div>
+        <div class="form-group">
+          <label>連結（選填）</label>
+          <input type="url" class="iez-link" placeholder="https://…" value="${escHtml(item ? (item.link || '') : '')}">
+        </div>
+        <div class="form-group">
+          <label>圖片（可上傳多張）</label>
+          <input type="file" class="iez-images" multiple accept="image/*">
+          <div class="img-thumb-list" id="thumbs-${zoneId}">${thumbsHtml}</div>
+        </div>
+      </div>
+      <div class="inline-edit-actions">
+        <button type="button" class="btn btn-secondary" onclick="cancelInlineEdit('${zoneId}')">取消</button>
+        <button type="button" class="btn btn-primary" onclick="saveInlineEdit('${zoneId}')">儲存</button>
+      </div>
+    `;
+
+    // File input handler
+    zone.querySelector('.iez-images').addEventListener('change', function() {
+      const files = Array.from(this.files);
+      const readers = files.map(f => new Promise(resolve => {
+        const r = new FileReader();
+        r.onload = e => resolve(e.target.result);
+        r.readAsDataURL(f);
+      }));
+      Promise.all(readers).then(results => {
+        pendingImagesMap[zoneId].push(...results);
+        renderInlineThumbs(zoneId);
+      });
+      this.value = '';
+    });
+
+    return zone;
+  }
+
+  function renderInlineThumbs(zoneId) {
+    const imgs = pendingImagesMap[zoneId] || [];
+    const container = document.getElementById('thumbs-' + zoneId);
+    if (!container) return;
+    container.innerHTML = imgs.map((src, idx) =>
+      `<div class="img-thumb-wrap">
+        <img class="img-thumb" src="${escHtml(src)}" alt="圖片${idx+1}">
+        <button type="button" class="img-thumb-del" onclick="removeInlineImage('${zoneId}',${idx})" title="移除">✕</button>
+      </div>`
+    ).join('');
+  }
+
+  window.removeInlineImage = function(zoneId, idx) {
+    if (!pendingImagesMap[zoneId]) return;
+    pendingImagesMap[zoneId].splice(idx, 1);
+    renderInlineThumbs(zoneId);
+  };
+
+  /* ── Open inline edit for existing item ── */
+  window.openInlineEdit = function(ti, ii) {
+    // Close any other open inline zones first
+    closeAllInlineZones();
+
+    const county = getCounty();
+    const item = county.topics[ti].items[ii];
+    const zoneId = `iez-edit-${ti}-${ii}`;
+    const entryEl = document.getElementById(`item-entry-${ti}-${ii}`);
+    if (!entryEl) return;
+
+    // Hide the entry row's actions temporarily by adding editing class
+    entryEl.classList.add('editing');
+
+    const zone = buildInlineForm(zoneId, item);
+    zone.dataset.ti = ti;
+    zone.dataset.ii = ii;
+    zone.dataset.mode = 'edit';
+
+    entryEl.insertAdjacentElement('afterend', zone);
+    zone.querySelector('.iez-question').focus();
+  };
+
+  /* ── Open inline add at bottom of topic ── */
+  window.openInlineAdd = function(ti) {
+    closeAllInlineZones();
+
+    const addRow = document.getElementById('add-row-' + ti);
+    if (!addRow) return;
+
+    const zoneId = `iez-add-${ti}`;
+    const zone = buildInlineForm(zoneId, null);
+    zone.dataset.ti = ti;
+    zone.dataset.mode = 'add';
+
+    addRow.insertAdjacentElement('beforebegin', zone);
+    addRow.style.display = 'none';
+    zone.querySelector('.iez-question').focus();
+  };
+
+  function closeAllInlineZones() {
+    document.querySelectorAll('.inline-edit-zone').forEach(z => {
+      const ti = z.dataset.ti;
+      const ii = z.dataset.ii;
+      const mode = z.dataset.mode;
+
+      if (mode === 'edit' && ti !== undefined && ii !== undefined) {
+        const entryEl = document.getElementById(`item-entry-${ti}-${ii}`);
+        if (entryEl) entryEl.classList.remove('editing');
+      }
+      if (mode === 'add' && ti !== undefined) {
+        const addRow = document.getElementById('add-row-' + ti);
+        if (addRow) addRow.style.display = '';
+      }
+      delete pendingImagesMap[z.id];
+      z.remove();
+    });
+  }
+
+  window.cancelInlineEdit = function(zoneId) {
+    const zone = document.getElementById(zoneId);
+    if (!zone) return;
+    const ti = zone.dataset.ti;
+    const ii = zone.dataset.ii;
+    const mode = zone.dataset.mode;
+
+    if (mode === 'edit' && ti !== undefined && ii !== undefined) {
+      const entryEl = document.getElementById(`item-entry-${ti}-${ii}`);
+      if (entryEl) entryEl.classList.remove('editing');
+    }
+    if (mode === 'add' && ti !== undefined) {
+      const addRow = document.getElementById('add-row-' + ti);
+      if (addRow) addRow.style.display = '';
+    }
+    delete pendingImagesMap[zoneId];
+    zone.remove();
+  };
+
+  window.saveInlineEdit = function(zoneId) {
+    const zone = document.getElementById(zoneId);
+    if (!zone) return;
+
+    const question = zone.querySelector('.iez-question').value.trim();
+    if (!question) { toast('請輸入問題/標題', 'err'); return; }
+
+    const answer = zone.querySelector('.iez-answer').value.trim();
+    const phone = zone.querySelector('.iez-phone').value.trim() || null;
+    const link = zone.querySelector('.iez-link').value.trim() || null;
+    const images = pendingImagesMap[zoneId] || [];
+
+    const county = getCounty();
+    const ti = parseInt(zone.dataset.ti);
+    const mode = zone.dataset.mode;
+
+    if (mode === 'add') {
+      county.topics[ti].items = county.topics[ti].items || [];
+      county.topics[ti].items.push({
+        id: currentCountyId + '_item_' + Date.now(),
+        question, answer, phone, link,
+        images: images.length > 0 ? images : undefined
+      });
+    } else {
+      const ii = parseInt(zone.dataset.ii);
+      const item = county.topics[ti].items[ii];
+      item.question = question;
+      item.answer = answer;
+      item.phone = phone;
+      item.link = link;
+      // Remove old single-image field, store as array
+      delete item.image;
+      item.images = images.length > 0 ? images : undefined;
+    }
+
+    saveData();
+    // Clean up and re-render
+    delete pendingImagesMap[zoneId];
+    renderAdminTopics();
+    // Re-expand this topic
+    const hd = document.querySelector(`#admin-topic-tree .topic-node:nth-child(${ti+1}) .topic-node-hd`);
+    const list = document.getElementById('topic-items-' + ti);
+    if (hd && list) { hd.classList.add('open'); list.classList.add('open'); }
+  };
+
   /* ════════════════════════
      MARQUEE
   ════════════════════════ */
@@ -354,7 +549,7 @@
   };
 
   /* ════════════════════════
-     TOPIC CRUD
+     TOPIC CRUD (Modal)
   ════════════════════════ */
   window.openAddTopic = function() {
     editingTopicIdx = null;
@@ -378,7 +573,6 @@
     if (!name) { toast('請輸入主題名稱', 'err'); return; }
     const county = getCounty();
     if (editingTopicIdx === null) {
-      // Add
       county.topics = county.topics || [];
       const id = currentCountyId + '_topic_' + Date.now();
       county.topics.push({ id, title: name, items: [] });
@@ -401,86 +595,8 @@
   };
 
   /* ════════════════════════
-     ITEM CRUD
+     ITEM DELETE
   ════════════════════════ */
-  function resetItemModal() {
-    document.getElementById('item-question-input').value = '';
-    document.getElementById('item-answer-input').value = '';
-    document.getElementById('item-phone-input').value = '';
-    document.getElementById('item-link-input').value = '';
-    document.getElementById('item-image-input').value = '';
-    document.getElementById('image-preview-wrap').style.display = 'none';
-    document.getElementById('image-preview').src = '';
-    pendingImageBase64 = null;
-  }
-
-  window.openAddItem = function(ti) {
-    editingItemState = { topicIdx: ti, itemIdx: null };
-    document.getElementById('modal-item-title').textContent = '新增資料';
-    resetItemModal();
-    openModal('modal-item');
-    setTimeout(() => document.getElementById('item-question-input').focus(), 80);
-  };
-
-  window.openEditItem = function(ti, ii) {
-    const county = getCounty();
-    const item = county.topics[ti].items[ii];
-    editingItemState = { topicIdx: ti, itemIdx: ii };
-    document.getElementById('modal-item-title').textContent = '編輯資料';
-    resetItemModal();
-    document.getElementById('item-question-input').value = item.question || '';
-    document.getElementById('item-answer-input').value = item.answer || '';
-    document.getElementById('item-phone-input').value = item.phone || '';
-    document.getElementById('item-link-input').value = item.link || '';
-    if (item.image) {
-      pendingImageBase64 = item.image;
-      document.getElementById('image-preview').src = item.image;
-      document.getElementById('image-preview-wrap').style.display = 'block';
-    }
-    openModal('modal-item');
-    setTimeout(() => document.getElementById('item-question-input').focus(), 80);
-  };
-
-  window.saveItem = function() {
-    const question = document.getElementById('item-question-input').value.trim();
-    if (!question) { toast('請輸入問題/標題', 'err'); return; }
-    const answer = document.getElementById('item-answer-input').value.trim();
-    const phone = document.getElementById('item-phone-input').value.trim() || null;
-    const link = document.getElementById('item-link-input').value.trim() || null;
-    const image = pendingImageBase64 || null;
-
-    const county = getCounty();
-    const { topicIdx, itemIdx } = editingItemState;
-    const topic = county.topics[topicIdx];
-
-    if (itemIdx === null) {
-      // Add
-      topic.items = topic.items || [];
-      topic.items.push({
-        id: currentCountyId + '_item_' + Date.now(),
-        question, answer, phone, link, image
-      });
-    } else {
-      const item = topic.items[itemIdx];
-      item.question = question;
-      item.answer = answer;
-      item.phone = phone;
-      item.link = link;
-      item.image = image;
-    }
-
-    saveData();
-    renderAdminTopics();
-    closeModal('modal-item');
-
-    // Re-open the topic
-    setTimeout(() => {
-      const hd = document.querySelector(`#admin-topic-tree .topic-node:nth-child(${topicIdx+1}) .topic-node-hd`);
-      const list = document.getElementById('topic-items-' + topicIdx);
-      if (hd && list) { hd.classList.add('open'); list.classList.add('open'); }
-    }, 50);
-  };
-
   window.deleteItem = function(ti, ii) {
     const county = getCounty();
     const item = county.topics[ti].items[ii];
@@ -488,35 +604,13 @@
       county.topics[ti].items.splice(ii, 1);
       saveData();
       renderAdminTopics();
-      // Re-open
+      // Re-expand
       setTimeout(() => {
         const hd = document.querySelector(`#admin-topic-tree .topic-node:nth-child(${ti+1}) .topic-node-hd`);
         const list = document.getElementById('topic-items-' + ti);
         if (hd && list) { hd.classList.add('open'); list.classList.add('open'); }
       }, 50);
     });
-  };
-
-  /* ════════════════════════
-     IMAGE
-  ════════════════════════ */
-  window.previewImage = function(input) {
-    const file = input.files[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = e => {
-      pendingImageBase64 = e.target.result;
-      document.getElementById('image-preview').src = e.target.result;
-      document.getElementById('image-preview-wrap').style.display = 'block';
-    };
-    reader.readAsDataURL(file);
-  };
-
-  window.clearImage = function() {
-    pendingImageBase64 = null;
-    document.getElementById('item-image-input').value = '';
-    document.getElementById('image-preview-wrap').style.display = 'none';
-    document.getElementById('image-preview').src = '';
   };
 
   /* ════════════════════════
@@ -529,14 +623,17 @@
     document.getElementById(id).classList.add('hidden');
   };
 
-  // Close modal on overlay click
   document.querySelectorAll('.modal-overlay').forEach(overlay => {
     overlay.addEventListener('click', e => {
       if (e.target === overlay) overlay.classList.add('hidden');
     });
   });
 
-  // Confirm modal
+  // Topic modal: Enter key
+  document.getElementById('topic-name-input').addEventListener('keydown', e => {
+    if (e.key === 'Enter') saveTopic();
+  });
+
   function openConfirm(msg, cb) {
     confirmCallback = cb;
     document.getElementById('confirm-msg').textContent = msg;
@@ -566,7 +663,6 @@
     return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
   }
 
-  // Expose for inline handlers
   window._adminToast = toast;
 
 })();

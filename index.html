@@ -220,7 +220,11 @@
       let meta = '';
       if (item.phone) meta += `<a class="meta-chip phone" href="tel:${encodeURI(item.phone)}">📞 ${escHtml(item.phone)}</a>`;
       if (item.link) meta += `<a class="meta-chip link" href="${escHtml(item.link)}" target="_blank" rel="noopener">🔗 連結</a>`;
-      if (item.image) meta += `<img class="answer-image" src="${escHtml(item.image)}" alt="圖片">`;
+      // Support images array (new) and image string (legacy)
+      const imgs = Array.isArray(item.images) && item.images.length > 0
+        ? item.images
+        : (item.image ? [item.image] : []);
+      imgs.forEach(src => { meta += `<img class="answer-image" src="${escHtml(src)}" alt="圖片">`; });
       return `
         <div class="item-row">
           <div class="item-question" data-answer="${escHtml(item.id || String(i))}">
