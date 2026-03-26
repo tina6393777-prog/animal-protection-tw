@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>後台管理 — 動物保護資訊查詢系統</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- PASSWORD GATE -->
+<div class="password-gate" id="passwordGate">
+  <div class="password-box">
+    <div class="icon">🔐</div>
+    <h2>後台管理</h2>
+    <p>請輸入管理員密碼以繼續</p>
+    <input type="password" id="pwdInput" placeholder="密碼" maxlength="20"
+           onkeydown="if(event.key==='Enter')checkPwd()">
+    <div class="err" id="pwdErr"></div>
+    <button class="btn btn-primary" style="width:100%" onclick="checkPwd()">進入管理</button>
+  </div>
+</div>
+
+<!-- ADMIN CONTENT (hidden until auth) -->
+<div id="adminContent" style="display:none;">
+  <div class="admin-page">
+    <!-- HEADER -->
+    <div class="admin-header">
+      <h1>⚙ 後台管理</h1>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <a href="index.html" class="btn btn-secondary">← 返回首頁</a>
+        <button class="btn btn-success" onclick="exportData()">📥 匯出 JSON</button>
+        <label class="btn btn-secondary" style="cursor:pointer;">
+          📤 匯入 JSON
+          <input type="file" accept=".json" style="display:none" onchange="importData(event)">
+        </label>
+        <button class="btn btn-primary" onclick="saveAll()">💾 儲存所有變更</button>
+      </div>
+    </div>
+
+    <div id="saveMsg" style="display:none;background:#E8F4E8;border-radius:8px;padding:10px 16px;margin-bottom:16px;color:#2E7D32;font-weight:700;"></div>
+
+    <!-- LAYOUT -->
+    <div class="admin-layout">
+      <!-- TREE SIDEBAR -->
+      <div class="admin-sidebar">
+        <div style="font-size:13px;font-weight:700;color:var(--text-light);margin-bottom:12px;text-transform:uppercase;letter-spacing:.08em;">資料樹狀結構</div>
+        <div id="adminTree"></div>
+      </div>
+
+      <!-- MAIN EDITOR -->
+      <div class="admin-main" id="adminMain">
+        <div class="admin-card" style="text-align:center;padding:48px 20px;color:var(--text-light);">
+          <div style="font-size:40px;margin-bottom:12px;">👈</div>
+          <div>請從左側選擇縣市或主題開始編輯</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+let data = null;
+let currentCountyIdx = null;
+let currentTopicIdx = null;
+
+// ── Auth ──
+function checkPwd() {
+  const v = document.getElementById('pwdInput').value;
+  const correct = (data && data.settings && data.settings.admin_password) ? data.settings.admin_password : '1959';
+  if (v === correct) {
+    document.getElementById('passwordGate').style.display = 'none';
+    document.getElementById('adminContent').style.display = '';
+  } else {
+    document.getElementById('pwdErr').textContent = '密碼錯誤，請再試一次';
+    document.getElementById('pwdInput').value = '';
+    document.getElementById('pwdInput').focus();
+  }
+}
+
+// ── Load data ──
+async function loadData() {
+  const saved = localStorage.getItem('animalData');
+  if (saved) { try { return JSON.parse(saved); } catch(e) {} }
+  const res = await fetch('data.json');
+  return await res.json();
+}
+
+(async () => {
+  try {
+    data = await loadData();
+  } catch(e) {
+    alert('資料載入失敗：' + e.message);
+    return;
+  }
+  buildTree();
+})();
+
+// ── Tree ──
+function buildTree() {
+  const tree = document.getElementById('adminTree');
+  tree.innerHTML = '';
+  data.counties.forEach((county, ci) => {
+    const wrap = document.createElement('div');
+    wrap.className = 'tree-county';
+    const cBtn = document.createElement('button');
+    cBtn.className = 'tree-county-btn';
+    cBtn.textContent = county.name;
+    cBtn.onclick = () => {
+      currentCountyIdx = ci;
+      currentTopicIdx = null;
+      document.querySelectorAll('.tree-county-btn').forEach(b => b.classList.remove('active'));
+      cBtn.classList.add('active');
+      const topics = wrap.querySelector('.tree-topics');
+      document.querySelectorAll('.tree-topics').forEach(t => t !== topics && t.classList.remove('show'));
+      topics.classList.toggle('show');
+      renderCountyEditor(ci);
+    };
+    const topicsDiv = document.createElement('div');
+    topicsDiv.className = 'tree-topics';
+    county.topics.forEach((topic, ti) => {
+      const tBtn = document.createElement('button');
+      tBtn.className = 'tree-topic-btn';
+      tBtn.textContent = topic.title;
+      tBtn.onclick = (e) => {
+        e.stopPropagation();
+        currentCountyIdx = ci;
+        currentTopicIdx = ti;
+        document.querySelectorAll('.tree-topic-btn').forEach(b => b.classList.remove('active'));
+        tBtn.classList.add('active');
+        renderTopicEditor(ci, ti);
+      };
+      topicsDiv.appendChild(tBtn);
+    });
+    wrap.appendChild(cBtn);
+    wrap.appendChild(topicsDiv);
+    tree.appendChild(wrap);
+  });
+}
+
+// ── County editor (marquee) ──
+function renderCountyEditor(ci) {
+  const county = data.counties[ci];
+  const main = document.getElementById('adminMain');
+  main.innerHTML = `
+    <div class="admin-card">
+      <h2>${county.name} — 縣市設定</h2>
+      <h3>跑馬燈文字</h3>
+      <div class="marquee-editor">
+        <input type="text" id="marqueeInput_${ci}" value="${escAttr(county.marquee || '')}" placeholder="請輸入跑馬燈文字…">
+        <button class="btn btn-primary btn-sm" onclick="saveMarquee(${ci})">儲存跑馬燈</button>
+      </div>
+      <p style="font-size:12px;color:var(--text-light);margin-top:8px;">提示：儲存後請點擊「儲存所有變更」使其生效。</p>
+    </div>`;
+}
+
+function saveMarquee(ci) {
+  const val = document.getElementById(`marqueeInput_${ci}`).value;
+  data.counties[ci].marquee = val;
+  showMsg('跑馬燈已更新，請按「儲存所有變更」儲存。');
+}
+
+// ── Topic editor ──
+function renderTopicEditor(ci, ti) {
+  const county = data.counties[ci];
+  const topic = county.topics[ti];
+  const main = document.getElementById('adminMain');
+  main.innerHTML = `
+    <div class="admin-card">
+      <h2>${county.name} › ${topic.title}</h2>
+      <div id="itemList"></div>
+      <button class="btn btn-primary" onclick="addItem(${ci},${ti})">＋ 新增項目</button>
+    </div>`;
+  renderItems(ci, ti);
+}
+
+function renderItems(ci, ti) {
+  const topic = data.counties[ci].topics[ti];
+  const list = document.getElementById('itemList');
+  list.innerHTML = '';
+  topic.items.forEach((item, ii) => {
+    const div = document.createElement('div');
+    div.className = 'item-editor';
+    div.id = `item_${ii}`;
+    div.innerHTML = `
+      <div class="item-editor-header" onclick="toggleItemEditor(${ii})">
+        <span style="flex:1">${escHtml(item.question) || '（未命名）'}</span>
+        <button class="btn btn-danger btn-sm" onclick="event.stopPropagation();deleteItem(${ci},${ti},${ii})">🗑 刪除</button>
+        <span style="font-size:12px;color:var(--text-light)">▼</span>
+      </div>
+      <div class="item-editor-body" id="body_${ii}">
+        <div class="form-group">
+          <label>問題</label>
+          <input type="text" id="q_${ii}" value="${escAttr(item.question||'')}" oninput="updateItem(${ci},${ti},${ii},'question',this.value)">
+        </div>
+        <div class="form-group">
+          <label>答案</label>
+          <textarea id="a_${ii}" oninput="updateItem(${ci},${ti},${ii},'answer',this.value)">${escHtml(item.answer||'')}</textarea>
+        </div>
+        <div class="form-group">
+          <label>電話（可用 / 分隔多組）</label>
+          <input type="text" value="${escAttr(item.phone||'')}" oninput="updateItem(${ci},${ti},${ii},'phone',this.value)">
+        </div>
+        <div class="form-group">
+          <label>連結 URL</label>
+          <input type="url" value="${escAttr(item.link||'')}" oninput="updateItem(${ci},${ti},${ii},'link',this.value)">
+        </div>
+        <div class="form-group">
+          <label>圖片上傳</label>
+          <input type="file" accept="image/*" onchange="handleImage(event,${ci},${ti},${ii})">
+          ${item.image ? `<img src="${item.image}" class="image-preview" id="img_${ii}">` : `<img src="" class="image-preview" id="img_${ii}" style="display:none">`}
+        </div>
+      </div>`;
+    list.appendChild(div);
+  });
+}
+
+function toggleItemEditor(ii) {
+  const body = document.getElementById(`body_${ii}`);
+  body.classList.toggle('show');
+}
+
+function updateItem(ci, ti, ii, field, value) {
+  data.counties[ci].topics[ti].items[ii][field] = value || null;
+  // Update header text if question changed
+  if (field === 'question') {
+    const hdr = document.querySelector(`#item_${ii} .item-editor-header span:first-child`);
+    if (hdr) hdr.textContent = value || '（未命名）';
+  }
+}
+
+function handleImage(event, ci, ti, ii) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    const b64 = e.target.result;
+    data.counties[ci].topics[ti].items[ii].image = b64;
+    const img = document.getElementById(`img_${ii}`);
+    if (img) { img.src = b64; img.style.display = 'block'; }
+  };
+  reader.readAsDataURL(file);
+}
+
+function addItem(ci, ti) {
+  const newItem = {
+    id: 'item_' + Date.now(),
+    question: '新問題',
+    answer: '請填寫答案',
+    phone: null,
+    link: null,
+    image: null
+  };
+  data.counties[ci].topics[ti].items.push(newItem);
+  renderItems(ci, ti);
+  // open last
+  const last = data.counties[ci].topics[ti].items.length - 1;
+  setTimeout(() => {
+    const body = document.getElementById(`body_${last}`);
+    if (body) body.classList.add('show');
+  }, 50);
+}
+
+function deleteItem(ci, ti, ii) {
+  if (!confirm('確定要刪除這個項目嗎？')) return;
+  data.counties[ci].topics[ti].items.splice(ii, 1);
+  renderItems(ci, ti);
+}
+
+// ── Save / Export / Import ──
+function saveAll() {
+  localStorage.setItem('animalData', JSON.stringify(data));
+  showMsg('✅ 已成功儲存到瀏覽器本機儲存！');
+}
+
+function exportData() {
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'data.json';
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+
+function importData(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const imported = JSON.parse(e.target.result);
+      if (!imported.counties) throw new Error('無效的資料格式');
+      data = imported;
+      localStorage.setItem('animalData', JSON.stringify(data));
+      buildTree();
+      document.getElementById('adminMain').innerHTML = '<div class="admin-card" style="text-align:center;padding:48px 20px;color:var(--text-light);"><div style="font-size:40px;margin-bottom:12px;">✅</div><div>匯入成功！請從左側選擇要編輯的內容。</div></div>';
+      showMsg('✅ 資料匯入成功！');
+    } catch(err) {
+      alert('匯入失敗：' + err.message);
+    }
+  };
+  reader.readAsText(file);
+  event.target.value = '';
+}
+
+function showMsg(msg) {
+  const el = document.getElementById('saveMsg');
+  el.textContent = msg;
+  el.style.display = 'block';
+  clearTimeout(el._t);
+  el._t = setTimeout(() => el.style.display = 'none', 3500);
+}
+
+function escHtml(s) { return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function escAttr(s) { return (s||'').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
+</script>
+</body>
+</html>

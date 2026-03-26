@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>動物保護資訊查詢系統</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="site-header">
+  <h1>🐾 動物保護資訊查詢系統</h1>
+  <div class="header-center">
+    <div class="search-wrap">
+      <span class="search-icon">🔍</span>
+      <input type="text" id="searchInput" placeholder="關鍵字搜尋（跨縣市）…" autocomplete="off">
+    </div>
+  </div>
+  <a href="admin.html" class="admin-btn">⚙ 管理</a>
+</header>
+
+<!-- MARQUEE -->
+<div class="marquee-bar" id="marqueeBar">
+  <div class="marquee-track" id="marqueeTrack">
+    <span id="marqueeText1"></span>
+    <span id="marqueeText2"></span>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="main-layout">
+  <!-- SIDEBAR -->
+  <nav class="sidebar">
+    <h2>選擇縣市</h2>
+    <div id="countyList"></div>
+  </nav>
+
+  <!-- CONTENT -->
+  <main class="content" id="mainContent">
+    <div id="topicArea"></div>
+    <div id="searchArea" class="search-results" style="display:none;"></div>
+  </main>
+</div>
+
+<footer class="site-footer">
+  © 動物保護資訊查詢系統｜資料僅供參考，請以各縣市主管機關公告為準
+</footer>
+
+<script>
+(async () => {
+  let data = null;
+  let currentCountyId = null;
+
+  // ── Load data ──
+  async function loadData() {
+    const saved = localStorage.getItem('animalData');
+    if (saved) {
+      try { return JSON.parse(saved); } catch(e) {}
+    }
+    const res = await fetch('data.json');
+    return await res.json();
+  }
+
+  try {
+    data = await loadData();
+  } catch(e) {
+    document.getElementById('mainContent').innerHTML = '<p style="padding:40px;color:red;">資料載入失敗，請確認 data.json 是否存在。</p>';
+    return;
+  }
+
+  // ── Build county buttons ──
+  const countyList = document.getElementById('countyList');
+  data.counties.forEach(county => {
+    const btn = document.createElement('button');
+    btn.className = 'county-btn';
+    btn.dataset.id = county.id;
+    btn.innerHTML = `<span class="dot" style="background:${county.color}"></span>${county.name}`;
+    btn.addEventListener('click', () => selectCounty(county.id));
+    countyList.appendChild(btn);
+  });
+
+  // ── Select county ──
+  function selectCounty(countyId) {
+    currentCountyId = countyId;
+    // Clear search
+    document.getElementById('searchInput').value = '';
+    document.getElementById('searchArea').style.display = 'none';
+    document.getElementById('topicArea').style.display = '';
+
+    // Update active button
+    document.querySelectorAll('.county-btn').forEach(b => {
+      b.classList.toggle('active', b.dataset.id === countyId);
+    });
+
+    const county = data.counties.find(c => c.id === countyId);
+    if (!county) return;
+
+    // Update marquee
+    updateMarquee(county.marquee);
+
+    // Render topics
+    renderTopics(county);
+  }
+
+  // ── Marquee ──
+  function updateMarquee(text) {
+    document.getElementById('marqueeText1').textContent = text;
+    document.getElementById('marqueeText2').textContent = text;
+  }
+
+  // ── Render topics ──
+  function renderTopics(county) {
+    const area = document.getElementById('topicArea');
+    area.innerHTML = '';
+    county.topics.forEach(topic => {
+      const card = document.createElement('div');
+      card.className = 'topic-card';
+      card.innerHTML = `
+        <div class="topic-header" style="background:${county.color}">
+          🐾 ${topic.title}
+        </div>
+        <div class="accordion-list">
+          ${topic.items.map(item => renderItem(item)).join('')}
+        </div>`;
+      area.appendChild(card);
+    });
+    bindAccordions(area);
+  }
+
+  // ── Render single item ──
+  function renderItem(item, extraTag) {
+    const infoRows = [];
+    if (item.phone) {
+      const phones = item.phone.split(/[/／]/).map(p => p.trim()).filter(Boolean);
+      const links = phones.map(p => `<a href="tel:${p.replace(/[^0-9+]/g,'')}" class="phone-link">📞 ${p}</a>`).join(' ');
+      infoRows.push(links);
+    }
+    if (item.link) {
+      infoRows.push(`<a href="${item.link}" target="_blank" rel="noopener" class="ext-link">🔗 前往連結</a>`);
+    }
+    const imgHtml = item.image ? `<img src="${item.image}" alt="圖片" class="item-image">` : '';
+    const tagHtml = extraTag ? `<span class="search-tag" style="background:${extraTag.color}">${extraTag.county} › ${extraTag.topic}</span>` : '';
+
+    return `<div class="accordion-item">
+      <button class="accordion-btn" type="button">
+        <span>${tagHtml}${item.question}</span>
+        <span class="accordion-arrow">▼</span>
+      </button>
+      <div class="accordion-body">
+        <pre>${escapeHtml(item.answer)}</pre>
+        ${imgHtml}
+        ${infoRows.length ? `<div class="info-row">${infoRows.join('')}</div>` : ''}
+      </div>
+    </div>`;
+  }
+
+  function escapeHtml(str) {
+    return (str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  // ── Accordion binding ──
+  function bindAccordions(root) {
+    root.querySelectorAll('.accordion-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const body = btn.nextElementSibling;
+        const isOpen = btn.classList.contains('open');
+        // close all in same card
+        const card = btn.closest('.accordion-list') || btn.closest('.search-results');
+        if (card) {
+          card.querySelectorAll('.accordion-btn.open').forEach(b => {
+            b.classList.remove('open');
+            b.nextElementSibling.classList.remove('show');
+          });
+        }
+        if (!isOpen) {
+          btn.classList.add('open');
+          body.classList.add('show');
+        }
+      });
+    });
+  }
+
+  // ── Search ──
+  document.getElementById('searchInput').addEventListener('input',e => {
+    const q = e.target.value.trim();
+    if (!q) {
+      document.getElementById('searchArea').style.display = 'none';
+      document.getElementById('topicArea').style.display = '';
+      return;
+    }
+    document.getElementById('topicArea').style.display = 'none';
+    document.getElementById('searchArea').style.display = '';
+    const kw = q.toLowerCase();
+    const results = [];
+    data.counties.forEach(county => {
+      county.topics.forEach(topic => {
+        topic.items.forEach(item => {
+          const haystack = (item.question + ' ' + item.answer + ' ' + (item.phone||'')).toLowerCase();
+          if (haystack.includes(kw)) {
+            results.push({ item, county, topic });
+          }
+        });
+      });
+    });
+
+    const area = document.getElementById('searchArea');
+    if (!results.length) {
+      area.innerHTML = `<div class="no-results"><span class="emoji">🔍</span>找不到「${escapeHtml(q)}」的相關資料</div>`;
+      return;
+    }
+    area.innerHTML = `<p style="margin-bottom:16px;color:var(--text-light);font-size:14px;">找到 <strong>${results.length}</strong> 筆結果</p>
+      <div class="topic-card">
+        <div class="accordion-list">
+          ${results.map(r => renderItem(r.item, { county: r.county.name, topic: r.topic.title, color: r.county.color })).join('')}
+        </div>
+      </div>`;
+    bindAccordions(area);
+  });
+
+  // ── Init: select first county ──
+  if (data.counties.length) {
+    selectCounty(data.counties[0].id);
+  }
+
+})();
+</script>
+</body>
+</html>
