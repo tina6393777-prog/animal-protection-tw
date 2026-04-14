@@ -546,8 +546,8 @@ function askAI(question){
     });
   });
 
-  var systemPrompt = '你是「1959動物保護專線」的內部AI助理。'
-    +'你的任務是根據以下知識庫內容，回答客服同仁的問題。'
+  var prompt = '你是「1959動物保護專線」的內部AI助理。'
+    +'請根據以下知識庫內容回答問題。'
     +'規則：'
     +'1. 只能根據知識庫內容回答，不可自行發明資訊。'
     +'2. 如果知識庫中有相關資訊，請整理成清楚的回答。'
@@ -555,24 +555,27 @@ function askAI(question){
     +'4. 回答要簡潔實用，適合客服人員直接參考使用。'
     +'5. 如有電話、地址、時間等具體資訊請一併提供。'
     +'6. 繁體中文回答。'
-    +'\n\n知識庫內容如下：\n'+ctx;
+    +'\n\n知識庫內容：\n'+ctx
+    +'\n\n問題：'+question;
 
-  fetch('https://api.anthropic.com/v1/messages', {
+  var GKEY = 'AIzaSyC3mWQoikDbZ6JkW7W7d17iO2jHtTyK1Js';
+  var url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key='+GKEY;
+
+  fetch(url, {
     method: 'POST',
     headers: {'Content-Type': 'application/json'},
     body: JSON.stringify({
-      model: 'claude-sonnet-4-20250514',
-      max_tokens: 1000,
-      system: systemPrompt,
-      messages: [{role:'user', content:'問題：'+question}]
+      contents: [{parts: [{text: prompt}]}],
+      generationConfig: {maxOutputTokens: 800, temperature: 0.2}
     })
   })
   .then(function(r){return r.json();})
   .then(function(data){
     var el = E('aiAnswer');
     if(!el) return;
-    if(data.content && data.content[0] && data.content[0].text){
-      el.textContent = data.content[0].text;
+    if(data.candidates && data.candidates[0] && data.candidates[0].content){
+      var text = data.candidates[0].content.parts[0].text;
+      el.textContent = text;
     } else if(data.error){
       el.innerHTML = '<span style="color:#C53030">⚠ AI 無法回答：'+esc(data.error.message||'未知錯誤')+'</span>';
     }
