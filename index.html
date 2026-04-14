@@ -498,24 +498,7 @@ function doSearch(q){
     if(qp.toLowerCase().indexOf(ql)>=0||ap.toLowerCase().indexOf(ql)>=0||(item.url&&item.url.toLowerCase().indexOf(ql)>=0))
       hits.push({c:c,t:t.name,ti:ti,ii:ii,item:item,qp:qp,ap:ap});
   });});});
-  if(!hits.length){
-    E('srchPanel').innerHTML='<div class="no-res">'
-      +'<div style="font-size:32px;margin-bottom:12px">🔍</div>'
-      +'<div style="font-weight:700;font-size:15px;margin-bottom:6px">知識庫中找不到「'+esc(q)+'」</div>'
-      +'<div style="font-size:13px;color:var(--muted);margin-bottom:20px">正在請 AI 根據知識庫內容為您整理回答…</div>'
-      +'<div id="aiBox" style="text-align:left;max-width:680px;margin:0 auto">'
-      +'<div style="background:#EBF8FF;border:1px solid #BEE3F8;border-radius:12px;padding:18px">'
-      +'<div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">'
-      +'<span style="font-size:20px">🤖</span>'
-      +'<span style="font-size:13px;font-weight:700;color:#2B6CB0">AI 輔助回答（僅供參考，以知識庫為準）</span></div>'
-      +'<div id="aiAnswer" style="font-size:14px;line-height:1.85;color:var(--text);white-space:pre-wrap">'
-      +'<span style="color:var(--muted)">⏳ 思考中…</span></div>'
-      +'</div>'
-      +'<div style="font-size:11px;color:var(--muted);margin-top:10px;text-align:center">⚠ AI 回答僅根據本知識庫內容整理，如有疑問請以知識庫原文為準</div>'
-      +'</div></div>';
-    askAI(q);
-    return;
-  }
+  if(!hits.length){E('srchPanel').innerHTML='<div class="no-res">🔍 未找到「'+esc(q)+'」的相關資料<br><span style="font-size:12px;margin-top:8px;display:block">建議換個關鍵字試試，或直接瀏覽各縣市主題</span></div>';return;}
   var h='<div class="sec-hdr"><div class="sec-ttl">搜尋「'+esc(q)+'」（'+hits.length+' 筆）</div></div>';
   hits.forEach(function(hit){var col=COLORS[hit.c];
     h+='<div class="hit" onclick="gotoRes(\''+hit.c+'\','+hit.ti+','+hit.ii+')">'
@@ -528,63 +511,6 @@ function doSearch(q){
   E('srchPanel').innerHTML=h;
 }
 function gotoRes(c,ti,ii){E('srchInput').value='';E('srchPanel').style.display='none';E('mainLayout').style.display='flex';if(c!==city)switchCity(c);else{renderTabs();renderSB();renderContent();}setTimeout(function(){var el=E('topic'+ti);if(el)el.scrollIntoView({behavior:'smooth'});var b=E('tbody'+ti);if(b&&!b.classList.contains('open'))togTopic(ti);var a=E('qaa'+ti+'_'+ii);if(a&&!a.classList.contains('open'))togQA(ti,ii);},120);}
-
-function askAI(question){
-  // Build knowledge base context (all Q&A from all cities)
-  var ctx = '';
-  CITIES.forEach(function(c){
-    ctx += '\n\n=== '+c+' ===\n';
-    db[c].topics.forEach(function(t){
-      ctx += '\n【'+t.name+'】\n';
-      t.items.forEach(function(item){
-        var q = stripColor(item.q||'');
-        var a = stripColor(item.a||'');
-        if(q && a) ctx += 'Q: '+q+'\nA: '+a+'\n';
-        else if(q) ctx += '資訊: '+q+'\n';
-        if(item.url) ctx += '連結: '+item.url+'\n';
-      });
-    });
-  });
-
-  var prompt = '你是「1959動物保護專線」的內部AI助理。'
-    +'請根據以下知識庫內容回答問題。'
-    +'規則：'
-    +'1. 只能根據知識庫內容回答，不可自行發明資訊。'
-    +'2. 如果知識庫中有相關資訊，請整理成清楚的回答。'
-    +'3. 如果知識庫中完全沒有相關資訊，請回答「知識庫中無此資訊，建議上班時段直接洽詢承辦單位。」'
-    +'4. 回答要簡潔實用，適合客服人員直接參考使用。'
-    +'5. 如有電話、地址、時間等具體資訊請一併提供。'
-    +'6. 繁體中文回答。'
-    +'\n\n知識庫內容：\n'+ctx
-    +'\n\n問題：'+question;
-
-  var GKEY = 'AIzaSyC3mWQoikDbZ6JkW7W7d17iO2jHtTyK1Js';
-  var url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key='+GKEY;
-
-  fetch(url, {
-    method: 'POST',
-    headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify({
-      contents: [{parts: [{text: prompt}]}],
-      generationConfig: {maxOutputTokens: 800, temperature: 0.2}
-    })
-  })
-  .then(function(r){return r.json();})
-  .then(function(data){
-    var el = E('aiAnswer');
-    if(!el) return;
-    if(data.candidates && data.candidates[0] && data.candidates[0].content){
-      var text = data.candidates[0].content.parts[0].text;
-      el.textContent = text;
-    } else if(data.error){
-      el.innerHTML = '<span style="color:#C53030">⚠ AI 無法回答：'+esc(data.error.message||'未知錯誤')+'</span>';
-    }
-  })
-  .catch(function(err){
-    var el = E('aiAnswer');
-    if(el) el.innerHTML = '<span style="color:#C53030">⚠ 連線失敗，請稍後再試</span>';
-  });
-}
 
 // ADMIN
 function clickAdmin(){if(!adminMode){E('loginOv').classList.add('open');setTimeout(function(){E('loginPw').focus();},80);}else openAdmin();}
