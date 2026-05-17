@@ -188,7 +188,7 @@ mark{background:#FEFCBF;border-radius:2px;padding:0 2px}
 #aiInputRow{display:flex;gap:8px;padding:12px;border-top:1px solid #E2E8F0;flex-shrink:0}
 #aiInput{flex:1;padding:9px 13px;border:2px solid #E2E8F0;border-radius:999px;font-size:13px;font-family:inherit;outline:none;transition:border-color .2s}
 #aiInput:focus{border-color:#4CAF7D}
-#aiSend{width:36px;height:36px;background:#4CAF7D;border:none;border-radius:50%;cursor:pointer;color:#fff;font-size:16px;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:background .2s}
+#aiSend{width:36px;height:36px;background:#4CAF7D;border:none;border-radius:50%;cursor:pointer;color:#fff;font-size:16px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
 #aiSend:hover{background:#3a9a68}
 #aiSend:disabled{background:#A0AEC0;cursor:not-allowed}
 @media(max-width:650px){#aiPanel{width:calc(100vw - 32px)}}
@@ -608,7 +608,8 @@ function goQuiz(){
   if(url){window.open(url,'_blank');}else{alert('找不到對應的測驗頁面');}
 }
 
-// ── AI 問答（使用 Claude API）──
+// ── AI 問答（Gemini API）──
+var GEMINI_KEY='AIzaSyBGcmbFrg_I2dqZvFxJoDKqLVYfUMUPt9Y';
 var aiOpen=false;
 
 function toggleAI(){
@@ -627,7 +628,7 @@ function getQAContext(){
       if(item.a)lines.push('A: '+item.a);
     });
   });
-  return lines.slice(0,100).join('\n'); // 最多取100筆避免太長
+  return lines.slice(0,80).join('\n');
 }
 
 async function askAI(){
@@ -637,12 +638,14 @@ async function askAI(){
 
   var msgs=E('aiMessages');
 
+  // 顯示使用者問題
   var uDiv=document.createElement('div');
   uDiv.className='ai-msg user';
   uDiv.textContent=q;
   msgs.appendChild(uDiv);
   inp.value='';
 
+  // 顯示載入中
   var loadDiv=document.createElement('div');
   loadDiv.className='ai-msg bot loading';
   loadDiv.textContent='⏳ 查詢中…';
@@ -652,31 +655,35 @@ async function askAI(){
 
   try{
     var context=getQAContext();
-    var res=await fetch('https://api.anthropic.com/v1/messages',{
-      method:'POST',
-      headers:{
-        'Content-Type':'application/json',
-        'x-api-key':'AIzaSyBGcmbFrg_I2dqZvFxJoDKqLVYfUMUPt9Y',
-        'anthropic-version':'2023-06-01',
-        'anthropic-dangerous-allow-browser':'true'
-      },
-      body:JSON.stringify({
-        model:'claude-sonnet-4-20250514',
-        max_tokens:400,
-        system:'你是1959動物保護專線的客服協助系統（'+city+'縣市）。根據以下知識庫回答客服人員的問題，用親切繁體中文，不超過120字，適合直接轉述給民眾。知識庫沒有的請建議轉介適當單位。\n\n【知識庫】\n'+context,
-        messages:[{role:'user',content:q}]
-      })
-    });
+    var fullPrompt='你是1959動物保護專線的客服協助系統（'+city+'縣市）。'
+      +'根據以下知識庫，用親切繁體中文回答客服人員的問題，不超過120字，適合直接轉述給民眾。'
+      +'知識庫沒有的資訊請建議轉介適當單位。\n\n'
+      +'【'+city+'知識庫】\n'+context+'\n\n'
+      +'【問題】'+q;
+
+    var res=await fetch(
+      'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key='+GEMINI_KEY,
+      {
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({
+          contents:[{parts:[{text:fullPrompt}]}],
+          generationConfig:{temperature:0.3,maxOutputTokens:300}
+        })
+      }
+    );
     if(!res.ok){
-      var errData=await res.json();
-      throw new Error(errData.error&&errData.error.message||'API錯誤'+res.status);
+      var e=await res.json();
+      throw new Error(e.error&&e.error.message||'API錯誤 '+res.status);
     }
     var data=await res.json();
+    var answer=data.candidates&&data.candidates[0]&&data.candidates[0].content.parts[0].text;
+    if(!answer)throw new Error('回應格式錯誤');
     loadDiv.className='ai-msg bot';
-    loadDiv.textContent=data.content[0].text;
+    loadDiv.textContent=answer;
   }catch(err){
     loadDiv.className='ai-msg bot';
-    loadDiv.textContent='⚠ 查詢失敗：'+err.message;
+    loadDiv.textContent='⚠ 查詢失敗：'+err.message+'。請稍後再試或直接搜尋知識庫。';
   }
 
   E('aiSend').disabled=false;
