@@ -187,6 +187,7 @@ mark{background:#FEFCBF;border-radius:2px;padding:0 2px}
   </div>
   <div class="hdr-r">
     <div class="sz-btns"><button class="sz-btn" onclick="chgSz(-1)">A-</button><button class="sz-btn" onclick="chgSz(1)">A+</button></div>
+    <button class="btn btn-grn" id="quizBtn" onclick="goQuiz()" style="gap:4px">📋 前往測驗</button>
     <button class="btn btn-out" id="adminBtn" onclick="clickAdmin()">&#x2699; &#x5F8C;&#x53F0;</button>
   </div>
 </header>
@@ -562,6 +563,13 @@ function renderImgPrev(){E('imgPrev').innerHTML=pImgs.map(function(s){return '<i
 
 document.addEventListener('click',function(e){if(e.target.classList.contains('a-link'))e.stopPropagation();});
 E('qaA').addEventListener('input',updPrev);
+
+function goQuiz(){
+  var cityMap={'桃園':'quiz-taoyuan.html','南投':'quiz-nantou.html','嘉義':'quiz-chiayi.html','彰化':'quiz-changhua.html'};
+  var url=cityMap[city];
+  if(url){window.open(url,'_blank');}else{alert('找不到對應的測驗頁面');}
+}
+
 init();
 </script>
 </body>
