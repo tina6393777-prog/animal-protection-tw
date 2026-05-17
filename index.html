@@ -219,8 +219,6 @@ mark{background:#FEFCBF;border-radius:2px;padding:0 2px}
   <div class="content" id="content"></div>
 </div>
 <div id="srchPanel"></div>
-
-<!-- AI 問答浮動按鈕 -->
 <div id="aiBox">
   <div id="aiPanel">
     <div id="aiPanelHdr">
@@ -608,8 +606,8 @@ function goQuiz(){
   if(url){window.open(url,'_blank');}else{alert('找不到對應的測驗頁面');}
 }
 
-// ── AI 問答（Gemini API）──
-var GEMINI_KEY='AIzaSyBGcmbFrg_I2dqZvFxJoDKqLVYfUMUPt9Y';
+// ── AI 問答 ──
+var AI_KEY='AIzaSyA_TEZRDSuqg3_v0PWWNpukxGrs06szETI';
 var aiOpen=false;
 
 function toggleAI(){
@@ -635,17 +633,14 @@ async function askAI(){
   var inp=E('aiInput');
   var q=inp.value.trim();
   if(!q)return;
-
   var msgs=E('aiMessages');
 
-  // 顯示使用者問題
   var uDiv=document.createElement('div');
   uDiv.className='ai-msg user';
   uDiv.textContent=q;
   msgs.appendChild(uDiv);
   inp.value='';
 
-  // 顯示載入中
   var loadDiv=document.createElement('div');
   loadDiv.className='ai-msg bot loading';
   loadDiv.textContent='⏳ 查詢中…';
@@ -656,13 +651,13 @@ async function askAI(){
   try{
     var context=getQAContext();
     var fullPrompt='你是1959動物保護專線的客服協助系統（'+city+'縣市）。'
-      +'根據以下知識庫，用親切繁體中文回答客服人員的問題，不超過120字，適合直接轉述給民眾。'
-      +'知識庫沒有的資訊請建議轉介適當單位。\n\n'
+      +'根據以下知識庫，用親切繁體中文回答，不超過120字，適合直接轉述給民眾。'
+      +'知識庫沒有的請建議轉介適當單位。\n\n'
       +'【'+city+'知識庫】\n'+context+'\n\n'
       +'【問題】'+q;
 
     var res=await fetch(
-      'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key='+GEMINI_KEY,
+      'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key='+AI_KEY,
       {
         method:'POST',
         headers:{'Content-Type':'application/json'},
@@ -683,9 +678,8 @@ async function askAI(){
     loadDiv.textContent=answer;
   }catch(err){
     loadDiv.className='ai-msg bot';
-    loadDiv.textContent='⚠ 查詢失敗：'+err.message+'。請稍後再試或直接搜尋知識庫。';
+    loadDiv.textContent='⚠ 查詢失敗：'+err.message;
   }
-
   E('aiSend').disabled=false;
   msgs.scrollTop=msgs.scrollHeight;
 }
