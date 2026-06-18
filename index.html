@@ -643,13 +643,12 @@ function toggleAI(){
   }
 }
 
+
 function searchQACards(val){
   var area=E('qaCardArea');
-  var q=val.trim();
+  var q=(val||'').trim();
   if(!q){area.innerHTML='';return;}
   if(!db||!db[city]){area.innerHTML='';return;}
-
-  // 搜尋相關 QA
   var results=[];
   db[city].topics.forEach(function(t){
     t.items.forEach(function(item){
@@ -662,37 +661,48 @@ function searchQACards(val){
       }
     });
   });
-
   if(!results.length){
-    area.innerHTML='<div class="qa-no-result" style="display:block">找不到相關 QA，可按 🤖 問 AI</div>';
+    area.innerHTML='<div style="font-size:12px;color:#718096;text-align:center;padding:10px">找不到相關 QA，可按 🤖 問 AI</div>';
     return;
   }
-
-  // 最多顯示 5 筆
   results=results.slice(0,5);
-  area.innerHTML=results.map(function(r,i){
-    var aText=r.a.replace(/\[\[\w+:([^\]]*)\]\]/g,'$1');
-    return '<div class="qa-card-btn" onclick="toggleQACard(this,'+i+')">'
-      +'<div class="qa-card-topic">📁 '+esc(r.topic)+'</div>'
-      +'<div class="qa-card-q">Q：'+esc(r.q)+'</div>'
-      +'<div class="qa-card-a" id="qca'+i+'">'+esc(aText)
-      +(r.a?'<br><button class="ai-copy-btn" onclick="event.stopPropagation();copyQA(''+i+'')">📋 複製</button>':'')
-      +'</div>'
-      +'</div>';
-  }).join('');
+  var html='';
+  for(var i=0;i<results.length;i++){
+    var r=results[i];
+    var aText=stripColor(r.a);
+    html+='<div class="qa-card-btn" id="qcb'+i+'" onclick="toggleQACard('+i+')">';
+    html+='<div class="qa-card-topic">📁 '+esc(r.topic)+'</div>';
+    html+='<div class="qa-card-q">Q：'+esc(r.q)+'</div>';
+    html+='<div class="qa-card-a" id="qca'+i+'">'+esc(aText)+'</div>';
+    html+='</div>';
+  }
+  area.innerHTML=html;
+  window._qaResults=results;
 }
 
-function toggleQACard(el,i){
+function toggleQACard(i){
   var a=E('qca'+i);
   if(!a)return;
-  a.classList.toggle('open');
-}
-
-function copyQA(i){
-  var el=E('qca'+i);
-  if(!el)return;
-  var txt=el.textContent.replace('📋 複製','').trim();
-  navigator.clipboard.writeText(txt).then(function(){toast('✅ 已複製');});
+  var isOpen=a.classList.contains('open');
+  // 關閉所有
+  document.querySelectorAll('.qa-card-a').forEach(function(el){el.classList.remove('open');});
+  if(!isOpen){
+    a.classList.add('open');
+    // 加複製按鈕
+    if(!a.querySelector('.ai-copy-btn')){
+      var btn=document.createElement('button');
+      btn.className='ai-copy-btn';
+      btn.textContent='📋 複製';
+      btn.onclick=function(e){
+        e.stopPropagation();
+        var r=window._qaResults&&window._qaResults[i];
+        if(!r)return;
+        navigator.clipboard.writeText(stripColor(r.a)).then(function(){toast('✅ 已複製');});
+      };
+      a.appendChild(document.createElement('br'));
+      a.appendChild(btn);
+    }
+  }
 }
 
 function clearAIChat(){
