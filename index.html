@@ -713,8 +713,10 @@ async function askAI(){
     }
 
     var data=await res.json();
+    // 檢查是否有 API 錯誤訊息
+    if(data.error)throw new Error(data.error.message||'API回傳錯誤');
     var answer=data.content&&data.content[0]&&data.content[0].text;
-    if(!answer)throw new Error('回應格式錯誤');
+    if(!answer)throw new Error('回應格式錯誤：'+JSON.stringify(data).slice(0,100));
 
     // 把 AI 回答存入歷史
     aiHistory.push({role:'assistant',content:answer});
