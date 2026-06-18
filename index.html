@@ -193,6 +193,15 @@ mark{background:#FEFCBF;border-radius:2px;padding:0 2px}
 #aiSend:disabled{background:#A0AEC0;cursor:not-allowed}
 .ai-copy-btn{margin-top:7px;background:#E2E8F0;border:none;border-radius:5px;padding:3px 9px;font-size:11px;cursor:pointer;font-family:inherit;color:#4A5568;display:inline-block}
 .ai-copy-btn:hover{background:#CBD5E0}
+#qaCardArea{padding:0 10px 6px;display:flex;flex-direction:column;gap:6px;max-height:260px;overflow-y:auto}
+.qa-card-btn{background:#fff;border:1.5px solid #E2E8F0;border-radius:10px;padding:9px 12px;cursor:pointer;text-align:left;transition:all .15s;font-family:inherit}
+.qa-card-btn:hover{border-color:#4CAF7D;box-shadow:0 2px 8px rgba(76,175,125,.15)}
+.qa-card-q{font-size:12px;font-weight:700;color:#2D3748;margin-bottom:4px;line-height:1.4}
+.qa-card-topic{font-size:10px;color:#718096;margin-bottom:5px}
+.qa-card-a{font-size:12px;color:#4A5568;line-height:1.6;display:none;margin-top:6px;padding-top:6px;border-top:1px solid #E2E8F0;white-space:pre-wrap;word-break:break-word}
+.qa-card-a.open{display:block}
+.qa-no-result{font-size:12px;color:#718096;text-align:center;padding:10px;display:none}
+#aiSend{width:36px;height:36px;background:#4CAF7D;border:none;border-radius:50%;cursor:pointer;color:#fff;font-size:16px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .ai-msg.loading span{display:inline-block;width:7px;height:7px;border-radius:50%;background:#A0AEC0;margin:0 2px;animation:aiDot 1.2s ease-in-out infinite}
 .ai-msg.loading span:nth-child(2){animation-delay:.2s}
 .ai-msg.loading span:nth-child(3){animation-delay:.4s}
@@ -235,11 +244,12 @@ mark{background:#FEFCBF;border-radius:2px;padding:0 2px}
       </div>
     </div>
     <div id="aiMessages">
-      <div class="ai-msg bot">👋 您好！我是 1959 動保知識庫 AI 助理。<br>請輸入民眾的問題，我會根據目前縣市的知識庫提供建議回覆。</div>
+      <div class="ai-msg bot">👋 輸入關鍵字，先幫你找相關 QA！<br>找不到答案再按 🤖 讓 AI 回答。</div>
     </div>
+    <div id="qaCardArea"></div>
     <div id="aiInputRow">
-      <input id="aiInput" type="text" placeholder="輸入問題，按 Enter 送出…" onkeydown="if(event.key==='Enter')askAI()">
-      <button id="aiSend" onclick="askAI()">➤</button>
+      <input id="aiInput" type="text" placeholder="輸入關鍵字搜尋 QA…" oninput="searchQACards(this.value)" onkeydown="if(event.key==='Enter')askAI()">
+      <button id="aiSend" onclick="askAI()" title="問 AI">🤖</button>
     </div>
   </div>
   <button id="aiToggle" onclick="toggleAI()" title="AI 智慧問答">🤖</button>
@@ -633,6 +643,58 @@ function toggleAI(){
   }
 }
 
+function searchQACards(val){
+  var area=E('qaCardArea');
+  var q=val.trim();
+  if(!q){area.innerHTML='';return;}
+  if(!db||!db[city]){area.innerHTML='';return;}
+
+  // 搜尋相關 QA
+  var results=[];
+  db[city].topics.forEach(function(t){
+    t.items.forEach(function(item){
+      if(!item.q)return;
+      var qLow=item.q.toLowerCase();
+      var aLow=(item.a||'').toLowerCase();
+      var kw=q.toLowerCase();
+      if(qLow.indexOf(kw)>=0||aLow.indexOf(kw)>=0){
+        results.push({topic:t.name,q:item.q,a:item.a||''});
+      }
+    });
+  });
+
+  if(!results.length){
+    area.innerHTML='<div class="qa-no-result" style="display:block">找不到相關 QA，可按 🤖 問 AI</div>';
+    return;
+  }
+
+  // 最多顯示 5 筆
+  results=results.slice(0,5);
+  area.innerHTML=results.map(function(r,i){
+    var aText=r.a.replace(/\[\[\w+:([^\]]*)\]\]/g,'$1');
+    return '<div class="qa-card-btn" onclick="toggleQACard(this,'+i+')">'
+      +'<div class="qa-card-topic">📁 '+esc(r.topic)+'</div>'
+      +'<div class="qa-card-q">Q：'+esc(r.q)+'</div>'
+      +'<div class="qa-card-a" id="qca'+i+'">'+esc(aText)
+      +(r.a?'<br><button class="ai-copy-btn" onclick="event.stopPropagation();copyQA(''+i+'')">📋 複製</button>':'')
+      +'</div>'
+      +'</div>';
+  }).join('');
+}
+
+function toggleQACard(el,i){
+  var a=E('qca'+i);
+  if(!a)return;
+  a.classList.toggle('open');
+}
+
+function copyQA(i){
+  var el=E('qca'+i);
+  if(!el)return;
+  var txt=el.textContent.replace('📋 複製','').trim();
+  navigator.clipboard.writeText(txt).then(function(){toast('✅ 已複製');});
+}
+
 function clearAIChat(){
   aiHistory=[];
   var msgs=E('aiMessages');
@@ -649,7 +711,7 @@ function getQAContext(){
       if(item.a)lines.push('A: '+(item.a||'').replace(/\[\[\w+:([^\]]*)\]\]/g,'$1'));
     });
   });
-  return lines.slice(0,120).join('\n');
+  return lines.slice(0,200).join('\n');
 }
 
 async function askAI(){
