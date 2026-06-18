@@ -181,19 +181,22 @@ mark{background:#FEFCBF;border-radius:2px;padding:0 2px}
 #aiPanelHdr span{font-size:14px;font-weight:800}
 #aiPanelHdr button{background:none;border:none;color:rgba(255,255,255,.7);cursor:pointer;font-size:18px;line-height:1;padding:0}
 #aiMessages{flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:10px;min-height:200px}
-.ai-msg{padding:10px 13px;border-radius:12px;font-size:13px;line-height:1.7;max-width:95%;word-break:break-word}
+.ai-msg{padding:10px 13px;border-radius:12px;font-size:13px;line-height:1.7;max-width:90%;word-break:break-word}
 .ai-msg.bot{background:#F5F7FA;color:#2D3748;align-self:flex-start;border-radius:4px 12px 12px 12px}
 .ai-msg.user{background:#4CAF7D;color:#fff;align-self:flex-end;border-radius:12px 4px 12px 12px}
 .ai-msg.loading{color:#718096;font-style:italic}
-.ai-hit{padding:8px 10px;background:#fff;border:1px solid #E2E8F0;border-radius:8px;margin-top:6px;font-size:12px;line-height:1.6;cursor:pointer}
-.ai-hit:hover{background:#f0fff4;border-color:#4CAF7D}
-.ai-hit .hit-q{font-weight:700;color:#2D3748;margin-bottom:3px}
-.ai-hit .hit-a{color:#4A5568}
 #aiInputRow{display:flex;gap:8px;padding:12px;border-top:1px solid #E2E8F0;flex-shrink:0}
 #aiInput{flex:1;padding:9px 13px;border:2px solid #E2E8F0;border-radius:999px;font-size:13px;font-family:inherit;outline:none;transition:border-color .2s}
 #aiInput:focus{border-color:#4CAF7D}
 #aiSend{width:36px;height:36px;background:#4CAF7D;border:none;border-radius:50%;cursor:pointer;color:#fff;font-size:16px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
 #aiSend:hover{background:#3a9a68}
+#aiSend:disabled{background:#A0AEC0;cursor:not-allowed}
+.ai-copy-btn{margin-top:7px;background:#E2E8F0;border:none;border-radius:5px;padding:3px 9px;font-size:11px;cursor:pointer;font-family:inherit;color:#4A5568;display:inline-block}
+.ai-copy-btn:hover{background:#CBD5E0}
+.ai-msg.loading span{display:inline-block;width:7px;height:7px;border-radius:50%;background:#A0AEC0;margin:0 2px;animation:aiDot 1.2s ease-in-out infinite}
+.ai-msg.loading span:nth-child(2){animation-delay:.2s}
+.ai-msg.loading span:nth-child(3){animation-delay:.4s}
+@keyframes aiDot{0%,80%,100%{transform:scale(.7);opacity:.5}40%{transform:scale(1);opacity:1}}
 @media(max-width:650px){#aiPanel{width:calc(100vw - 32px)}}
 </style>
 </head>
@@ -225,14 +228,17 @@ mark{background:#FEFCBF;border-radius:2px;padding:0 2px}
 <div id="aiBox">
   <div id="aiPanel">
     <div id="aiPanelHdr">
-      <span>🤖 AI 智慧問答</span>
-      <button onclick="toggleAI()">✕</button>
+      <span>🤖 AI 智慧問答｜<span id="aiCityLabel">桃園</span></span>
+      <div style="display:flex;align-items:center;gap:8px">
+        <button id="aiClearBtn" onclick="clearAIChat()" title="清除對話" style="background:none;border:none;color:rgba(255,255,255,.6);cursor:pointer;font-size:13px;padding:0">🗑</button>
+        <button onclick="toggleAI()" style="background:none;border:none;color:rgba(255,255,255,.7);cursor:pointer;font-size:18px;line-height:1;padding:0">✕</button>
+      </div>
     </div>
     <div id="aiMessages">
-      <div class="ai-msg bot">👋 您好！請輸入民眾的問題關鍵字，我會從知識庫找出相關的處理方式。</div>
+      <div class="ai-msg bot">👋 您好！我是 1959 動保知識庫 AI 助理。<br>請輸入民眾的問題，我會根據目前縣市的知識庫提供建議回覆。</div>
     </div>
     <div id="aiInputRow">
-      <input id="aiInput" type="text" placeholder="輸入關鍵字，例如：幼貓、路倒…" onkeydown="if(event.key==='Enter')askAI()">
+      <input id="aiInput" type="text" placeholder="輸入問題，按 Enter 送出…" onkeydown="if(event.key==='Enter')askAI()">
       <button id="aiSend" onclick="askAI()">➤</button>
     </div>
   </div>
@@ -609,65 +615,140 @@ function goQuiz(){
   if(url){window.open(url,'_blank');}else{alert('找不到對應的測驗頁面');}
 }
 
-// ── AI 智慧問答（本地知識庫搜尋，不需要 API）──
+// ── AI 問答（Claude API）──
+var CLAUDE_KEY='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';
 var aiOpen=false;
+var aiHistory=[];  // 保留對話記憶
 
 function toggleAI(){
   aiOpen=!aiOpen;
   var panel=E('aiPanel');
-  if(aiOpen){panel.classList.add('open');setTimeout(function(){E('aiInput').focus();},100);}
-  else{panel.classList.remove('open');}
+  if(aiOpen){
+    panel.classList.add('open');
+    // 同步顯示目前縣市
+    if(E('aiCityLabel'))E('aiCityLabel').textContent=city;
+    setTimeout(function(){E('aiInput').focus();},100);
+  }else{
+    panel.classList.remove('open');
+  }
 }
 
-function askAI(){
+function clearAIChat(){
+  aiHistory=[];
+  var msgs=E('aiMessages');
+  msgs.innerHTML='<div class="ai-msg bot">🔄 對話已清除。請輸入新的問題！</div>';
+}
+
+function getQAContext(){
+  var lines=[];
+  if(!db||!db[city])return'';
+  db[city].topics.forEach(function(t){
+    lines.push('【主題：'+t.name+'】');
+    t.items.forEach(function(item){
+      if(item.q)lines.push('Q: '+item.q);
+      if(item.a)lines.push('A: '+(item.a||'').replace(/\[\[\w+:([^\]]*)\]\]/g,'$1'));
+    });
+  });
+  return lines.slice(0,120).join('\n');
+}
+
+async function askAI(){
   var inp=E('aiInput');
   var q=inp.value.trim();
   if(!q)return;
   var msgs=E('aiMessages');
 
-  // 顯示使用者問題
+  // 更新縣市標籤
+  if(E('aiCityLabel'))E('aiCityLabel').textContent=city;
+
+  // 顯示使用者訊息
   var uDiv=document.createElement('div');
   uDiv.className='ai-msg user';
   uDiv.textContent=q;
   msgs.appendChild(uDiv);
   inp.value='';
+
+  // 顯示等待中
+  var loadDiv=document.createElement('div');
+  loadDiv.className='ai-msg bot loading';
+  loadDiv.innerHTML='<span>●</span><span>●</span><span>●</span>';
+  msgs.appendChild(loadDiv);
   msgs.scrollTop=msgs.scrollHeight;
+  E('aiSend').disabled=true;
+  E('aiInput').disabled=true;
 
-  // 搜尋知識庫
-  var hits=searchQA(q);
-  var botDiv=document.createElement('div');
-  botDiv.className='ai-msg bot';
+  try{
+    var context=getQAContext();
+    var systemPrompt='你是「1959動物保護專線」的內部客服輔助系統，目前服務縣市為【'+city+'縣市】。\n'
+      +'你的角色是幫助客服同仁快速找到正確答案，以便轉述給撥打1959的民眾。\n\n'
+      +'回答規則：\n'
+      +'1. 優先根據下方【'+city+'知識庫】內容回答\n'
+      +'2. 回答用親切的繁體中文，適合直接轉述給民眾\n'
+      +'3. 如知識庫有明確答案，請簡潔說明（約50-100字）\n'
+      +'4. 如知識庫沒有相關資訊，請誠實說明並建議轉介單位\n'
+      +'5. 涉及緊急救援、動物傷亡等，請特別提醒客服人員確認當地SOP\n'
+      +'6. 不要編造聯絡電話或不確定的資訊\n\n'
+      +'【'+city+'知識庫】\n'+context;
 
-  if(hits.length===0){
-    botDiv.innerHTML='🔍 知識庫中找不到「<strong>'+esc(q)+'</strong>」的相關內容。<br>建議直接瀏覽各主題或換個關鍵字試試。';
-  } else {
-    var html='📋 找到 <strong>'+hits.length+'</strong> 筆相關資料：<br>';
-    hits.slice(0,3).forEach(function(h){
-      html+='<div class="ai-hit"><div class="hit-q">Q：'+esc(h.q)+'</div><div class="hit-a">A：'+esc(h.a.substring(0,100))+(h.a.length>100?'…':'')+'</div></div>';
+    // 加入歷史對話（最多保留5輪）
+    aiHistory.push({role:'user',content:q});
+    if(aiHistory.length>10)aiHistory=aiHistory.slice(-10);
+
+    var res=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{
+        'Content-Type':'application/json',
+        'x-api-key':CLAUDE_KEY,
+        'anthropic-version':'2023-06-01',
+        'anthropic-dangerous-direct-browser-calls':'true'
+      },
+      body:JSON.stringify({
+        model:'claude-sonnet-4-6',
+        max_tokens:512,
+        system:systemPrompt,
+        messages:aiHistory
+      })
     });
-    if(hits.length>3) html+='<div style="font-size:11px;color:#718096;margin-top:6px">還有 '+(hits.length-3)+' 筆，可用上方搜尋查看更多</div>';
-    botDiv.innerHTML=html;
+
+    if(!res.ok){
+      var eData=await res.json();
+      throw new Error(eData.error&&eData.error.message||'API錯誤 '+res.status);
+    }
+
+    var data=await res.json();
+    var answer=data.content&&data.content[0]&&data.content[0].text;
+    if(!answer)throw new Error('回應格式錯誤');
+
+    // 把 AI 回答存入歷史
+    aiHistory.push({role:'assistant',content:answer});
+
+    loadDiv.className='ai-msg bot';
+    loadDiv.textContent=answer;
+
+    // 加入複製按鈕
+    var copyBtn=document.createElement('button');
+    copyBtn.className='ai-copy-btn';
+    copyBtn.textContent='📋 複製';
+    copyBtn.onclick=function(){
+      navigator.clipboard.writeText(answer).then(function(){
+        copyBtn.textContent='✅ 已複製';
+        setTimeout(function(){copyBtn.textContent='📋 複製';},2000);
+      });
+    };
+    loadDiv.appendChild(document.createElement('br'));
+    loadDiv.appendChild(copyBtn);
+
+  }catch(err){
+    loadDiv.className='ai-msg bot';
+    loadDiv.textContent='⚠ 查詢失敗：'+err.message;
+    // 失敗時移出歷史
+    aiHistory.pop();
   }
 
-  msgs.appendChild(botDiv);
+  E('aiSend').disabled=false;
+  E('aiInput').disabled=false;
+  E('aiInput').focus();
   msgs.scrollTop=msgs.scrollHeight;
-}
-
-function searchQA(q){
-  var kws=q.toLowerCase().split(/\s+/).filter(Boolean);
-  var hits=[];
-  if(!db||!db[city])return hits;
-  db[city].topics.forEach(function(t){
-    t.items.forEach(function(item){
-      if(!item.q||!item.a)return;
-      var text=(item.q+' '+item.a).toLowerCase();
-      var score=0;
-      kws.forEach(function(kw){ if(text.indexOf(kw)>=0) score++; });
-      if(score>0) hits.push({q:item.q,a:item.a,score:score});
-    });
-  });
-  hits.sort(function(a,b){return b.score-a.score;});
-  return hits;
 }
 
 init();
