@@ -260,7 +260,7 @@ body {
   <div id="screen-start" class="card">
     <div class="start-emoji">📋</div>
     <div class="start-title">動保專線知識測驗</div>
-    <div class="start-sub">AI 從知識庫自動出題，混合是非、單選、複選<br>80 分以上通過，成績自動寄送主管群組</div>
+    <div class="start-sub">AI 從知識庫自動出題，混合是非、單選、複選<br>85 分以上通過，成績自動寄送主管群組</div>
 
     <div class="info-row">
       <div class="info-chip">
@@ -268,7 +268,7 @@ body {
         <div class="lbl">隨機題數</div>
       </div>
       <div class="info-chip">
-        <div class="num">80</div>
+        <div class="num">85</div>
         <div class="lbl">及格分數</div>
       </div>
       <div class="info-chip">
@@ -636,7 +636,7 @@ function nextQ(){
 function showResult(){
   show('screen-result');
   const score=S.totalPts>0?Math.round((S.earnedPts/S.totalPts)*100):0;
-  const pass=score>=80;
+  const pass=score>=85;
 
   document.getElementById('result-emoji').textContent=score===100?'🏆':pass?'🎉':'📚';
   document.getElementById('result-name').textContent=S.name+'（'+S.city+'）';
@@ -646,7 +646,7 @@ function showResult(){
   scoreEl.className='result-score-big '+(pass?'pass':'fail');
 
   const verdictEl=document.getElementById('result-verdict');
-  verdictEl.textContent=pass?'✅ 恭喜通過！':'❌ 未達及格標準（80分），建議複習後重考';
+  verdictEl.textContent=pass?'✅ 恭喜通過！':'❌ 未達及格標準（85分），建議複習後重考';
   verdictEl.className='result-verdict '+(pass?'verdict-pass':'verdict-fail');
 
   let fullCorrect=0,partial=0,wrong=0;
