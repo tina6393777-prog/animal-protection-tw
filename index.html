@@ -16,25 +16,25 @@
   --radius:12px;
 
   /* 四縣市色系 */
-  --taoyuan:#C0392B;      /* 桃園：深紅磚 */
-  --taoyuan-light:#FDF1F0;
-  --taoyuan-mid:#E8A09A;
+  --taoyuan:#E8736C;
+  --taoyuan-light:#FFF5F5;
+  --taoyuan-mid:#F5B8B5;
 
-  --nantou:#3D7A5E;       /* 南投：山林綠 */
-  --nantou-light:#EDF5F0;
-  --nantou-mid:#92C4A8;
+  --nantou:#4DBF82;
+  --nantou-light:#F0FBF5;
+  --nantou-mid:#99DFB8;
 
-  --chiayi:#B07D2A;       /* 嘉義：金黃褐 */
-  --chiayi-light:#FBF5E6;
-  --chiayi-mid:#D9B96A;
+  --chiayi:#E8953A;
+  --chiayi-light:#FFF8F0;
+  --chiayi-mid:#F5CEAA;
 
-  --changhua:#2B6CB0;     /* 彰化：靛藍 */
-  --changhua-light:#EBF1FA;
-  --changhua-mid:#7AAAD6;
+  --changhua:#5B9FE8;
+  --changhua-light:#F0F6FF;
+  --changhua-mid:#A8CCEF;
 
-  --city-color:#3D7A5E;
-  --city-light:#EDF5F0;
-  --city-mid:#92C4A8;
+  --city-color:#4DBF82;
+  --city-light:#F0FBF5;
+  --city-mid:#99DFB8;
 }
 *{box-sizing:border-box;margin:0;padding:0}
 body{
@@ -131,6 +131,7 @@ header{
   display:flex;gap:0;
   position:sticky;top:60px;z-index:190;
 }
+/* sidebar top 由 JS 動態設定 */
 .c-tab{
   padding:14px 22px;border:none;background:none;
   cursor:pointer;font-size:13px;font-weight:700;
@@ -160,6 +161,7 @@ header{
   position:sticky;top:113px;height:calc(100vh - 113px);
   overflow-y:auto;
 }
+/* JS 會在 init 後動態更新 sidebar top / height */
 .sb-head{
   padding:0 16px 10px;font-size:10px;font-weight:700;
   color:var(--muted);letter-spacing:1px;text-transform:uppercase;
@@ -623,22 +625,22 @@ mark{background:#FFF59D;border-radius:2px;padding:0 2px}
 <script>
 // ── 縣市色彩設定 ──
 var COLORS={
-  '桃園':'#C0392B',
-  '南投':'#3D7A5E',
-  '嘉義':'#B07D2A',
-  '彰化':'#2B6CB0'
+  '桃園':'#E8736C',
+  '南投':'#4DBF82',
+  '嘉義':'#E8953A',
+  '彰化':'#5B9FE8'
 };
 var COLORS_LIGHT={
-  '桃園':'#FDF1F0',
-  '南投':'#EDF5F0',
-  '嘉義':'#FBF5E6',
-  '彰化':'#EBF1FA'
+  '桃園':'#FFF5F5',
+  '南投':'#F0FBF5',
+  '嘉義':'#FFF8F0',
+  '彰化':'#F0F6FF'
 };
 var COLORS_MID={
-  '桃園':'#E8A09A',
-  '南投':'#92C4A8',
-  '嘉義':'#D9B96A',
-  '彰化':'#7AAAD6'
+  '桃園':'#F5B8B5',
+  '南投':'#99DFB8',
+  '嘉義':'#F5CEAA',
+  '彰化':'#A8CCEF'
 };
 var CITIES=['桃園','南投','嘉義','彰化'];
 var db,city,adminMode,pImgs,editCtx,mqData,fSize;
@@ -684,10 +686,11 @@ function init(){
     .then(function(json){
       if(!json['桃園'])throw new Error('data.json 格式不符');
       db=json;saveDB();renderSB();renderContent();
+      fixOffsets();
     })
     .catch(function(err){
       var s=localStorage.getItem('qadb');
-      if(s){try{db=JSON.parse(s);renderSB();renderContent();toast('⚠ 使用暫存資料（'+err.message+'）');return;}catch(e2){}}
+      if(s){try{db=JSON.parse(s);renderSB();renderContent();fixOffsets();toast('⚠ 使用暫存資料（'+err.message+'）');return;}catch(e2){}}
       E('content').innerHTML='<div class="loading-msg"><div style="font-size:36px;margin-bottom:12px">⚠️</div>'
         +'<div style="font-size:15px;font-weight:700;color:#C62828;margin-bottom:8px">無法載入資料</div>'
         +'<div style="font-size:12px;color:var(--muted)">'+esc(err.message)+'<br>請確認 data.json 已上傳至 GitHub 同一目錄</div></div>';
@@ -706,8 +709,8 @@ function renderMQ(){
     var lbl=m.scope==='all'?'📢 全站':('📌 '+m.scope);
     var bg=m.scope==='all'?'#555':COLORS[m.scope];
     var tc=m.scope==='all'?'#fff':'#fff';
-    return '<div class="mq-row" style="background:'+COLORS_LIGHT[m.scope]||'#F7F6F3'"
-      +'>'
+    var rowBg=(m.scope==='all'?'#F7F6F3':(COLORS_LIGHT[m.scope]||'#F7F6F3'));
+    return '<div class="mq-row" style="background:'+rowBg+'">'
       +'<span class="mq-lbl" style="background:'+bg+';color:'+tc+'">'+lbl+'</span>'
       +'<div class="mq-track"><div class="mq-txt">'+esc(m.text)+'</div></div></div>';
   }).join('');
@@ -729,7 +732,7 @@ function switchCity(c){
   E('srchInput').value='';
   E('srchPanel').style.display='none';
   E('mainLayout').style.display='flex';
-  renderTabs();renderSB();renderContent();
+  renderTabs();renderSB();renderContent();fixOffsets();
   // 更新 Admin info box 顏色
   if(E('adminInfoBox'))E('adminInfoBox').style.borderColor=COLORS_MID[c];
 }
@@ -985,6 +988,18 @@ async function askAI(){
     loadDiv.className='ai-msg bot';loadDiv.textContent=answer;
   }catch(err){loadDiv.className='ai-msg bot';loadDiv.textContent='⚠ 查詢失敗：'+err.message;}
   E('aiSend').disabled=false;msgs.scrollTop=msgs.scrollHeight;
+}
+
+function fixOffsets(){
+  var hdrH=60;
+  var mqH=E('mqSec')?E('mqSec').getBoundingClientRect().height:0;
+  var navEl=document.querySelector('.city-nav');
+  var navH=navEl?navEl.getBoundingClientRect().height:41;
+  var navTop=hdrH+mqH;
+  var sbTop=navTop+navH;
+  if(navEl){navEl.style.top=navTop+'px';}
+  var sb=E('sidebar');
+  if(sb){sb.style.top=sbTop+'px';sb.style.height='calc(100vh - '+sbTop+'px)';}
 }
 
 init();
