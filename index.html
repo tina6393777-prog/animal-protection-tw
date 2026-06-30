@@ -5,373 +5,208 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>1959 動保知識庫</title>
 <style>
-/* ── 色彩系統 ── */
 :root{
-  --bg:#F7F6F3;
-  --card:#fff;
+  --bg:#F5F5F3;
   --text:#1A1A1A;
-  --muted:#888;
-  --border:#E5E3DC;
-  --sh:0 2px 16px rgba(0,0,0,.07);
-  --radius:12px;
+  --muted:#777;
+  --border:#E0DED8;
+  --card:#fff;
+  --radius:10px;
 
-  /* 四縣市色系 */
-  --taoyuan:#E8736C;
-  --taoyuan-light:#FFF5F5;
-  --taoyuan-mid:#F5B8B5;
+  --taoyuan:#E8736C;   --taoyuan-light:#FFF5F5; --taoyuan-mid:#F5B8B5;
+  --nantou:#4DBF82;    --nantou-light:#F0FBF5;  --nantou-mid:#99DFB8;
+  --chiayi:#E8953A;    --chiayi-light:#FFF8F0;  --chiayi-mid:#F5CEAA;
+  --changhua:#5B9FE8;  --changhua-light:#F0F6FF;--changhua-mid:#A8CCEF;
 
-  --nantou:#4DBF82;
-  --nantou-light:#F0FBF5;
-  --nantou-mid:#99DFB8;
-
-  --chiayi:#E8953A;
-  --chiayi-light:#FFF8F0;
-  --chiayi-mid:#F5CEAA;
-
-  --changhua:#5B9FE8;
-  --changhua-light:#F0F6FF;
-  --changhua-mid:#A8CCEF;
-
-  --city-color:#4DBF82;
-  --city-light:#F0FBF5;
-  --city-mid:#99DFB8;
+  --cc:#4DBF82;
+  --cl:#F0FBF5;
+  --cm:#99DFB8;
 }
 *{box-sizing:border-box;margin:0;padding:0}
-body{
-  font-family:"Noto Sans TC","Microsoft JhengHei","Segoe UI",sans-serif;
-  background:var(--bg);color:var(--text);
-  min-height:100vh;font-size:14px;
-  -webkit-font-smoothing:antialiased;
-}
+body{font-family:"Noto Sans TC","Microsoft JhengHei",sans-serif;background:var(--bg);color:var(--text);min-height:100vh;font-size:14px}
 
-/* ── 跑馬燈 ── */
-#mqSec{overflow:hidden;border-bottom:1px solid var(--border)}
-.mq-row{
-  display:flex;align-items:center;
-  height:36px;border-bottom:1px solid var(--border);
-}
+/* ══ 跑馬燈 ══ */
+#mqSec{overflow:hidden}
+.mq-row{display:flex;align-items:center;height:34px;border-bottom:1px solid rgba(255,255,255,.15)}
 .mq-row:last-child{border-bottom:none}
-.mq-lbl{
-  flex-shrink:0;padding:0 14px;font-size:11px;font-weight:700;
-  height:100%;display:flex;align-items:center;
-  border-right:1px solid var(--border);white-space:nowrap;
-  letter-spacing:.5px;
-}
+.mq-lbl{flex-shrink:0;padding:0 14px;font-size:11px;font-weight:700;height:100%;display:flex;align-items:center;border-right:1px solid rgba(255,255,255,.2);white-space:nowrap;color:#fff;letter-spacing:.5px}
 .mq-track{overflow:hidden;flex:1;height:100%;display:flex;align-items:center}
-.mq-txt{
-  white-space:nowrap;display:inline-block;
-  animation:scrollL 35s linear infinite;
-  font-size:12px;padding-left:20px;color:var(--text);letter-spacing:.3px;
-}
+.mq-txt{white-space:nowrap;display:inline-block;animation:mqs 35s linear infinite;font-size:12px;padding-left:24px;color:rgba(255,255,255,.92);letter-spacing:.3px}
 .mq-row:hover .mq-txt{animation-play-state:paused}
-@keyframes scrollL{from{transform:translateX(100%)}to{transform:translateX(-100%)}}
+@keyframes mqs{from{transform:translateX(100%)}to{transform:translateX(-100%)}}
 
-/* ── Header ── */
-header{
-  background:#fff;padding:0 24px;
-  display:flex;align-items:center;gap:14px;
-  height:60px;
-  border-bottom:2px solid var(--city-color);
+/* ══ Banner（縣市色） ══ */
+#banner{
+  background:var(--cc);
+  padding:20px 32px 24px;
   position:sticky;top:0;z-index:200;
-  transition:border-color .3s;
-}
-.logo{display:flex;align-items:center;gap:11px;flex-shrink:0;text-decoration:none}
-.logo-mark{
-  width:36px;height:36px;
-  background:var(--city-color);
-  border-radius:8px;
-  display:flex;align-items:center;justify-content:center;
-  font-size:18px;color:#fff;
   transition:background .3s;
-  flex-shrink:0;
 }
-.logo-text h1{font-size:15px;font-weight:800;color:var(--text);letter-spacing:.5px}
-.logo-text p{font-size:10px;color:var(--muted);letter-spacing:.3px;margin-top:1px}
+.banner-top{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:16px}
+.brand{display:flex;align-items:center;gap:12px}
+.brand-icon{width:42px;height:42px;background:rgba(255,255,255,.25);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0}
+.brand-text h1{font-size:20px;font-weight:900;color:#fff;letter-spacing:.5px}
+.brand-text p{font-size:11px;color:rgba(255,255,255,.75);margin-top:2px;letter-spacing:.3px}
+.banner-btns{display:flex;gap:7px;align-items:center;flex-shrink:0}
+.wbtn{padding:7px 15px;border-radius:7px;border:none;cursor:pointer;font-size:12px;font-weight:700;font-family:inherit;display:inline-flex;align-items:center;gap:5px;white-space:nowrap;transition:all .18s;letter-spacing:.3px}
+.wbtn-solid{background:#fff;color:var(--cc);transition:background .3s,color .3s}
+.wbtn-solid:hover{background:rgba(255,255,255,.85)}
+.wbtn-ghost{background:rgba(255,255,255,.2);color:#fff;border:1.5px solid rgba(255,255,255,.4)}
+.wbtn-ghost:hover{background:rgba(255,255,255,.32)}
+.wbtn-ghost.on{background:rgba(255,255,255,.35);border-color:#fff}
+.sz-btns{display:flex;gap:2px}
+.sz-btn{background:rgba(255,255,255,.18);border:none;padding:6px 9px;border-radius:6px;cursor:pointer;font-size:11px;font-weight:700;font-family:inherit;color:#fff;transition:background .18s}
+.sz-btn:hover{background:rgba(255,255,255,.32)}
 
 /* 搜尋框 */
-.srch-wrap{flex:1;max-width:420px}
+.srch-row{display:flex;align-items:center;gap:10px}
 .srch{
-  display:flex;align-items:center;gap:8px;
-  background:var(--bg);border:1.5px solid var(--border);
-  border-radius:8px;padding:8px 14px;
-  transition:border-color .2s,box-shadow .2s;
+  flex:1;max-width:560px;
+  display:flex;align-items:center;gap:9px;
+  background:#fff;border-radius:9px;
+  padding:10px 16px;
+  box-shadow:0 2px 12px rgba(0,0,0,.12);
 }
-.srch:focus-within{border-color:var(--city-color);box-shadow:0 0 0 3px var(--city-light)}
-.srch input{border:none;background:none;outline:none;font-size:13px;width:100%;color:var(--text);font-family:inherit}
-.srch input::placeholder{color:var(--muted)}
-.srch-icon{color:var(--muted);font-size:14px;flex-shrink:0}
+.srch input{border:none;outline:none;font-size:14px;width:100%;color:var(--text);font-family:inherit}
+.srch input::placeholder{color:#aaa}
+.srch-icon{color:#bbb;font-size:15px;flex-shrink:0}
 
-/* Header 右側按鈕群 */
-.hdr-r{display:flex;gap:6px;flex-shrink:0;align-items:center}
-.btn{
-  padding:7px 14px;border-radius:7px;border:none;cursor:pointer;
-  font-size:12px;font-weight:700;display:inline-flex;align-items:center;
-  gap:5px;font-family:inherit;transition:all .18s;white-space:nowrap;
-  letter-spacing:.3px;
-}
-.btn-solid{background:var(--city-color);color:#fff}
-.btn-solid:hover{opacity:.88}
-.btn-ghost{background:transparent;color:var(--text);border:1.5px solid var(--border)}
-.btn-ghost:hover{border-color:var(--city-color);color:var(--city-color)}
-.btn-ghost.admin-on{background:var(--city-light);border-color:var(--city-color);color:var(--city-color)}
-.sz-btns{display:flex;gap:2px;align-items:center}
-.sz-btn{
-  background:var(--bg);border:1.5px solid var(--border);
-  padding:5px 9px;border-radius:6px;cursor:pointer;
-  font-size:11px;font-weight:700;font-family:inherit;color:var(--muted);
-  transition:all .18s;
-}
-.sz-btn:hover{border-color:var(--city-color);color:var(--city-color)}
-
-/* ── 縣市 Tab 列 ── */
-.city-nav{
+/* ══ 縣市 Tab 列 ══ */
+#cityNav{
   background:#fff;
-  border-bottom:1px solid var(--border);
-  padding:0 24px;
+  border-bottom:2px solid var(--border);
+  padding:0 32px;
   display:flex;gap:0;
-  position:sticky;top:60px;z-index:190;
+  position:sticky;top:0;z-index:190;
+  transition:border-color .3s;
 }
-/* sidebar top 由 JS 動態設定 */
 .c-tab{
-  padding:14px 22px;border:none;background:none;
+  padding:13px 20px;border:none;background:none;
   cursor:pointer;font-size:13px;font-weight:700;
   color:var(--muted);font-family:inherit;
   position:relative;transition:color .18s;
-  display:flex;align-items:center;gap:7px;
-  letter-spacing:.3px;
-}
-.c-tab::after{
-  content:'';position:absolute;bottom:0;left:0;right:0;height:3px;
-  background:transparent;transition:background .18s,bottom .18s;
-  border-radius:3px 3px 0 0;
-}
-.c-tab:hover{color:var(--text)}
-.c-tab.active{color:var(--city-color)}
-.c-tab.active::after{background:var(--city-color)}
-.c-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
-
-/* ── 主佈局：左側欄 + 右側內容 ── */
-.layout{display:flex;min-height:calc(100vh - 113px)}
-
-/* 左側欄 */
-.sidebar{
-  width:200px;flex-shrink:0;background:#fff;
-  border-right:1px solid var(--border);
-  padding:16px 0;
-  position:sticky;top:113px;height:calc(100vh - 113px);
-  overflow-y:auto;
-}
-/* JS 會在 init 後動態更新 sidebar top / height */
-.sb-head{
-  padding:0 16px 10px;font-size:10px;font-weight:700;
-  color:var(--muted);letter-spacing:1px;text-transform:uppercase;
-  display:flex;align-items:center;justify-content:space-between;
-}
-.sb-add-btn{
-  background:none;border:none;cursor:pointer;
-  font-size:16px;color:var(--muted);display:none;
-  line-height:1;transition:color .15s;
-}
-.sb-add-btn:hover{color:var(--city-color)}
-.sb-item{
-  display:flex;align-items:center;
-  border-left:3px solid transparent;
-  background:none;width:100%;cursor:pointer;
-  transition:all .13s;user-select:none;
-}
-.sb-item.act{border-left-color:var(--city-color);background:var(--city-light)}
-.sb-item:hover{background:var(--city-light)}
-.sb-lbl{
-  flex:1;padding:9px 10px 9px 12px;
-  font-size:12px;font-weight:600;color:var(--muted);
-  text-align:left;line-height:1.4;
-}
-.sb-item.act .sb-lbl{color:var(--city-color)}
-.sb-cnt{
-  font-size:10px;font-weight:700;
-  padding:2px 6px;border-radius:999px;
-  background:#EBEBEB;color:var(--muted);
-  flex-shrink:0;margin-right:10px;
-}
-.sb-item.act .sb-cnt{background:var(--city-color);color:#fff}
-.sb-mv-wrap{display:flex;flex-direction:column;gap:1px;padding:2px 2px 2px 6px;flex-shrink:0}
-.sb-mv{background:none;border:none;cursor:pointer;font-size:9px;color:var(--muted);padding:1px 2px;border-radius:3px;line-height:1}
-.sb-mv:hover:not([disabled]){background:#EEE;color:var(--text)}
-.sb-mv[disabled]{opacity:.2;cursor:default}
-.sb-acts{display:none;gap:2px;margin:0 4px}
-.sb-eb,.sb-db{background:none;border:none;cursor:pointer;font-size:11px;padding:2px 4px;border-radius:3px}
-.sb-eb:hover{background:#EBF8FF}.sb-db:hover{background:#FFF5F5}
-
-/* ── 主內容區 ── */
-.content{flex:1;padding:20px 24px;min-width:0}
-
-/* 主題 Accordion */
-.topic{
-  margin-bottom:12px;
-  border-radius:var(--radius);
-  overflow:hidden;
-  box-shadow:0 1px 4px rgba(0,0,0,.06);
-}
-.t-hdr{
   display:flex;align-items:center;gap:8px;
-  padding:11px 16px;cursor:pointer;user-select:none;
-  transition:opacity .18s;
-  background:var(--city-color);
+  letter-spacing:.3px;white-space:nowrap;
 }
-.t-hdr:hover{opacity:.93}
-.t-num{
-  width:22px;height:22px;border-radius:6px;
-  background:rgba(255,255,255,.2);color:#fff;
-  display:flex;align-items:center;justify-content:center;
-  font-size:10px;font-weight:900;flex-shrink:0;
+.c-tab::after{content:'';position:absolute;bottom:-2px;left:0;right:0;height:3px;background:transparent;border-radius:3px 3px 0 0;transition:background .18s}
+.c-tab:hover{color:var(--text)}
+.c-tab.active{color:var(--cc)}
+.c-tab.active::after{background:var(--cc)}
+.c-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0;transition:transform .18s}
+.c-tab.active .c-dot{transform:scale(1.2)}
+
+/* ══ 主內容（無側欄，全寬） ══ */
+#mainArea{max-width:900px;margin:0 auto;padding:24px 24px 40px}
+
+/* 主題分類 Chip（比照 MUJI 的分類按鈕列） */
+#chipBar{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:20px}
+.chip{
+  padding:7px 16px;border-radius:999px;
+  border:1.5px solid var(--border);
+  background:#fff;color:var(--text);
+  font-size:12px;font-weight:700;cursor:pointer;
+  font-family:inherit;transition:all .18s;
+  white-space:nowrap;letter-spacing:.2px;
 }
+.chip:hover{border-color:var(--cc);color:var(--cc)}
+.chip.active{background:var(--cc);border-color:var(--cc);color:#fff}
+
+/* 結果小標 */
+.res-meta{font-size:12px;color:var(--muted);margin-bottom:14px;letter-spacing:.3px;border-bottom:1px solid var(--border);padding-bottom:10px}
+
+/* 主題區塊 */
+.topic{margin-bottom:12px;border-radius:var(--radius);overflow:hidden;box-shadow:0 1px 5px rgba(0,0,0,.06)}
+.t-hdr{
+  display:flex;align-items:center;gap:9px;
+  padding:12px 18px;cursor:pointer;user-select:none;
+  transition:opacity .18s;background:var(--cc);
+}
+.t-hdr:hover{opacity:.92}
+.t-num{width:24px;height:24px;border-radius:6px;background:rgba(255,255,255,.22);color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;flex-shrink:0}
 .t-ttl{color:#fff;font-size:13px;font-weight:800;flex:1;letter-spacing:.3px}
 .t-tools{align-items:center;gap:4px;flex-shrink:0;display:none}
-.t-btn{
-  background:rgba(255,255,255,.22);border:none;color:#fff;
-  padding:3px 9px;border-radius:5px;font-size:11px;font-weight:700;
-  cursor:pointer;font-family:inherit;white-space:nowrap;
-}
+.t-btn{background:rgba(255,255,255,.22);border:none;color:#fff;padding:3px 9px;border-radius:5px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit}
 .t-btn:hover{background:rgba(255,255,255,.4)}
-.t-count{
-  font-size:10px;font-weight:700;color:rgba(255,255,255,.8);
-  background:rgba(0,0,0,.15);padding:2px 7px;border-radius:999px;
-  flex-shrink:0;
-}
+.t-cnt{font-size:10px;font-weight:700;color:rgba(255,255,255,.8);background:rgba(0,0,0,.15);padding:2px 8px;border-radius:999px;flex-shrink:0}
 .t-chev{color:rgba(255,255,255,.8);font-size:12px;transition:transform .2s;flex-shrink:0}
 .t-chev.open{transform:rotate(180deg)}
-.t-body{display:none;border:1px solid var(--border);border-top:none;border-radius:0 0 var(--radius) var(--radius);overflow:hidden;background:#fff}
+.t-body{display:none;background:#fff;border:1px solid var(--border);border-top:none;border-radius:0 0 var(--radius) var(--radius);overflow:hidden}
 .t-body.open{display:block}
 
-/* Q&A 卡片 */
-.qa-card{border-top:1px solid var(--border);background:#fff}
+/* QA 卡片 */
+.qa-card{border-top:1px solid var(--border)}
 .qa-card:first-child{border-top:none}
-.qa-q{
-  display:flex;align-items:flex-start;gap:9px;
-  padding:12px 16px;cursor:pointer;transition:background .13s;user-select:none;
-}
-.qa-q:hover{background:var(--city-light)}
-.q-badge{
-  width:20px;height:20px;border-radius:5px;
-  background:var(--city-color);color:#fff;
-  display:flex;align-items:center;justify-content:center;
-  font-size:9px;font-weight:900;flex-shrink:0;margin-top:2px;
-}
-.q-txt{font-size:13px;font-weight:700;flex:1;line-height:1.55;word-break:break-word}
+.qa-q{display:flex;align-items:flex-start;gap:10px;padding:13px 18px;cursor:pointer;transition:background .13s;user-select:none}
+.qa-q:hover{background:var(--cl)}
+.q-badge{width:20px;height:20px;border-radius:5px;background:var(--cc);color:#fff;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:900;flex-shrink:0;margin-top:2px;transition:background .3s}
+.q-txt{font-size:13px;font-weight:700;flex:1;line-height:1.6;word-break:break-word}
 .qa-acts{display:none;gap:3px;flex-shrink:0;align-items:center}
 .mv-btn{background:rgba(0,0,0,.06);color:var(--muted);border:none;cursor:pointer;padding:2px 5px;border-radius:3px;font-size:10px;font-weight:700;line-height:1}
 .mv-btn:hover:not([disabled]){background:rgba(0,0,0,.13)}
 .mv-btn[disabled]{opacity:.25;cursor:default}
-.qa-pb,.eb,.db{border:none;cursor:pointer;padding:2px 7px;border-radius:4px;font-size:10px;font-weight:700;font-family:inherit}
-.qa-pb{background:#FFF8E1;color:#795548}.qa-pb:hover{background:#FFE082}
-.eb{background:#E3F2FD;color:#1565C0}.eb:hover{background:#BBDEFB}
-.db{background:#FFEBEE;color:#C62828}.db:hover{background:#FFCDD2}
-.q-chev{color:var(--muted);font-size:10px;flex-shrink:0;margin-top:4px;transition:transform .2s}
+.q-chev{color:#ccc;font-size:10px;flex-shrink:0;margin-top:5px;transition:transform .2s}
 .q-chev.open{transform:rotate(180deg)}
-
-.qa-a{display:none;padding:0 16px 14px 45px;background:var(--city-light);border-top:1px solid var(--border)}
+.qa-a{display:none;padding:0 18px 16px 48px;background:var(--cl);border-top:1px solid var(--border)}
 .qa-a.open{display:block}
-.a-txt{font-size:13px;line-height:1.9;white-space:pre-wrap;padding-top:12px;word-break:break-word;color:var(--text)}
+.a-txt{font-size:13px;line-height:1.9;white-space:pre-wrap;padding-top:13px;word-break:break-word}
+.qa-edit-btns{display:none;gap:3px;flex-shrink:0;align-items:center}
+.eb2,.db2,.qa-pb2{border:none;cursor:pointer;padding:2px 7px;border-radius:4px;font-size:10px;font-weight:700;font-family:inherit}
+.eb2{background:#E3F2FD;color:#1565C0}.eb2:hover{background:#BBDEFB}
+.db2{background:#FFEBEE;color:#C62828}.db2:hover{background:#FFCDD2}
+.qa-pb2{background:#FFF8E1;color:#795548}.qa-pb2:hover{background:#FFE082}
 
-/* 色彩標記 */
-.hl-red{color:#C62828;font-weight:700}
-.hl-orange{color:#BF360C;font-weight:700}
+.hl-red{color:#D32F2F;font-weight:700}
+.hl-orange{color:#E64A19;font-weight:700}
 .hl-blue{color:#1565C0;font-weight:700}
-.hl-green{color:#1B5E20;font-weight:700}
+.hl-green{color:#2E7D32;font-weight:700}
 .hl-purple{color:#4527A0;font-weight:700}
-
-.a-link{color:var(--city-color);text-decoration:underline;word-break:break-all}
+.a-link{color:var(--cc);text-decoration:underline;word-break:break-all}
 .a-link:hover{opacity:.75}
-.url-chip{
-  display:inline-flex;align-items:center;gap:5px;
-  background:#fff;border:1.5px solid var(--border);border-radius:7px;
-  padding:5px 11px;margin:8px 0 3px;font-size:12px;font-weight:600;
-  text-decoration:none;color:var(--city-color);transition:border-color .18s;
-  word-break:break-all;
-}
-.url-chip:hover{border-color:var(--city-color)}
-.copy-btn{
-  background:#fff;color:var(--city-color);border:1.5px solid var(--city-mid);
-  cursor:pointer;padding:4px 10px;border-radius:6px;
-  font-size:11px;font-weight:700;margin-top:8px;font-family:inherit;
-  transition:all .18s;
-}
-.copy-btn:hover{background:var(--city-light)}
+.url-chip{display:inline-flex;align-items:center;gap:5px;background:#fff;border:1.5px solid var(--border);border-radius:7px;padding:5px 12px;margin:8px 0 3px;font-size:12px;font-weight:600;text-decoration:none;color:var(--cc);transition:border-color .18s;word-break:break-all}
+.url-chip:hover{border-color:var(--cc)}
+.copy-btn{background:#fff;color:var(--cc);border:1.5px solid var(--cm);cursor:pointer;padding:4px 11px;border-radius:6px;font-size:11px;font-weight:700;margin-top:9px;font-family:inherit;transition:all .18s}
+.copy-btn:hover{background:var(--cl)}
 .img-wrap{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
 .img-wrap img{max-width:180px;border-radius:8px;cursor:pointer;border:2px solid var(--border)}
-.img-wrap img:hover{border-color:var(--city-color)}
-.info-card{
-  padding:11px 16px;font-size:13px;line-height:1.8;
-  border-top:1px solid var(--border);background:#fff;
-  white-space:pre-wrap;word-break:break-word;
-}
+.img-wrap img:hover{border-color:var(--cc)}
+.info-card{padding:12px 18px;font-size:13px;line-height:1.8;border-top:1px solid var(--border);background:#fff;white-space:pre-wrap;word-break:break-word}
 .info-card:first-child{border-top:none}
 
 /* 搜尋結果 */
-#srchPanel{padding:20px 24px;display:none}
-.srch-hdr{
-  font-size:12px;color:var(--muted);
-  border-bottom:1px solid var(--border);
-  padding-bottom:10px;margin-bottom:12px;
-  letter-spacing:.3px;
-}
-.hit{
-  background:#fff;border:1.5px solid var(--border);border-radius:10px;
-  padding:13px 16px;margin-bottom:8px;cursor:pointer;transition:all .18s;
-}
-.hit:hover{border-color:var(--city-color);box-shadow:var(--sh)}
+#srchPanel{max-width:900px;margin:0 auto;padding:24px}
+.srch-hdr{font-size:12px;color:var(--muted);border-bottom:1px solid var(--border);padding-bottom:10px;margin-bottom:14px;letter-spacing:.3px}
+.hit{background:#fff;border:1.5px solid var(--border);border-radius:10px;padding:14px 18px;margin-bottom:8px;cursor:pointer;transition:all .18s}
+.hit:hover{border-color:var(--cc);box-shadow:0 2px 12px rgba(0,0,0,.08)}
 .hit-meta{display:flex;align-items:center;gap:7px;margin-bottom:5px;font-size:11px;color:var(--muted)}
 .hit-city{color:#fff;padding:2px 9px;border-radius:999px;font-size:10px;font-weight:700}
 .hit-q{font-size:13px;font-weight:700;line-height:1.5}
 .hit-a{font-size:12px;color:var(--muted);margin-top:3px;max-height:44px;overflow:hidden;white-space:pre-wrap}
-mark{background:#FFF59D;border-radius:2px;padding:0 2px}
-.no-res{
-  text-align:center;color:var(--muted);
-  padding:48px 20px;font-size:13px;
-}
+mark{background:#FFF9C4;border-radius:2px;padding:0 2px}
+.no-res{text-align:center;color:var(--muted);padding:48px 20px;font-size:13px}
 
-/* ── AI 問答浮動按鈕 ── */
+/* AI 浮動 */
 #aiBox{position:fixed;bottom:24px;right:24px;z-index:500;display:flex;flex-direction:column;align-items:flex-end;gap:10px}
-#aiToggle{
-  width:52px;height:52px;border-radius:50%;
-  background:var(--city-color);
-  border:none;cursor:pointer;font-size:22px;
-  box-shadow:0 4px 18px rgba(0,0,0,.2);
-  transition:all .2s;display:flex;align-items:center;justify-content:center;color:#fff;
-}
-#aiToggle:hover{transform:scale(1.1);opacity:.9}
-#aiPanel{
-  width:340px;background:#fff;border-radius:14px;
-  box-shadow:0 8px 40px rgba(0,0,0,.14);
-  display:none;flex-direction:column;overflow:hidden;max-height:500px;
-}
+#aiToggle{width:52px;height:52px;border-radius:50%;background:var(--cc);border:none;cursor:pointer;font-size:22px;box-shadow:0 4px 18px rgba(0,0,0,.18);transition:all .3s;display:flex;align-items:center;justify-content:center;color:#fff}
+#aiToggle:hover{transform:scale(1.1)}
+#aiPanel{width:340px;background:#fff;border-radius:14px;box-shadow:0 8px 40px rgba(0,0,0,.14);display:none;flex-direction:column;overflow:hidden;max-height:500px}
 #aiPanel.open{display:flex}
-#aiPanelHdr{
-  background:var(--city-color);color:#fff;
-  padding:12px 16px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;
-  transition:background .3s;
-}
-#aiPanelHdr span{font-size:13px;font-weight:800;letter-spacing:.3px}
-#aiPanelHdr button{background:none;border:none;color:rgba(255,255,255,.7);cursor:pointer;font-size:18px;line-height:1;padding:0}
-#aiMessages{flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:10px;min-height:200px}
+#aiPHdr{background:var(--cc);color:#fff;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;transition:background .3s}
+#aiPHdr span{font-size:13px;font-weight:800;letter-spacing:.3px}
+#aiPHdr button{background:none;border:none;color:rgba(255,255,255,.7);cursor:pointer;font-size:18px;line-height:1;padding:0}
+#aiMsgs{flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:10px;min-height:200px}
 .ai-msg{padding:10px 13px;border-radius:12px;font-size:13px;line-height:1.7;max-width:90%;word-break:break-word}
-.ai-msg.bot{background:var(--bg);color:var(--text);align-self:flex-start;border-radius:4px 12px 12px 12px}
-.ai-msg.user{background:var(--city-color);color:#fff;align-self:flex-end;border-radius:12px 4px 12px 12px}
+.ai-msg.bot{background:var(--bg);align-self:flex-start;border-radius:4px 12px 12px 12px}
+.ai-msg.user{background:var(--cc);color:#fff;align-self:flex-end;border-radius:12px 4px 12px 12px;transition:background .3s}
 .ai-msg.loading{color:var(--muted);font-style:italic}
 #aiInputRow{display:flex;gap:8px;padding:12px;border-top:1px solid var(--border);flex-shrink:0}
 #aiInput{flex:1;padding:8px 13px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;font-family:inherit;outline:none;transition:border-color .2s}
-#aiInput:focus{border-color:var(--city-color)}
-#aiSend{
-  width:36px;height:36px;background:var(--city-color);
-  border:none;border-radius:8px;cursor:pointer;color:#fff;
-  font-size:16px;display:flex;align-items:center;justify-content:center;flex-shrink:0;
-  transition:background .3s;
-}
+#aiInput:focus{border-color:var(--cc)}
+#aiSend{width:36px;height:36px;background:var(--cc);border:none;border-radius:8px;cursor:pointer;color:#fff;font-size:16px;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:background .3s}
 #aiSend:hover{opacity:.85}
 #aiSend:disabled{background:#ccc;cursor:not-allowed}
 
-/* ── Overlay / Modal ── */
-.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:1000;align-items:center;justify-content:center;padding:14px}
+/* Modal */
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.42);z-index:1000;align-items:center;justify-content:center;padding:14px}
 .overlay.open{display:flex}
 .modal{background:#fff;border-radius:14px;padding:24px;width:100%;max-width:500px;max-height:92vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.2)}
 .modal h3{font-size:15px;font-weight:800;margin-bottom:16px;letter-spacing:.3px}
@@ -379,22 +214,27 @@ mark{background:#FFF59D;border-radius:2px;padding:0 2px}
 .fg{margin-bottom:12px}
 .fg label{display:block;font-size:10px;font-weight:700;color:var(--muted);margin-bottom:3px;text-transform:uppercase;letter-spacing:.5px}
 .fg input,.fg textarea,.fg select{width:100%;padding:8px 11px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;font-family:inherit;color:var(--text);outline:none;transition:border-color .18s;resize:vertical}
-.fg input:focus,.fg textarea:focus,.fg select:focus{border-color:var(--city-color)}
+.fg input:focus,.fg textarea:focus,.fg select:focus{border-color:var(--cc)}
 .fg textarea{min-height:90px}
 .upload-zone{border:2px dashed var(--border);border-radius:9px;padding:14px;text-align:center;cursor:pointer;color:var(--muted);font-size:13px;transition:border-color .18s}
-.upload-zone:hover{border-color:var(--city-color)}
+.upload-zone:hover{border-color:var(--cc)}
 .img-prev{display:flex;gap:6px;flex-wrap:wrap;margin-top:7px}
-.img-prev img{width:64px;height:48px;object-fit:cover;border-radius:5px;border:2px solid var(--border);cursor:pointer}
+.img-prev img{width:64px;height:48px;object-fit:cover;border-radius:5px;border:2px solid var(--border)}
 .color-bar{display:flex;align-items:center;gap:6px;margin-bottom:7px;flex-wrap:wrap;padding:8px 10px;background:var(--bg);border-radius:8px;border:1px solid var(--border)}
 .color-bar span{font-size:11px;font-weight:700;color:var(--muted);white-space:nowrap}
 .clr-btn{width:22px;height:22px;border-radius:50%;border:2px solid rgba(255,255,255,.6);cursor:pointer;transition:transform .15s;flex-shrink:0;box-shadow:0 1px 3px rgba(0,0,0,.2)}
 .clr-btn:hover{transform:scale(1.3)}
 .clr-clear{background:#fff;border:1px solid var(--border);border-radius:5px;padding:2px 8px;font-size:11px;cursor:pointer;font-family:inherit;color:var(--muted)}
-.clr-clear:hover{border-color:var(--city-color);color:var(--city-color)}
+.clr-clear:hover{border-color:var(--cc);color:var(--cc)}
 .a-prev{margin-top:8px;padding:10px;background:#fff;border-radius:8px;font-size:13px;line-height:1.8;white-space:pre-wrap;border:1px solid var(--border);display:none}
 .a-prev-lbl{font-size:10px;font-weight:700;color:var(--muted);margin-bottom:4px;display:block;text-transform:uppercase}
-
-/* 後台 Modal */
+.mmbtn{padding:6px 13px;border-radius:7px;border:none;cursor:pointer;font-size:12px;font-weight:700;font-family:inherit;transition:all .18s;display:inline-flex;align-items:center;gap:5px}
+.mm-solid{background:var(--cc);color:#fff;transition:background .3s}
+.mm-solid:hover{opacity:.88}
+.mm-ghost{background:transparent;color:var(--text);border:1.5px solid var(--border)}
+.mm-ghost:hover{border-color:var(--cc);color:var(--cc)}
+.mm-danger{background:#FFEBEE;color:#C62828;border:none}
+.mm-danger:hover{background:#FFCDD2}
 .admin-sec{margin-bottom:18px}
 .admin-sec h4{font-size:10px;font-weight:700;color:var(--muted);margin-bottom:7px;text-transform:uppercase;letter-spacing:.5px}
 .mq-row2{display:flex;gap:6px;margin-bottom:6px;align-items:center}
@@ -402,48 +242,29 @@ mark{background:#FFF59D;border-radius:2px;padding:0 2px}
 .mq-row2 input{flex:1;padding:7px 10px;border:1.5px solid var(--border);border-radius:7px;font-size:12px;font-family:inherit;outline:none}
 .mq-del{background:#FFEBEE;color:#C62828;border:none;cursor:pointer;padding:7px 10px;border-radius:7px;font-weight:700;font-size:12px}
 .exp-btns{display:flex;gap:7px;flex-wrap:wrap}
-
-/* 登入框 */
+.info-box{background:var(--cl);border:1px solid var(--cm);border-radius:9px;padding:11px 13px;margin-bottom:10px;font-size:12px;line-height:1.7}
 .login-box{background:#fff;border-radius:14px;padding:28px;width:280px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.2)}
-.login-box h3{font-size:15px;font-weight:800;margin-bottom:4px;letter-spacing:.5px}
+.login-box h3{font-size:15px;font-weight:800;margin-bottom:4px}
 .login-box p{font-size:12px;color:var(--muted);margin-bottom:14px}
 .login-box input{width:100%;padding:10px;border:1.5px solid var(--border);border-radius:9px;font-size:18px;text-align:center;letter-spacing:5px;outline:none;margin-bottom:7px;font-family:inherit}
-.login-box input:focus{border-color:var(--city-color)}
+.login-box input:focus{border-color:var(--cc)}
 .l-err{color:#C62828;font-size:12px;margin-bottom:6px;display:none}
 .l-btns{display:flex;gap:6px}
-
-/* 燈箱 */
 .lb{display:none;position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:2000;align-items:center;justify-content:center}
 .lb.open{display:flex}
 .lb img{max-width:90vw;max-height:90vh;border-radius:8px}
 .lb-x{position:fixed;top:16px;right:20px;color:#fff;font-size:30px;cursor:pointer;line-height:1;font-weight:300;opacity:.8}
-.lb-x:hover{opacity:1}
-
-/* Toast */
-.toast{position:fixed;bottom:20px;right:20px;background:#1A1A1A;color:#fff;padding:10px 16px;border-radius:9px;font-size:12px;font-weight:600;z-index:3000;transform:translateY(80px);opacity:0;transition:all .28s;pointer-events:none;letter-spacing:.3px}
+.toast{position:fixed;bottom:20px;right:20px;background:#1A1A1A;color:#fff;padding:10px 16px;border-radius:9px;font-size:12px;font-weight:600;z-index:3000;transform:translateY(80px);opacity:0;transition:all .28s;pointer-events:none}
 .toast.show{transform:translateY(0);opacity:1}
-
-/* 載入中 */
-.loading-msg{padding:48px;text-align:center;color:var(--muted);font-size:14px}
-
-/* 後台資訊框 */
-.info-box{background:var(--city-light);border:1px solid var(--city-mid);border-radius:9px;padding:11px 13px;margin-bottom:10px;font-size:12px;line-height:1.7;color:var(--text)}
-
-/* Btn 變體補充 */
-.btn-danger{background:#FFEBEE;color:#C62828;border:none}
-.btn-danger:hover{background:#FFCDD2}
-
-/* RWD */
-@media(max-width:700px){
-  .sidebar{display:none}
-  .logo-text p{display:none}
-  .sz-btns{display:none}
-  header{padding:0 14px;gap:8px}
-  .city-nav{padding:0 14px;overflow-x:auto}
-  .c-tab{padding:12px 14px;font-size:12px}
-  .content{padding:14px}
-  #srchPanel{padding:14px}
+@media(max-width:680px){
+  #banner{padding:14px 16px 18px}
+  .brand-text h1{font-size:16px}
+  .srch{max-width:100%}
+  #cityNav{padding:0 12px;overflow-x:auto}
+  .c-tab{padding:11px 12px;font-size:12px}
+  #mainArea{padding:14px 12px 32px}
   #aiPanel{width:calc(100vw - 28px)}
+  .banner-btns .sz-btns{display:none}
 }
 </style>
 </head>
@@ -452,54 +273,56 @@ mark{background:#FFF59D;border-radius:2px;padding:0 2px}
 <!-- 跑馬燈 -->
 <div id="mqSec"></div>
 
-<!-- Header -->
-<header id="mainHeader">
-  <div class="logo">
-    <div class="logo-mark" id="logoMark">🐾</div>
-    <div class="logo-text">
-      <h1>1959 動保知識庫</h1>
-      <p>動物保護專線 · 內部查詢系統</p>
+<!-- Banner -->
+<div id="banner">
+  <div class="banner-top">
+    <div class="brand">
+      <div class="brand-icon">🐾</div>
+      <div class="brand-text">
+        <h1>1959 動保知識庫</h1>
+        <p id="bannerSub">動物保護專線 · 內部查詢系統</p>
+      </div>
+    </div>
+    <div class="banner-btns">
+      <div class="sz-btns">
+        <button class="sz-btn" onclick="chgSz(-1)">A-</button>
+        <button class="sz-btn" onclick="chgSz(1)">A+</button>
+      </div>
+      <button class="wbtn wbtn-solid" id="quizBtn" onclick="goQuiz()">📋 前往測驗</button>
+      <button class="wbtn wbtn-ghost" id="adminBtn" onclick="clickAdmin()">⚙ 後台</button>
     </div>
   </div>
-
-  <div class="srch-wrap">
+  <div class="srch-row">
     <div class="srch">
       <span class="srch-icon">🔍</span>
-      <input id="srchInput" type="text" placeholder="跨縣市關鍵字搜尋…" oninput="doSearch(this.value)" autocomplete="off">
+      <input id="srchInput" type="text" placeholder="輸入關鍵字搜尋…例如：動物咬傷、流浪狗、寵物登記" oninput="doSearch(this.value)" autocomplete="off">
     </div>
   </div>
-
-  <div class="hdr-r">
-    <div class="sz-btns">
-      <button class="sz-btn" onclick="chgSz(-1)">A-</button>
-      <button class="sz-btn" onclick="chgSz(1)">A+</button>
-    </div>
-    <button class="btn btn-solid" id="quizBtn" onclick="goQuiz()">📋 前往測驗</button>
-    <button class="btn btn-ghost" id="adminBtn" onclick="clickAdmin()">⚙ 後台</button>
-  </div>
-</header>
+</div>
 
 <!-- 縣市 Tab 列 -->
-<nav class="city-nav" id="cityTabs"></nav>
+<nav id="cityNav"></nav>
 
-<!-- 主佈局 -->
-<div class="layout" id="mainLayout">
-  <aside class="sidebar" id="sidebar"></aside>
-  <main class="content" id="content"></main>
+<!-- 主內容 -->
+<div id="mainArea" style="display:block">
+  <!-- Chip 分類列 -->
+  <div id="chipBar"></div>
+  <div class="res-meta" id="resMeta"></div>
+  <div id="content"></div>
 </div>
 
 <!-- 搜尋結果 -->
-<div id="srchPanel"></div>
+<div id="srchPanel" style="display:none"></div>
 
-<!-- AI 浮動按鈕 -->
+<!-- AI -->
 <div id="aiBox">
   <div id="aiPanel">
-    <div id="aiPanelHdr">
+    <div id="aiPHdr">
       <span>🤖 AI 智慧問答</span>
       <button onclick="toggleAI()">✕</button>
     </div>
-    <div id="aiMessages">
-      <div class="ai-msg bot">您好！我是 AI 助理，可以協助查詢動保相關問題。請直接輸入您的問題。</div>
+    <div id="aiMsgs">
+      <div class="ai-msg bot">您好！我是 AI 助理，可以協助查詢動保相關問題，請直接輸入問題。</div>
     </div>
     <div id="aiInputRow">
       <input id="aiInput" type="text" placeholder="輸入問題…" onkeydown="if(event.key==='Enter')askAI()">
@@ -509,17 +332,16 @@ mark{background:#FFF59D;border-radius:2px;padding:0 2px}
   <button id="aiToggle" onclick="toggleAI()" title="AI 智慧問答">🤖</button>
 </div>
 
-<!-- 後台登入 -->
+<!-- 登入 -->
 <div class="overlay" id="loginOv">
   <div class="login-box">
     <h3>🔐 後台登入</h3>
     <p>請輸入管理密碼</p>
-    <input type="password" id="loginPw" placeholder="••••" maxlength="10"
-      onkeydown="if(event.key==='Enter')doLogin()">
+    <input type="password" id="loginPw" placeholder="••••" maxlength="10" onkeydown="if(event.key==='Enter')doLogin()">
     <div class="l-err" id="loginErr">密碼錯誤，請再試一次</div>
     <div class="l-btns">
-      <button class="btn btn-ghost" style="flex:1" onclick="closeLogin()">取消</button>
-      <button class="btn btn-solid" style="flex:1" onclick="doLogin()">登入</button>
+      <button class="mmbtn mm-ghost" style="flex:1" onclick="closeLogin()">取消</button>
+      <button class="mmbtn mm-solid" style="flex:1" onclick="doLogin()">登入</button>
     </div>
   </div>
 </div>
@@ -531,7 +353,7 @@ mark{background:#FFF59D;border-radius:2px;padding:0 2px}
     <div class="admin-sec">
       <h4>📢 跑馬燈（最多 3 條）</h4>
       <div id="mqEds"></div>
-      <button class="btn btn-ghost" style="margin-top:5px;font-size:11px;padding:5px 10px" onclick="addMqEd()">+ 新增</button>
+      <button class="mmbtn mm-ghost" style="margin-top:5px;font-size:11px;padding:5px 10px" onclick="addMqEd()">+ 新增</button>
     </div>
     <div class="admin-sec">
       <h4>📂 新增主題</h4>
@@ -546,57 +368,52 @@ mark{background:#FFF59D;border-radius:2px;padding:0 2px}
           <label style="display:block;font-size:10px;font-weight:700;color:var(--muted);margin-bottom:3px">主題名稱</label>
           <input id="newTopicInp" type="text" placeholder="輸入名稱" style="width:100%;padding:8px 11px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;font-family:inherit;outline:none">
         </div>
-        <button class="btn btn-solid" style="height:37px;flex-shrink:0" onclick="addTopic()">新增</button>
+        <button class="mmbtn mm-solid" style="height:37px;flex-shrink:0" onclick="addTopic()">新增</button>
       </div>
     </div>
     <div class="admin-sec">
       <h4>💾 儲存資料（必做）</h4>
-      <div class="info-box" id="adminInfoBox">
-        ℹ️ <strong>新增修改後必須執行以下步驟，才能讓所有人看到更新：</strong><br>
+      <div class="info-box">
+        ℹ️ <strong>新增修改後必須執行以下步驟：</strong><br>
         1、點「⬇ 下載 data.json」<br>
         2、到 GitHub 上傳覆蓋原來的 data.json<br>
         3、所有人重新整頁即看到最新資料
       </div>
       <div class="exp-btns">
-        <button class="btn btn-solid" onclick="exportDB()">⬇ 下載 data.json</button>
-        <label class="btn btn-ghost" style="cursor:pointer;font-size:12px">⬆ 匯入還原
+        <button class="mmbtn mm-solid" onclick="exportDB()">⬇ 下載 data.json</button>
+        <label class="mmbtn mm-ghost" style="cursor:pointer;font-size:12px">⬆ 匯入還原
           <input type="file" accept=".json" style="display:none" onchange="importDB(this)">
         </label>
       </div>
     </div>
     <div class="modal-btns">
-      <button class="btn btn-danger" onclick="doLogout()" style="margin-right:auto">🚪 登出</button>
-      <button class="btn btn-ghost" onclick="closeAdmin()">關閉</button>
-      <button class="btn btn-solid" onclick="saveAdmin()">💾 儲存</button>
+      <button class="mmbtn mm-danger" onclick="doLogout()" style="margin-right:auto">🚪 登出</button>
+      <button class="mmbtn mm-ghost" onclick="closeAdmin()">關閉</button>
+      <button class="mmbtn mm-solid" onclick="saveAdmin()">💾 儲存</button>
     </div>
   </div>
 </div>
 
-<!-- Q&A 編輯 -->
+<!-- QA 編輯 -->
 <div class="overlay" id="qaOv">
   <div class="modal">
-    <h3 id="qaTitle">✏ Q&amp;A</h3>
-    <div class="fg">
-      <label>縣市</label>
-      <select id="qaCity" onchange="updQaTopic()">
-        <option>桃園</option><option>南投</option><option>嘉義</option><option>彰化</option>
-      </select>
-    </div>
+    <h3 id="qaTitle">✏ Q&A</h3>
+    <div class="fg"><label>縣市</label><select id="qaCity" onchange="updQaTopic()"><option>桃園</option><option>南投</option><option>嘉義</option><option>彰化</option></select></div>
     <div class="fg"><label>主題</label><select id="qaTopic"></select></div>
     <div class="fg"><label>問題（Q）</label><input type="text" id="qaQ" placeholder="輸入問題"></div>
     <div class="fg">
       <label>回答（A）</label>
       <div class="color-bar">
         <span>標色：</span>
-        <button class="clr-btn" style="background:#C62828" title="紅" onclick="applyClr('red')"></button>
-        <button class="clr-btn" style="background:#BF360C" title="橙" onclick="applyClr('orange')"></button>
+        <button class="clr-btn" style="background:#D32F2F" title="紅" onclick="applyClr('red')"></button>
+        <button class="clr-btn" style="background:#E64A19" title="橙" onclick="applyClr('orange')"></button>
         <button class="clr-btn" style="background:#1565C0" title="藍" onclick="applyClr('blue')"></button>
-        <button class="clr-btn" style="background:#1B5E20" title="綠" onclick="applyClr('green')"></button>
+        <button class="clr-btn" style="background:#2E7D32" title="綠" onclick="applyClr('green')"></button>
         <button class="clr-btn" style="background:#4527A0" title="紫" onclick="applyClr('purple')"></button>
         <button class="clr-clear" onclick="removeClr()">清除色彩</button>
         <span id="clrHint" style="font-size:11px;color:#C62828;display:none">請先選取文字</span>
       </div>
-      <textarea id="qaA" placeholder="輸入回答（留空為純資訊卡片）—選取文字再點色彩按鈕可標色"></textarea>
+      <textarea id="qaA" placeholder="輸入回答（留空為純資訊卡片）"></textarea>
       <div class="a-prev" id="aPrev"><span class="a-prev-lbl">預覽效果</span><div id="aPrevContent"></div></div>
     </div>
     <div class="fg"><label>連結網址（選填）</label><input type="url" id="qaUrl" placeholder="https://"></div>
@@ -607,93 +424,55 @@ mark{background:#FFF59D;border-radius:2px;padding:0 2px}
       <div class="img-prev" id="imgPrev"></div>
     </div>
     <div class="modal-btns">
-      <button class="btn btn-ghost" onclick="closeQa()">取消</button>
-      <button class="btn btn-solid" onclick="saveQa()">💾 儲存</button>
+      <button class="mmbtn mm-ghost" onclick="closeQa()">取消</button>
+      <button class="mmbtn mm-solid" onclick="saveQa()">💾 儲存</button>
     </div>
   </div>
 </div>
 
-<!-- 燈箱 -->
-<div class="lb" id="lb" onclick="closeLb()">
-  <span class="lb-x">&times;</span>
-  <img id="lbImg" src="" alt="">
-</div>
-
-<!-- Toast -->
+<div class="lb" id="lb" onclick="closeLb()"><span class="lb-x">&times;</span><img id="lbImg" src="" alt=""></div>
 <div class="toast" id="toast"></div>
 
 <script>
-// ── 縣市色彩設定 ──
-var COLORS={
-  '桃園':'#E8736C',
-  '南投':'#4DBF82',
-  '嘉義':'#E8953A',
-  '彰化':'#5B9FE8'
-};
-var COLORS_LIGHT={
-  '桃園':'#FFF5F5',
-  '南投':'#F0FBF5',
-  '嘉義':'#FFF8F0',
-  '彰化':'#F0F6FF'
-};
-var COLORS_MID={
-  '桃園':'#F5B8B5',
-  '南投':'#99DFB8',
-  '嘉義':'#F5CEAA',
-  '彰化':'#A8CCEF'
-};
+var COLORS={'桃園':'#E8736C','南投':'#4DBF82','嘉義':'#E8953A','彰化':'#5B9FE8'};
+var COLORS_LIGHT={'桃園':'#FFF5F5','南投':'#F0FBF5','嘉義':'#FFF8F0','彰化':'#F0F6FF'};
+var COLORS_MID={'桃園':'#F5B8B5','南投':'#99DFB8','嘉義':'#F5CEAA','彰化':'#A8CCEF'};
 var CITIES=['桃園','南投','嘉義','彰化'];
-var db,city,adminMode,pImgs,editCtx,mqData,fSize;
-var aiOpen=false;
+var db,city='桃園',adminMode=false,pImgs=[],editCtx=null,mqData=[],fSize=14,aiOpen=false,curChip=-1;
 
 function E(id){return document.getElementById(id);}
 function esc(s){if(!s)return'';return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
-
-// 套用縣市色系到 CSS 變數
-function applyCityTheme(c){
-  var r=document.documentElement.style;
-  r.setProperty('--city-color',COLORS[c]);
-  r.setProperty('--city-light',COLORS_LIGHT[c]);
-  r.setProperty('--city-mid',COLORS_MID[c]);
-}
-
-function renderColored(s){
-  if(!s)return'';
-  return esc(s).replace(/\[\[(\w+):([^\]]*)\]\]/g,function(_,c,t){return'<span class="hl-'+c+'">'+t+'</span>';});
-}
-function stripColor(s){return(s||'').replace(/\[\[\w+:([^\]]*)\]\]/g,'$1');}
-function linkify(s){return s.replace(/(https?:\/\/)([^\s<>"&]*)(&amp;[^\s<>"]*)?/g,function(_,a,b,c){var u=(a+b+(c||'')).replace(/&amp;/g,'&');return'<a class="a-link" href="'+u+'" target="_blank" rel="noopener" onclick="event.stopPropagation()">'+(a+b+(c||''))+'</a>';});}
-function hl(t,q){var re=new RegExp('('+q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+')','gi');return t.replace(re,'<mark>$1</mark>');}
+function rc(s){if(!s)return'';return esc(s).replace(/\[\[(\w+):([^\]]*)\]\]/g,function(_,c,t){return'<span class="hl-'+c+'">'+t+'</span>';});}
+function sc(s){return(s||'').replace(/\[\[\w+:([^\]]*)\]\]/g,'$1');}
+function lfy(s){return s.replace(/(https?:\/\/)([^\s<>"&]*)(&amp;[^\s<>"]*)?/g,function(_,a,b,c){var u=(a+b+(c||'')).replace(/&amp;/g,'&');return'<a class="a-link" href="'+u+'" target="_blank" rel="noopener" onclick="event.stopPropagation()">'+(a+b+(c||''))+'</a>';});}
+function hl(t,q){return t.replace(new RegExp('('+q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+')','gi'),'<mark>$1</mark>');}
 function toast(m){var t=E('toast');t.textContent=m;t.classList.add('show');clearTimeout(t._t);t._t=setTimeout(function(){t.classList.remove('show');},2500);}
-function clone(o){return JSON.parse(JSON.stringify(o));}
+function saveDB(){try{localStorage.setItem('qadb',JSON.stringify(db));}catch(e){}}
 
-function saveDB(){try{localStorage.setItem('qadb',JSON.stringify(db));}catch(e){toast('⚠ 儲存失敗');}}
+function setTheme(c){
+  var r=document.documentElement.style;
+  r.setProperty('--cc',COLORS[c]);
+  r.setProperty('--cl',COLORS_LIGHT[c]);
+  r.setProperty('--cm',COLORS_MID[c]);
+  // 更新 wbtn-solid 的文字色
+  document.querySelectorAll('.wbtn-solid').forEach(function(el){el.style.color=COLORS[c];});
+}
 
 function init(){
-  city='桃園';adminMode=false;pImgs=[];editCtx=null;
   fSize=parseInt(localStorage.getItem('fs')||'14');
   document.body.style.fontSize=fSize+'px';
   try{mqData=JSON.parse(localStorage.getItem('mq')||'[]');}catch(e){mqData=[];}
   if(!mqData.length)mqData=[{scope:'all',text:'歡迎使用 1959 動保知識庫！提供桃園、南投、嘉義、彰化四縣市動物保護資訊查詢。'}];
-
-  applyCityTheme(city);
+  setTheme(city);
   renderMQ();renderTabs();
-
-  E('content').innerHTML='<div class="loading-msg">⏳ 載入資料中…</div>';
-
+  E('content').innerHTML='<div style="padding:48px;text-align:center;color:var(--muted)">⏳ 載入資料中…</div>';
   fetch('data.json?t='+Date.now())
     .then(function(r){if(!r.ok)throw new Error('無法載入 data.json ('+r.status+')');return r.json();})
-    .then(function(json){
-      if(!json['桃園'])throw new Error('data.json 格式不符');
-      db=json;saveDB();renderSB();renderContent();
-      fixOffsets();
-    })
+    .then(function(j){if(!j['桃園'])throw new Error('data.json 格式不符');db=j;saveDB();renderChips();renderContent();})
     .catch(function(err){
       var s=localStorage.getItem('qadb');
-      if(s){try{db=JSON.parse(s);renderSB();renderContent();fixOffsets();toast('⚠ 使用暫存資料（'+err.message+'）');return;}catch(e2){}}
-      E('content').innerHTML='<div class="loading-msg"><div style="font-size:36px;margin-bottom:12px">⚠️</div>'
-        +'<div style="font-size:15px;font-weight:700;color:#C62828;margin-bottom:8px">無法載入資料</div>'
-        +'<div style="font-size:12px;color:var(--muted)">'+esc(err.message)+'<br>請確認 data.json 已上傳至 GitHub 同一目錄</div></div>';
+      if(s){try{db=JSON.parse(s);renderChips();renderContent();toast('⚠ 使用暫存資料');return;}catch(e2){}}
+      E('content').innerHTML='<div style="padding:48px;text-align:center"><div style="font-size:36px;margin-bottom:12px">⚠️</div><div style="font-size:15px;font-weight:700;color:#C62828;margin-bottom:8px">無法載入資料</div><div style="font-size:12px;color:var(--muted)">'+esc(err.message)+'</div></div>';
     });
 }
 
@@ -706,80 +485,68 @@ function renderMQ(){
   if(!rows.length){el.style.display='none';return;}
   el.style.display='block';
   el.innerHTML=rows.map(function(m){
+    var bg=m.scope==='all'?'#444':(COLORS[m.scope]||'#555');
     var lbl=m.scope==='all'?'📢 全站':('📌 '+m.scope);
-    var bg=m.scope==='all'?'#555':COLORS[m.scope];
-    var tc=m.scope==='all'?'#fff':'#fff';
-    var rowBg=(m.scope==='all'?'#F7F6F3':(COLORS_LIGHT[m.scope]||'#F7F6F3'));
+    var rowBg=m.scope==='all'?'#333':(COLORS[m.scope]||'#444');
     return '<div class="mq-row" style="background:'+rowBg+'">'
-      +'<span class="mq-lbl" style="background:'+bg+';color:'+tc+'">'+lbl+'</span>'
+      +'<span class="mq-lbl" style="background:'+bg+'">'+lbl+'</span>'
       +'<div class="mq-track"><div class="mq-txt">'+esc(m.text)+'</div></div></div>';
   }).join('');
 }
 
 // ── 縣市 Tabs ──
 function renderTabs(){
-  E('cityTabs').innerHTML=CITIES.map(function(c){
-    var active=c===city;
-    var style=active?'--city-color:'+COLORS[c]+';':'';
-    return '<button class="c-tab'+(active?' active':'')+'" style="'+style+'" onclick="switchCity(\''+c+'\')">'
+  E('cityNav').innerHTML=CITIES.map(function(c){
+    return '<button class="c-tab'+(c===city?' active':'')+'" onclick="switchCity(\''+c+'\')">'
       +'<span class="c-dot" style="background:'+COLORS[c]+'"></span>'+c+'</button>';
   }).join('');
 }
-
 function switchCity(c){
-  city=c;
-  applyCityTheme(c);
+  city=c;curChip=-1;
+  setTheme(c);
   E('srchInput').value='';
   E('srchPanel').style.display='none';
-  E('mainLayout').style.display='flex';
-  renderTabs();renderSB();renderContent();fixOffsets();
-  // 更新 Admin info box 顏色
-  if(E('adminInfoBox'))E('adminInfoBox').style.borderColor=COLORS_MID[c];
+  E('mainArea').style.display='block';
+  renderTabs();renderChips();renderContent();
 }
 
-// ── 側欄 ──
-function renderSB(){
-  var sb=E('sidebar');
+// ── Chip 分類 ──
+function renderChips(){
+  if(!db||!db[city]){E('chipBar').innerHTML='';return;}
   var topics=db[city].topics;
-  var last=topics.length-1;
-  var h='<div class="sb-head"><span>主題大綱</span>'
-    +'<button class="sb-add-btn" id="sbAddBtn" onclick="sbAdd()" style="display:'+(adminMode?'block':'none')+'">＋</button></div>';
-  topics.forEach(function(t,i){
-    h+='<button class="sb-item" id="sbi'+i+'" onclick="sbClick('+i+')">'
-      +(adminMode?'<span class="sb-mv-wrap">'
-        +'<button class="sb-mv" onclick="event.stopPropagation();moveTopic('+i+',-1)" '+(i===0?'disabled':'')+' title="上移">▲</button>'
-        +'<button class="sb-mv" onclick="event.stopPropagation();moveTopic('+i+',1)" '+(i===last?'disabled':'')+' title="下移">▼</button>'
-        +'</span>':'')
-      +'<span class="sb-lbl">'+esc(t.name)+'</span>'
-      +'<span class="sb-cnt">'+t.items.length+'</span>'
-      +'<span class="sb-acts" style="display:'+(adminMode?'flex':'none')+'">'
-      +'<button class="sb-eb" onclick="event.stopPropagation();sbRename('+i+')">✏</button>'
-      +'<button class="sb-db" onclick="event.stopPropagation();sbDel('+i+')">🗑</button></span>'
-      +'</button>';
-  });
-  sb.innerHTML=h;
-  if(topics.length)E('sbi0').classList.add('act');
+  E('chipBar').innerHTML=topics.map(function(t,i){
+    return '<button class="chip'+(curChip===i?' active':'')+'" onclick="clickChip('+i+')">'+esc(t.name)+'</button>';
+  }).join('');
+  updateMeta();
 }
-function sbClick(i){
-  document.querySelectorAll('.sb-item').forEach(function(el,j){el.classList.toggle('act',j===i);});
-  var el=E('topic'+i);if(el)el.scrollIntoView({behavior:'smooth',block:'start'});
-  var b=E('tbody'+i);if(b&&!b.classList.contains('open'))togTopic(i);
+function clickChip(i){
+  curChip=(curChip===i?-1:i);
+  renderChips();renderContent();
 }
-function sbAdd(){var n=prompt('請輸入新主題名稱：');if(!n||!n.trim())return;db[city].topics.push({name:n.trim(),items:[]});saveDB();renderSB();renderContent();toast('✅ 主題已新增');}
-function sbRename(i){var o=db[city].topics[i].name;var n=prompt('修改名稱：',o);if(!n||n===o)return;db[city].topics[i].name=n.trim();saveDB();renderSB();renderContent();toast('✅ 已更新');}
-function sbDel(i){if(!confirm('刪除「'+db[city].topics[i].name+'」？'))return;db[city].topics.splice(i,1);saveDB();renderSB();renderContent();toast('🗑 已刪除');}
-function moveTopic(i,dir){var arr=db[city].topics;var dest=i+dir;if(dest<0||dest>=arr.length)return;var tmp=arr[i];arr[i]=arr[dest];arr[dest]=tmp;saveDB();renderSB();renderContent();toast(dir<0?'▲ 已上移':'▼ 已下移');}
+function updateMeta(){
+  if(!db||!db[city]){E('resMeta').textContent='';return;}
+  var topics=db[city].topics;
+  if(curChip>=0&&curChip<topics.length){
+    E('resMeta').textContent=topics[curChip].name+' · 共 '+topics[curChip].items.length+' 筆';
+  }else{
+    var total=topics.reduce(function(s,t){return s+t.items.length;},0);
+    E('resMeta').textContent=city+' · '+topics.length+' 個主題 · '+total+' 筆資料';
+  }
+}
 
 // ── 主內容 ──
 function renderContent(){
+  if(!db||!db[city]){return;}
   var topics=db[city].topics;
-  var total=topics.reduce(function(s,t){return s+t.items.length;},0);
-  var h='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:8px">'
-    +'<div style="font-size:12px;color:var(--muted);letter-spacing:.3px">'+city+' · '+topics.length+' 個主題 · '+total+' 筆資料</div>'
-    +(adminMode?'<button class="btn btn-solid" style="font-size:11px;padding:5px 11px" onclick="openAddQa(0)">＋ 新增 Q&A</button>':'')
-    +'</div>';
-
-  topics.forEach(function(topic,ti){
+  updateMeta();
+  // 決定要顯示哪些主題
+  var showTopics=curChip>=0?[{t:topics[curChip],i:curChip}]:topics.map(function(t,i){return{t:t,i:i};});
+  var h='';
+  if(adminMode){
+    h+='<div style="margin-bottom:14px"><button class="mmbtn mm-solid" style="font-size:11px;padding:5px 11px" onclick="openAddQa(0)">＋ 新增 Q&A</button></div>';
+  }
+  showTopics.forEach(function(obj){
+    var topic=obj.t,ti=obj.i,last=topic.items.length-1;
     h+='<div class="topic" id="topic'+ti+'">'
       +'<div class="t-hdr" onclick="togTopic('+ti+')">'
       +'<div class="t-num">'+(ti+1)+'</div>'
@@ -787,219 +554,132 @@ function renderContent(){
       +'<div class="t-tools" style="display:'+(adminMode?'flex':'none')+'">'
       +'<button class="t-btn" onclick="event.stopPropagation();openAddQa('+ti+')">＋ 新增</button>'
       +'<button class="t-btn" onclick="event.stopPropagation();sortT('+ti+',1)">A↑Z</button>'
-      +'<button class="t-btn" onclick="event.stopPropagation();sortT('+ti+',-1)">Z↓A</button>'
-      +'</div>'
-      +'<span class="t-count">'+topic.items.length+'</span>'
+      +'<button class="t-btn" onclick="event.stopPropagation();sortT('+ti+',-1)">Z↓A</button></div>'
+      +'<span class="t-cnt">'+topic.items.length+'</span>'
       +'<span class="t-chev open" id="tchev'+ti+'">▾</span></div>'
       +'<div class="t-body open" id="tbody'+ti+'">';
-
     topic.items.forEach(function(item,ii){
       var hasDet=item.a||item.url||(item.imgs&&item.imgs.length);
       if(hasDet){
-        var aH=item.a?linkify(renderColored(item.a)):'';
+        var aH=item.a?lfy(rc(item.a)):'';
         var uH=item.url?'<a class="url-chip a-link" href="'+esc(item.url)+'" target="_blank" rel="noopener" onclick="event.stopPropagation()">🔗 '+esc(item.url)+'</a>':'';
         var iH=(item.imgs&&item.imgs.length)?'<div class="img-wrap">'+item.imgs.map(function(s,si){return'<img src="'+s+'" onclick="openLb('+ti+','+ii+','+si+')" alt="附圖">';}).join('')+'</div>':'';
         var cB=item.a?'<button class="copy-btn" onclick="event.stopPropagation();cpTxt('+ti+','+ii+')">📋 複製回答</button>':'';
-        var maxIi=topic.items.length-1;
         var adm=adminMode?'<div class="qa-acts" style="display:flex">'
-          +'<button class="mv-btn" onclick="event.stopPropagation();moveQa('+ti+','+ii+',-1)" '+(ii===0?'disabled style="opacity:.25"':'')+' title="上移">▲</button>'
-          +'<button class="mv-btn" onclick="event.stopPropagation();moveQa('+ti+','+ii+',1)" '+(ii===maxIi?'disabled style="opacity:.25"':'')+' title="下移">▼</button>'
-          +'<button class="qa-pb" onclick="event.stopPropagation()">📌</button>'
-          +'<button class="eb" onclick="event.stopPropagation();openEdit('+ti+','+ii+')">✏</button>'
-          +'<button class="db" onclick="event.stopPropagation();delQa('+ti+','+ii+')">🗑</button></div>':'';
-        h+='<div class="qa-card" id="qac'+ti+'_'+ii+'">'
-          +'<div class="qa-q" onclick="togQA('+ti+','+ii+')">'
-          +'<div class="q-badge">Q</div>'
-          +'<div class="q-txt">'+linkify(renderColored(item.q))+'</div>'
+          +'<button class="mv-btn" onclick="event.stopPropagation();moveQa('+ti+','+ii+',-1)" '+(ii===0?'disabled':'')+'>▲</button>'
+          +'<button class="mv-btn" onclick="event.stopPropagation();moveQa('+ti+','+ii+',1)" '+(ii===last?'disabled':'')+'>▼</button>'
+          +'<button class="eb2" onclick="event.stopPropagation();openEdit('+ti+','+ii+')">✏</button>'
+          +'<button class="db2" onclick="event.stopPropagation();delQa('+ti+','+ii+')">🗑</button></div>':'';
+        h+='<div class="qa-card"><div class="qa-q" onclick="togQA('+ti+','+ii+')">'
+          +'<div class="q-badge">Q</div><div class="q-txt">'+lfy(rc(item.q))+'</div>'
           +adm+'<span class="q-chev" id="chev'+ti+'_'+ii+'">▾</span></div>'
-          +'<div class="qa-a" id="qaa'+ti+'_'+ii+'">'
-          +(aH?'<div class="a-txt">'+aH+'</div>':'')
-          +cB+uH+iH+'</div></div>';
+          +'<div class="qa-a" id="qaa'+ti+'_'+ii+'">'+(aH?'<div class="a-txt">'+aH+'</div>':'')+cB+uH+iH+'</div></div>';
       }else{
         var adm2=adminMode?'<span style="float:right;display:inline-flex;gap:3px;margin-left:7px">'
-          +'<button class="eb" style="font-size:10px;padding:2px 6px" onclick="event.stopPropagation();openEdit('+ti+','+ii+')">✏</button>'
-          +'<button class="db" style="font-size:10px;padding:2px 6px" onclick="event.stopPropagation();delQa('+ti+','+ii+')">🗑</button></span>':'';
-        h+='<div class="info-card">'+adm2+linkify(renderColored(item.q))+'</div>';
+          +'<button class="eb2" style="font-size:10px;padding:2px 6px" onclick="event.stopPropagation();openEdit('+ti+','+ii+')">✏</button>'
+          +'<button class="db2" style="font-size:10px;padding:2px 6px" onclick="event.stopPropagation();delQa('+ti+','+ii+')">🗑</button></span>':'';
+        h+='<div class="info-card">'+adm2+lfy(rc(item.q))+'</div>';
       }
     });
     h+='</div></div>';
   });
-  E('content').innerHTML=h;
+  E('content').innerHTML=h||'<div style="padding:32px;text-align:center;color:var(--muted)">此主題尚無資料</div>';
 }
 
-function sortT(ti,dir){db[city].topics[ti].items.sort(function(a,b){return dir*(a.q||'').localeCompare(b.q||'','zh-TW');});saveDB();renderContent();toast(dir>0?'✅ A→Z 排序完成':'✅ Z→A 排序完成');}
+function sortT(ti,dir){db[city].topics[ti].items.sort(function(a,b){return dir*(a.q||'').localeCompare(b.q||'','zh-TW');});saveDB();renderContent();toast(dir>0?'✅ A→Z':'✅ Z→A');}
 function togTopic(i){E('tbody'+i).classList.toggle('open');E('tchev'+i).classList.toggle('open');}
 function togQA(ti,ii){var a=E('qaa'+ti+'_'+ii);var c=E('chev'+ti+'_'+ii);a.classList.toggle('open');c.classList.toggle('open');}
-function cpTxt(ti,ii){var t=stripColor(db[city].topics[ti].items[ii].a||'');if(navigator.clipboard){navigator.clipboard.writeText(t).then(function(){toast('📋 已複製');});}else{var ta=document.createElement('textarea');ta.value=t;document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);toast('📋 已複製');}}
+function cpTxt(ti,ii){var t=sc(db[city].topics[ti].items[ii].a||'');if(navigator.clipboard){navigator.clipboard.writeText(t).then(function(){toast('📋 已複製');});}else{var ta=document.createElement('textarea');ta.value=t;document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);toast('📋 已複製');}}
 function openLb(ti,ii,si){E('lbImg').src=db[city].topics[ti].items[ii].imgs[si];E('lb').classList.add('open');}
 function closeLb(){E('lb').classList.remove('open');}
-function moveQa(ti,ii,dir){var items=db[city].topics[ti].items;var dest=ii+dir;if(dest<0||dest>=items.length)return;var tmp=items[ii];items[ii]=items[dest];items[dest]=tmp;saveDB();renderSB();renderContent();toast(dir<0?'▲ 已上移':'▼ 已下移');}
+function moveQa(ti,ii,dir){var items=db[city].topics[ti].items;var dest=ii+dir;if(dest<0||dest>=items.length)return;var tmp=items[ii];items[ii]=items[dest];items[dest]=tmp;saveDB();renderContent();toast(dir<0?'▲ 上移':'▼ 下移');}
 
 // ── 搜尋 ──
 function doSearch(q){
   q=q.trim();
-  if(!q){E('srchPanel').style.display='none';E('mainLayout').style.display='flex';return;}
-  E('mainLayout').style.display='none';E('srchPanel').style.display='block';
-  var ql=q.toLowerCase();var hits=[];
+  if(!q){E('srchPanel').style.display='none';E('mainArea').style.display='block';return;}
+  E('mainArea').style.display='none';E('srchPanel').style.display='block';
+  var ql=q.toLowerCase(),hits=[];
   CITIES.forEach(function(c){db[c].topics.forEach(function(t,ti){t.items.forEach(function(item,ii){
-    var qp=stripColor(item.q),ap=stripColor(item.a||'');
+    var qp=sc(item.q),ap=sc(item.a||'');
     if(qp.toLowerCase().indexOf(ql)>=0||ap.toLowerCase().indexOf(ql)>=0||(item.url&&item.url.toLowerCase().indexOf(ql)>=0))
       hits.push({c:c,t:t.name,ti:ti,ii:ii,item:item,qp:qp,ap:ap});
   });});});
-  if(!hits.length){
-    E('srchPanel').innerHTML='<div class="no-res">🔍 未找到「'+esc(q)+'」的相關資料<br><span style="font-size:12px;display:block;margin-top:6px">建議換個關鍵字試試，或直接瀏覽各縣市主題</span></div>';
-    return;
-  }
-  var h='<div class="srch-hdr">搜尋「'+esc(q)+'」，共找到 '+hits.length+' 筆結果</div>';
+  if(!hits.length){E('srchPanel').innerHTML='<div class="no-res">🔍 未找到「'+esc(q)+'」<br><span style="font-size:12px;display:block;margin-top:6px">建議換個關鍵字，或直接瀏覽各縣市主題</span></div>';return;}
+  var h='<div class="srch-hdr">搜尋「'+esc(q)+'」，共 '+hits.length+' 筆結果</div>';
   hits.forEach(function(hit){
     var col=COLORS[hit.c];
     h+='<div class="hit" onclick="gotoRes(\''+hit.c+'\','+hit.ti+','+hit.ii+')">'
       +'<div class="hit-meta"><span class="hit-city" style="background:'+col+'">'+hit.c+'</span>› '+esc(hit.t)+'</div>'
       +'<div class="hit-q">'+hl(esc(hit.qp),q)+'</div>'
-      +(hit.ap?'<div class="hit-a">'+hl(esc(hit.ap.substring(0,130)),q)+(hit.ap.length>130?'…':'')+'</div>':'')
-      +(hit.item.url?'<div style="font-size:11px;color:'+col+';margin-top:3px">🔗 '+esc(hit.item.url)+'</div>':'')
-      +'</div>';
+      +(hit.ap?'<div class="hit-a">'+hl(esc(hit.ap.substring(0,130)),q)+(hit.ap.length>130?'…':'')+'</div>':'')+'</div>';
   });
   E('srchPanel').innerHTML=h;
 }
 function gotoRes(c,ti,ii){
-  E('srchInput').value='';E('srchPanel').style.display='none';E('mainLayout').style.display='flex';
-  if(c!==city){switchCity(c);}else{renderTabs();renderSB();renderContent();}
-  setTimeout(function(){
-    var el=E('topic'+ti);if(el)el.scrollIntoView({behavior:'smooth'});
-    var b=E('tbody'+ti);if(b&&!b.classList.contains('open'))togTopic(ti);
-    var a=E('qaa'+ti+'_'+ii);if(a&&!a.classList.contains('open'))togQA(ti,ii);
-  },120);
+  E('srchInput').value='';E('srchPanel').style.display='none';E('mainArea').style.display='block';
+  if(c!==city){switchCity(c);}else{renderTabs();renderChips();renderContent();}
+  setTimeout(function(){var el=E('topic'+ti);if(el)el.scrollIntoView({behavior:'smooth'});var b=E('tbody'+ti);if(b&&!b.classList.contains('open'))togTopic(ti);var a=E('qaa'+ti+'_'+ii);if(a&&!a.classList.contains('open'))togQA(ti,ii);},130);
 }
 
 // ── 後台 ──
 function clickAdmin(){if(!adminMode){E('loginOv').classList.add('open');setTimeout(function(){E('loginPw').focus();},80);}else openAdmin();}
 function closeLogin(){E('loginOv').classList.remove('open');E('loginPw').value='';E('loginErr').style.display='none';}
-function doLogin(){
-  if(E('loginPw').value==='1959'){
-    adminMode=true;closeLogin();openAdmin();
-    E('adminBtn').textContent='⚙ 後台（編輯中）';
-    E('adminBtn').classList.add('admin-on');
-    renderSB();renderContent();toast('✅ 進入編輯模式');
-  }else{E('loginErr').style.display='block';E('loginPw').value='';E('loginPw').focus();}
-}
+function doLogin(){if(E('loginPw').value==='1959'){adminMode=true;closeLogin();openAdmin();E('adminBtn').textContent='⚙ 後台（編輯中）';E('adminBtn').classList.add('on');renderChips();renderContent();toast('✅ 進入編輯模式');}else{E('loginErr').style.display='block';E('loginPw').value='';E('loginPw').focus();}}
 function openAdmin(){renderMqEds();E('admCity').value=city;E('adminOv').classList.add('open');}
 function closeAdmin(){E('adminOv').classList.remove('open');}
-function saveAdmin(){
-  mqData=[];
-  document.querySelectorAll('.mq-row2').forEach(function(r){
-    var s=r.querySelector('select').value;var t=r.querySelector('input').value.trim();
-    if(t)mqData.push({scope:s,text:t});
-  });
-  localStorage.setItem('mq',JSON.stringify(mqData));renderMQ();closeAdmin();toast('✅ 已儲存');
-}
-function doLogout(){if(!confirm('確定登出？'))return;adminMode=false;closeAdmin();E('adminBtn').textContent='⚙ 後台';E('adminBtn').classList.remove('admin-on');renderSB();renderContent();toast('👋 已登出');}
+function saveAdmin(){mqData=[];document.querySelectorAll('.mq-row2').forEach(function(r){var s=r.querySelector('select').value;var t=r.querySelector('input').value.trim();if(t)mqData.push({scope:s,text:t});});localStorage.setItem('mq',JSON.stringify(mqData));renderMQ();closeAdmin();toast('✅ 已儲存');}
+function doLogout(){if(!confirm('確定登出？'))return;adminMode=false;closeAdmin();E('adminBtn').textContent='⚙ 後台';E('adminBtn').classList.remove('on');renderChips();renderContent();toast('👋 已登出');}
 function renderMqEds(){var c=E('mqEds');c.innerHTML='';(mqData.length?mqData:[{scope:'all',text:''}]).forEach(function(m){addMqRow(m.scope,m.text);});}
 function addMqEd(){if(document.querySelectorAll('.mq-row2').length>=3){toast('⚠ 最多3條');return;}addMqRow('all','');}
-function addMqRow(sc,tx){
-  var c=E('mqEds');if(c.children.length>=3)return;
-  var d=document.createElement('div');d.className='mq-row2';
-  var opts=CITIES.map(function(ci){return'<option value="'+ci+'"'+(sc===ci?' selected':'')+'>'+ci+'</option>';}).join('');
-  d.innerHTML='<select><option value="all"'+(sc==='all'?' selected':'')+'>全站</option>'+opts+'</select>'
-    +'<input type="text" placeholder="公告文字" value="'+esc(tx||'')+'"><button class="mq-del" onclick="this.parentElement.remove()">✕</button>';
-  c.appendChild(d);
-}
-function addTopic(){var c=E('admCity').value;var n=E('newTopicInp').value.trim();if(!n){toast('⚠ 請輸入名稱');return;}db[c].topics.push({name:n,items:[]});saveDB();E('newTopicInp').value='';if(c===city){renderSB();renderContent();}toast('✅ 主題已新增');}
+function addMqRow(sc,tx){var c=E('mqEds');if(c.children.length>=3)return;var d=document.createElement('div');d.className='mq-row2';var opts=CITIES.map(function(ci){return'<option value="'+ci+'"'+(sc===ci?' selected':'')+'>'+ci+'</option>';}).join('');d.innerHTML='<select><option value="all"'+(sc==='all'?' selected':'')+'>全站</option>'+opts+'</select><input type="text" placeholder="公告文字" value="'+esc(tx||'')+'"><button class="mq-del" onclick="this.parentElement.remove()">✕</button>';c.appendChild(d);}
+function addTopic(){var c=E('admCity').value;var n=E('newTopicInp').value.trim();if(!n){toast('⚠ 請輸入名稱');return;}db[c].topics.push({name:n,items:[]});saveDB();E('newTopicInp').value='';if(c===city){renderChips();renderContent();}toast('✅ 主題已新增');}
 function exportDB(){dlFile(JSON.stringify(db,null,2),'data.json','application/json');toast('✅ data.json 已下載，請上傳到 GitHub！');}
-function importDB(inp){var f=inp.files[0];if(!f)return;var r=new FileReader();r.onload=function(e){try{var p=JSON.parse(e.target.result);if(!p['桃園'])throw new Error('格式不符');db=p;saveDB();renderSB();renderContent();toast('✅ 已匯入，記得下載並上傳 data.json！');}catch(er){toast('⚠ '+er.message);}};r.readAsText(f);inp.value='';}
+function importDB(inp){var f=inp.files[0];if(!f)return;var r=new FileReader();r.onload=function(e){try{var p=JSON.parse(e.target.result);if(!p['桃園'])throw new Error('格式不符');db=p;saveDB();renderChips();renderContent();toast('✅ 已匯入');}catch(er){toast('⚠ '+er.message);}};r.readAsText(f);inp.value='';}
 function dlFile(ct,nm,tp){var b=new Blob([ct],{type:tp});var u=URL.createObjectURL(b);var a=document.createElement('a');a.href=u;a.download=nm;document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(u);}
 
 // ── 色彩標記 ──
-function applyClr(color){
-  var ta=E('qaA');var s=ta.selectionStart,en=ta.selectionEnd;
-  if(s===en){E('clrHint').style.display='inline';setTimeout(function(){E('clrHint').style.display='none';},2000);return;}
-  var v=ta.value,sel=v.substring(s,en).replace(/\[\[\w+:([^\]]*)\]\]/g,'$1');
-  var tagged='[['+color+':'+sel+']]';
-  ta.value=v.substring(0,s)+tagged+v.substring(en);
-  ta.selectionStart=s;ta.selectionEnd=s+tagged.length;updPrev();
-}
+function applyClr(color){var ta=E('qaA');var s=ta.selectionStart,en=ta.selectionEnd;if(s===en){E('clrHint').style.display='inline';setTimeout(function(){E('clrHint').style.display='none';},2000);return;}var v=ta.value,sel=v.substring(s,en).replace(/\[\[\w+:([^\]]*)\]\]/g,'$1');var tagged='[['+color+':'+sel+']]';ta.value=v.substring(0,s)+tagged+v.substring(en);ta.selectionStart=s;ta.selectionEnd=s+tagged.length;updPrev();}
 function removeClr(){var ta=E('qaA');var s=ta.selectionStart,en=ta.selectionEnd;if(s===en){ta.value=ta.value.replace(/\[\[\w+:([^\]]*)\]\]/g,'$1');}else{var v=ta.value;ta.value=v.substring(0,s)+v.substring(s,en).replace(/\[\[\w+:([^\]]*)\]\]/g,'$1')+v.substring(en);}updPrev();}
-function updPrev(){var v=E('qaA').value;var pv=E('aPrev');var pc=E('aPrevContent');if(v.indexOf('[[')>=0){pv.style.display='block';pc.innerHTML=linkify(renderColored(v));}else{pv.style.display='none';}}
+function updPrev(){var v=E('qaA').value;if(v.indexOf('[[')>=0){E('aPrev').style.display='block';E('aPrevContent').innerHTML=lfy(rc(v));}else{E('aPrev').style.display='none';}}
 
-// ── Q&A 編輯 ──
+// ── QA 編輯 ──
 function openAddQa(ti){editCtx=null;pImgs=[];E('qaTitle').textContent='➕ 新增 Q&A';E('qaCity').value=city;updQaTopic(ti);E('qaQ').value='';E('qaA').value='';E('qaUrl').value='';E('imgPrev').innerHTML='';E('aPrev').style.display='none';E('qaOv').classList.add('open');}
 function openEdit(ti,ii){var item=db[city].topics[ti].items[ii];editCtx={city:city,ti:ti,ii:ii};pImgs=(item.imgs||[]).slice();E('qaTitle').textContent='✏ 編輯 Q&A';E('qaCity').value=city;updQaTopic(ti);E('qaQ').value=item.q||'';E('qaA').value=item.a||'';E('qaUrl').value=item.url||'';renderImgPrev();updPrev();E('qaOv').classList.add('open');}
 function updQaTopic(sel){var c=E('qaCity').value;E('qaTopic').innerHTML=db[c].topics.map(function(t,i){return'<option value="'+i+'"'+(i===sel?' selected':'')+'>'+esc(t.name)+'</option>';}).join('');}
 function closeQa(){E('qaOv').classList.remove('open');editCtx=null;pImgs=[];E('aPrev').style.display='none';}
-function saveQa(){var c=E('qaCity').value;var ti=parseInt(E('qaTopic').value);var q=E('qaQ').value.trim();var a=E('qaA').value.trim();var url=E('qaUrl').value.trim();if(!q){toast('⚠ 請輸入問題');return;}var item={q:q};if(a)item.a=a;if(url)item.url=url;if(pImgs.length)item.imgs=pImgs;if(editCtx&&editCtx.ii>=0)db[c].topics[ti].items[editCtx.ii]=item;else db[c].topics[ti].items.push(item);saveDB();closeQa();if(c===city){renderSB();renderContent();}toast('✅ 已儲存');}
-function delQa(ti,ii){if(!confirm('確定刪除？'))return;db[city].topics[ti].items.splice(ii,1);saveDB();renderSB();renderContent();toast('🗑 已刪除');}
+function saveQa(){var c=E('qaCity').value;var ti=parseInt(E('qaTopic').value);var q=E('qaQ').value.trim();var a=E('qaA').value.trim();var url=E('qaUrl').value.trim();if(!q){toast('⚠ 請輸入問題');return;}var item={q:q};if(a)item.a=a;if(url)item.url=url;if(pImgs.length)item.imgs=pImgs;if(editCtx&&editCtx.ii>=0)db[c].topics[ti].items[editCtx.ii]=item;else db[c].topics[ti].items.push(item);saveDB();closeQa();if(c===city){renderChips();renderContent();}toast('✅ 已儲存');}
+function delQa(ti,ii){if(!confirm('確定刪除？'))return;db[city].topics[ti].items.splice(ii,1);saveDB();renderChips();renderContent();toast('🗑 已刪除');}
 function handleImgs(inp){Array.from(inp.files).forEach(function(f){var r=new FileReader();r.onload=function(e){pImgs.push(e.target.result);renderImgPrev();};r.readAsDataURL(f);});inp.value='';}
 function renderImgPrev(){E('imgPrev').innerHTML=pImgs.map(function(s){return'<img src="'+s+'" onclick="E(\'lbImg\').src=this.src;E(\'lb\').classList.add(\'open\')" alt="">';}).join('');}
-
 document.addEventListener('click',function(e){if(e.target.classList.contains('a-link'))e.stopPropagation();});
 E('qaA').addEventListener('input',updPrev);
 
-// ── 前往測驗 ──
-function goQuiz(){
-  var cityMap={'桃園':'quiz-taoyuan.html','南投':'quiz-nantou.html','嘉義':'quiz-chiayi.html','彰化':'quiz-changhua.html'};
-  var url=cityMap[city];
-  if(url){window.open(url,'_blank');}else{alert('找不到對應的測驗頁面');}
-}
+// ── 測驗 ──
+function goQuiz(){var m={'桃園':'quiz-taoyuan.html','南投':'quiz-nantou.html','嘉義':'quiz-chiayi.html','彰化':'quiz-changhua.html'};var u=m[city];if(u)window.open(u,'_blank');else alert('找不到測驗頁面');}
 
-// ── AI 問答 ──
+// ── AI ──
 var AI_KEY='AIzaSyA_TEZRDSuqg3_v0PWWNpukxGrs06szETI';
-
-function toggleAI(){
-  aiOpen=!aiOpen;
-  var panel=E('aiPanel');
-  if(aiOpen){panel.classList.add('open');setTimeout(function(){E('aiInput').focus();},100);}
-  else{panel.classList.remove('open');}
-}
-
-function getQAContext(){
-  var lines=[];
-  if(!db||!db[city])return'';
-  db[city].topics.forEach(function(t){
-    t.items.forEach(function(item){
-      if(item.q)lines.push('Q: '+item.q);
-      if(item.a)lines.push('A: '+item.a);
-    });
-  });
-  return lines.slice(0,80).join('\n');
-}
-
+function toggleAI(){aiOpen=!aiOpen;if(aiOpen){E('aiPanel').classList.add('open');setTimeout(function(){E('aiInput').focus();},100);}else{E('aiPanel').classList.remove('open');}}
+function getCtx(){var lines=[];if(!db||!db[city])return'';db[city].topics.forEach(function(t){t.items.forEach(function(item){if(item.q)lines.push('Q: '+item.q);if(item.a)lines.push('A: '+item.a);});});return lines.slice(0,80).join('\n');}
 async function askAI(){
   var inp=E('aiInput');var q=inp.value.trim();if(!q)return;
-  var msgs=E('aiMessages');
-  var uDiv=document.createElement('div');uDiv.className='ai-msg user';uDiv.textContent=q;msgs.appendChild(uDiv);
+  var msgs=E('aiMsgs');
+  var u=document.createElement('div');u.className='ai-msg user';u.textContent=q;msgs.appendChild(u);
   inp.value='';
-  var loadDiv=document.createElement('div');loadDiv.className='ai-msg bot loading';loadDiv.textContent='⏳ 查詢中…';msgs.appendChild(loadDiv);
+  var ld=document.createElement('div');ld.className='ai-msg bot loading';ld.textContent='⏳ 查詢中…';msgs.appendChild(ld);
   msgs.scrollTop=msgs.scrollHeight;E('aiSend').disabled=true;
   try{
-    var context=getQAContext();
-    var fullPrompt='你是1959動物保護專線的客服協助系統（'+city+'縣市）。'
-      +'根據以下知識庫，用親切繁體中文回答，不超過120字，適合直接轉述給民眾。'
-      +'知識庫沒有的請建議轉介適當單位。\n\n'
-      +'【'+city+'知識庫】\n'+context+'\n\n'
-      +'【問題】'+q;
-    var res=await fetch(
-      'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key='+AI_KEY,
-      {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({contents:[{parts:[{text:fullPrompt}]}],generationConfig:{temperature:0.3,maxOutputTokens:300}})}
-    );
-    if(!res.ok){var e=await res.json();throw new Error(e.error&&e.error.message||'API錯誤 '+res.status);}
+    var res=await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key='+AI_KEY,
+      {method:'POST',headers:{'Content-Type':'application/json'},
+       body:JSON.stringify({contents:[{parts:[{text:'你是1959動物保護專線客服協助系統（'+city+'縣市）。根據以下知識庫，用親切繁體中文回答，不超過120字。知識庫沒有的請建議轉介適當單位。\n\n【知識庫】\n'+getCtx()+'\n\n【問題】'+q}]}],generationConfig:{temperature:0.3,maxOutputTokens:300}})});
+    if(!res.ok)throw new Error('API錯誤 '+res.status);
     var data=await res.json();
-    var answer=data.candidates&&data.candidates[0]&&data.candidates[0].content.parts[0].text;
-    if(!answer)throw new Error('回應格式錯誤');
-    loadDiv.className='ai-msg bot';loadDiv.textContent=answer;
-  }catch(err){loadDiv.className='ai-msg bot';loadDiv.textContent='⚠ 查詢失敗：'+err.message;}
+    var ans=data.candidates&&data.candidates[0]&&data.candidates[0].content.parts[0].text;
+    if(!ans)throw new Error('回應格式錯誤');
+    ld.className='ai-msg bot';ld.textContent=ans;
+  }catch(err){ld.className='ai-msg bot';ld.textContent='⚠ 查詢失敗：'+err.message;}
   E('aiSend').disabled=false;msgs.scrollTop=msgs.scrollHeight;
-}
-
-function fixOffsets(){
-  var hdrH=60;
-  var mqH=E('mqSec')?E('mqSec').getBoundingClientRect().height:0;
-  var navEl=document.querySelector('.city-nav');
-  var navH=navEl?navEl.getBoundingClientRect().height:41;
-  var navTop=hdrH+mqH;
-  var sbTop=navTop+navH;
-  if(navEl){navEl.style.top=navTop+'px';}
-  var sb=E('sidebar');
-  if(sb){sb.style.top=sbTop+'px';sb.style.height='calc(100vh - '+sbTop+'px)';}
 }
 
 init();
