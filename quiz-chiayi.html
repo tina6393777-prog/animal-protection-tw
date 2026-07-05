@@ -264,8 +264,8 @@ body {
 
     <div class="info-row">
       <div class="info-chip">
-        <div class="num">10-20</div>
-        <div class="lbl">隨機題數</div>
+        <div class="num">20</div>
+        <div class="lbl">固定題數</div>
       </div>
       <div class="info-chip">
         <div class="num">85</div>
@@ -287,11 +287,8 @@ body {
     </div>
     <div class="form-group">
       <label>所屬縣市</label>
-      <select id="inp-city">
-        <option value="桃園" selected>桃園</option>
-        <option value="南投">南投</option>
-        <option value="嘉義">嘉義</option>
-        <option value="彰化">彰化</option>
+      <select id="inp-city" disabled style="background:#f0fff4;color:#3a9a68;font-weight:700;cursor:default">
+        <option value="嘉義" selected>嘉義</option>
       </select>
     </div>
 
@@ -467,7 +464,7 @@ const QUESTION_BANK = [{"type": "single", "q": "嘉義市動保教育園區的�
 // ══════════════════════════════
 function startQuiz(){
   const name = document.getElementById('inp-name').value.trim();
-  const city = '嘉義';
+  const city = document.getElementById('inp-city').value;
   if(!name){ alert('請輸入姓名！'); return; }
 
   S.name=name; S.city=city;
@@ -477,8 +474,9 @@ function startQuiz(){
   show('screen-loading');
 
   setTimeout(()=>{
-    // 隨機抽 10~15 題
-    const count = Math.floor(Math.random()*6)+10;
+    
+    // 固定出 20 題
+    const count = 20;
     const shuffled = [...QUESTION_BANK].sort(()=>Math.random()-0.5);
     S.questions = shuffled.slice(0, Math.min(count, shuffled.length));
     S.questions.forEach(q=>{
@@ -724,7 +722,7 @@ function showResult(){
 //  EmailJS 寄信
 // ══════════════════════════════
 async function autoSendReport(score){
-  const pass=score>=80;
+  const pass=score>=85;
   const now=new Date().toLocaleString('zh-TW');
 
   // 整理答題明細
