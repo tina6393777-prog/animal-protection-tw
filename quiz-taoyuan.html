@@ -287,11 +287,8 @@ body {
     </div>
     <div class="form-group">
       <label>所屬縣市</label>
-      <select id="inp-city">
+      <select id="inp-city" disabled style="background:#f0fff4;color:#3a9a68;font-weight:700;cursor:default">
         <option value="桃園" selected>桃園</option>
-        <option value="南投">南投</option>
-        <option value="嘉義">嘉義</option>
-        <option value="彰化">彰化</option>
       </select>
     </div>
 
@@ -366,9 +363,6 @@ body {
 </div>
 
 <script>
-// ══════════════════════════════
-//  設定區（你的 API Keys）
-// ══════════════════════════════
 const CONFIG = {
   GEMINI_KEY: 'AIzaSyBGcmbFrg_I2dqZvFxJoDKqLVYfUMUPt9Y',
   EMAILJS_PUBLIC_KEY: 'GL2bE8A4d3jSItIUJ',
@@ -377,67 +371,13 @@ const CONFIG = {
   MANAGER_EMAIL: 'khnpduty@chainsea.com.tw'
 };
 
-// ══════════════════════════════
-//  各縣市知識庫（正式版請替換成真實 data.json 內容）
-// ══════════════════════════════
 const CITY_QA = {
-  '桃園': `
-【桃園縣市動保QA知識庫】
-Q: 救援人員接獲通報後多久內應抵達現場？A: 2小時內。
-Q: 民眾在道路上發現動物屍體應聯繫哪個單位？A: 清潔隊。
-Q: 發現幼貓外觀乾淨肚子微凸應如何建議？A: 放回原處，母貓會回來照顧，不要帶走。
-Q: 私人圍籬農地內發現動物屍體1959可以進入嗎？A: 不行，私人領域公權力完全無法介入。
-Q: 1959主要受理哪些動物？A: 犬和貓，野生動物不在受理範圍。
-Q: 發現野生鳥類受傷應如何處理？A: 請民眾轉介農業部生物多樣性研究所，1959不受理野生動物。
-Q: 收費停車場屬於哪種場域？A: 公眾得出入之場所，1959可介入處置。
-Q: 幼鳥在地上有羽毛且健康應如何處理？A: 不要撿走，是離巢學飛期，鳥媽媽會回來照顧。
-Q: 民眾通報狗狗有傷人紀錄應如何處理？A: 需帶回，有傷人紀錄不可就地野放。
-Q: 通報案件需要提供哪些資訊？A: 發現時間、地點、動物狀況描述、通報人真實姓名及電話。
-  `,
-  '南投': `
-【南投縣市動保QA知識庫】
-Q: 南投上班時間聯絡電話為何？A: 049-2222542，週一至週五8:30~17:00。
-Q: 南投假日或非上班時間備援電話為何？A: 02-87928781。
-Q: 救援人員接獲通報後多久內應抵達現場？A: 2小時內。
-Q: 道路上發現動物屍體應聯繫哪個單位？A: 清潔隊處理。
-Q: 保育類動物如石虎穿山甲通報哪個單位？A: 農業部生物多樣性研究所，電話049-2761331。
-Q: 1959主要受理哪些動物？A: 犬和貓。
-Q: 私人土地發現受傷動物可以進入嗎？A: 不行，需要地主同意才可進入私人領域。
-Q: 幼貓外觀乾淨精神好應如何建議？A: 放回原處等母貓回來，不要帶走。
-Q: 通報案件需要提供哪些資訊？A: 發現時間、地點、動物狀況、通報人姓名電話。
-Q: 動物無傷病且有剪耳代表什麼？A: 已結紮，可就地野放。
-  `,
-  '嘉義': `
-【嘉義縣市動保QA知識庫】
-Q: 嘉義動保園區收容哪些情況的犬貓？A: 受傷犬貓及飼主棄養（需預約）。
-Q: 嘉義園區棄養預約時間為何？A: 週二至週六上午下午特定時段。
-Q: 未滿6個月幼犬貓可以送到嘉義園區嗎？A: 不行，未滿6月齡無法收容。
-Q: 救援人員接獲通報後多久內應抵達？A: 2小時內。
-Q: 道路上發現動物屍體應聯繫哪個單位？A: 清潔隊。
-Q: 發現幼貓外觀乾淨肚子微凸應如何建議？A: 放回原處，有母貓照顧不要帶走。
-Q: 1959主要受理哪些動物？A: 犬和貓。
-Q: 野生動物受傷應聯繫哪個單位？A: 農業部生物多樣性研究所。
-Q: 通報案件需要提供哪些基本資訊？A: 時間、地點、狀況描述、通報人姓名電話。
-Q: 有剪耳記號的動物代表什麼？A: 已完成TNVR結紮，可就地野放。
-  `,
-  '彰化': `
-【彰化縣市動保QA知識庫】
-Q: 彰化捕犬專線電話為何？A: 04-8590010，上班時間專用。
-Q: 彰化有提供民眾貓隻捕捉服務嗎？A: 目前無貓隻捕捉服務，但有誘捕籠外借，需上班時間預約。
-Q: 救援人員接獲通報後多久內應抵達？A: 2小時內。
-Q: 道路上發現動物屍體應聯繫哪個單位？A: 清潔隊。
-Q: 拾獲健康品種犬貓應如何建議？A: 協助送往動物醫院掃晶片確認是否有飼主。
-Q: 1959主要受理哪些動物？A: 犬和貓。
-Q: 私人土地上發現動物屍體可以進入清理嗎？A: 不行，私人領域公權力無法介入。
-Q: 發現幼貓外觀乾淨精神好應如何建議？A: 放回原處等母貓，不要帶走。
-Q: 通報案件需要提供哪些基本資訊？A: 時間、地點、動物狀況、通報人姓名電話。
-Q: 動物有傷人紀錄可以就地野放嗎？A: 不行，有傷人紀錄必須帶回處置。
-  `
+  '桃園': `【桃園縣市動保QA知識庫】Q: 救援人員接獲通報後多久內應抵達現場？A: 2小時內。Q: 民眾在道路上發現動物屍體應聯繫哪個單位？A: 清潔隊。`,
+  '南投': `【南投縣市動保QA知識庫】Q: 南投上班時間聯絡電話為何？A: 049-2222542。`,
+  '嘉義': `【嘉義縣市動保QA知識庫】Q: 嘉義動保園區收容哪些情況的犬貓？A: 受傷犬貓及飼主棄養（需預約）。`,
+  '彰化': `【彰化縣市動保QA知識庫】Q: 彰化捕犬專線電話為何？A: 04-8590010。`
 };
 
-// ══════════════════════════════
-//  State
-// ══════════════════════════════
 let S = {
   name:'', city:'',
   questions:[], current:0,
@@ -447,7 +387,6 @@ let S = {
   _multiSelected: new Set()
 };
 
-// EmailJS 初始化
 emailjs.init(CONFIG.EMAILJS_PUBLIC_KEY);
 
 function show(id){
@@ -457,104 +396,61 @@ function show(id){
   });
 }
 
-// ══════════════════════════════
-//  題庫（來自真實 data.json）
-// ══════════════════════════════
 const QUESTION_BANK = [{"type": "tf", "q": "桃園1959動物保護專線的標準開頭語為「桃園1959動物保護專線您好，敝姓X很高興為您服務」。", "ans": true, "explain": "正確。標準開頭語為「桃園1959動物保護專線您好，敝姓X很高興為您服務」，電話接起後1-2秒內需完整說出。"}, {"type": "single", "q": "桃園1959委外急難救助服務時間為何？", "opts": ["全年無休24小時", "平日17:00-08:00，一般假日24小時", "週一至週五08:00-17:00", "週末及假日08:00-22:00"], "ans": [1], "explain": "委外服務時間：平日週一至週五 17:00-08:00，一般假日及政府宣佈停班則為24小時全時段，由佶鼎超媒體有限公司協助。"}, {"type": "single", "q": "桃園委外急難救助廠商「佶鼎超媒體」的話務窗口電話為何？", "opts": ["0937802020", "0966652765", "0972588688", "03-3250126"], "ans": [2], "explain": "佶鼎超媒體有限公司話務窗口為0972588688，備援電話為0937802020（負責人賴彥文），備用電話為0966652765。"}, {"type": "tf", "q": "接獲動保通報時，可以用「是否方便提供」等詢問方式請民眾提供姓名電話地址。", "ans": false, "explain": "錯誤。配合農業部要求，應直接「請」民眾提供全名/電話/地址，不可說「是否方便/可否提供」等詢問字樣。"}, {"type": "single", "q": "民眾通報發現路殺動物屍體（桃園），客服應如何處理？", "opts": ["立即派委外救援隊前往", "請民眾洽各區清潔隊，如清潔隊休假可撥1999", "請民眾自行以黑色袋子裝好等待", "通報桃園動保處上班時間處理"], "ans": [1], "explain": "可請民眾洽各區清潔隊協助，如遇清潔隊休假，亦可請民眾撥打1999協助處理，會派案給清潔隊。"}, {"type": "single", "q": "蛇、蜂、保育類動物、野生動物等案件，在桃園應轉介哪個單位？", "opts": ["桃園動保處直接受理", "消防局119", "農業局林務科，可請民眾撥1999", "警察局110"], "ans": [2], "explain": "蛇、蜂、保育類動物、野生動物屬農業局林務科權責，可請民眾撥打1999協助，會派給林務科。但鴿子及白嘴八哥例外，歸桃園動保處接案。"}, {"type": "tf", "q": "鴿子和白嘴八哥（台灣冠八哥）的救援案件，應請民眾撥打1999轉農業局林務科處理。", "ans": false, "explain": "錯誤。鴿子及白嘴八哥歸桃園動保處接案，不是1999。白嘴八哥屬二級保育類動物，請勿派外勤，請民眾安置待上班再聯繫動保處。"}, {"type": "single", "q": "民眾下班時段撿到犬貓想送到桃園園區，客服應如何回應？", "opts": ["請民眾直接送到園區", "系統錄案，請民眾協助安置，上班時段由單位聯繫處理", "告知民眾無法受理", "請民眾撥打1999"], "ans": [1], "explain": "下班時段請民眾協助安置，不要讓民眾直接送到園區。系統錄案後上班時段由單位聯繫處理。且收容需符合：民眾為桃園市民、拾獲地在桃園。"}, {"type": "single", "q": "民眾想認養桃園動保園區的犬貓，認養者需符合哪些條件？", "opts": ["年滿18歲，攜帶身分證", "年滿20歲，攜帶身分證或駕照", "年滿18歲，需有自宅且攜帶戶籍謄本", "年滿20歲，需繳納手續費500元"], "ans": [1], "explain": "領養者須年滿20歲並攜帶身分證或駕照，於開放時間內（週二、四、六、日早上10點至下午3點半）至現場挑選動物。目前為提高認養率，無須繳納手續費用。"}, {"type": "single", "q": "桃園動物保護教育園區（新屋收容所）的開放時間為何？", "opts": ["週一至週五 09:30~16:00", "每週二、四、五、六、日 09:30~16:00", "每週一至週六 08:00~17:00", "全年無休 09:00~17:00"], "ans": [1], "explain": "桃園動物保護園區（新屋收容所）開放時間：每週二、四、五、六、日，服務時段上午09:30至下午16:00（中午12時至13時不開放入動物舍參觀）。"}, {"type": "tf", "q": "民眾通報受傷流浪犬貓時，客服可主動提供動物醫院及合約醫院資訊給民眾。", "ans": false, "explain": "錯誤。客服不主動提供動物醫院及合約醫院資訊，避免費用爭議。拾獲受傷流浪犬貓應確認是遊蕩犬貓後聯絡委外廠商協助。"}, {"type": "single", "q": "桃園動物保護處目前正確的聯絡電話為何？", "opts": ["03-3250126#500", "03-4861760", "03-3250126#556", "1999"], "ans": [0], "explain": "桃園動物保護處電話為03-3250126#500，地址為桃園市桃園區向善街120-1號，上班時間週一至週五 08:00-12:00、13:00-17:00。"}, {"type": "single", "q": "民眾詢問誘捕籠外借，設籍桃園市的市民最多可借幾個，借用期限為何？", "opts": ["2個，借用期限2週", "1個，借用期限1週，可展延3次，每次1週，最多1個月", "1個，借用期限2週，不可展延", "依需求提供，無限制"], "ans": [1], "explain": "設籍桃園市之市民，原則上可借用1個誘捕籠，借用期限1周，可申請展延3次，每次1週，至多借用一個月。"}, {"type": "tf", "q": "高速公路或快速道路上發生的動物案件，由桃園1959委外廠商優先處理。", "ans": false, "explain": "錯誤。高速公路及快速道路案件以事發地的業管單位為優先受理（建議透過1999轉業管單位），需請高公局北區養護工程分局處理，主辦單位評估需要才會再請1959協助。"}, {"type": "single", "q": "任何情況下，客服人員是否可以請民眾自行PO網求援或找愛心人士求援？", "opts": ["可以，非緊急案件可建議民眾自行求援", "夜間無法派員時可以建議", "不管任何情況，一律不得請民眾PO網求援或找愛心人士求援", "只有假日才可以建議民眾自行求援"], "ans": [2], "explain": "不管任何情況，一律不得請民眾PO網求援、愛心人士求援。業主已明確告知不要請民眾自行求援，如有需求請紀錄後送由桃園動防所後續處理。"}, {"type": "single", "q": "桃園寵登系統錄案後，客服人員是否可以結案？", "opts": ["可以，案件處理完成後即可結案", "上班時間的案件可以結案", "不可結案，後送由承辦單位上班日處理", "只有諮詢案件才可以結案"], "ans": [2], "explain": "寵登系統錄案（每筆通話皆獨立入案），不可結案！後送案件由承辦單位上班日協助處理。"}, {"type": "single", "q": "民眾飼主不擬繼續飼養犬貓，需完成哪些手續才能辦理讓渡？", "opts": ["只需攜帶身分證至園區辦理即可", "需完成晶片植入、寵物登記、施打當年度狂犬病疫苗與絕育，費用由原飼主負擔", "只需完成絕育手術即可", "無需任何手續，直接送交收容所"], "ans": [1], "explain": "欲申請讓渡之犬貓需先完成晶片植入、寵物登記、施打當年度狂犬病疫苗與絕育，相關費用由原飼主自行負擔，始得辦理讓渡手續。"}];
 
-// ══════════════════════════════
-//  Start → 從題庫隨機抽題
-// ══════════════════════════════
 function startQuiz(){
   const name = document.getElementById('inp-name').value.trim();
-  const city = '桃園';
+  const city = document.getElementById('inp-city').value;
   if(!name){ alert('請輸入姓名！'); return; }
-
   S.name=name; S.city=city;
   S.current=0; S.answers=[];
   S.totalPts=0; S.earnedPts=0;
-
   show('screen-loading');
-
   setTimeout(()=>{
-    // 隨機抽 10~15 題
-    const count = Math.floor(Math.random()*6)+10;
+    // 固定出 20 題
+    const count = 20;
     const shuffled = [...QUESTION_BANK].sort(()=>Math.random()-0.5);
     S.questions = shuffled.slice(0, Math.min(count, shuffled.length));
-    S.questions.forEach(q=>{
-      S.totalPts += (q.type==='multi') ? q.ans.length : 1;
-    });
+    S.questions.forEach(q=>{ S.totalPts += (q.type==='multi') ? q.ans.length : 1; });
     show('screen-quiz');
     renderQ();
   }, 1000);
 }
 
-// 題目由本地題庫產生，不需要 API
-
-// ══════════════════════════════
-//  Render Question
-// ══════════════════════════════
 function renderQ(){
   const q = S.questions[S.current];
   const total = S.questions.length;
   const cur = S.current;
-
   document.getElementById('progress-bar').style.width=((cur/total)*100)+'%';
   document.getElementById('progress-txt').textContent=(cur+1)+' / '+total;
-
   const pct = S.totalPts>0 ? Math.round((S.earnedPts/S.totalPts)*100) : 0;
   document.getElementById('live-score-txt').textContent='目前得分 '+pct+' 分';
   document.getElementById('live-score-fill').style.width=pct+'%';
-
   const badge = document.getElementById('type-badge');
-  if(q.type==='tf'){
-    badge.className='type-badge type-tf'; badge.textContent='🔵 是非題';
-  } else if(q.type==='single'){
-    badge.className='type-badge type-single'; badge.textContent='🟢 單選題';
-  } else {
-    badge.className='type-badge type-multi'; badge.textContent='🟣 複選題（可多選）';
-  }
-
+  if(q.type==='tf'){ badge.className='type-badge type-tf'; badge.textContent='🔵 是非題'; }
+  else if(q.type==='single'){ badge.className='type-badge type-single'; badge.textContent='🟢 單選題'; }
+  else { badge.className='type-badge type-multi'; badge.textContent='🟣 複選題（可多選）'; }
   document.getElementById('q-text').textContent=q.q;
   document.getElementById('q-hint').textContent=
     q.type==='multi'?'⚠️ 此題為複選，請選出所有正確答案後按「確認作答」':
     q.type==='single'?'請選擇一個最正確的答案':'請判斷對或錯';
-
   const eb=document.getElementById('explain-box');
   eb.style.display='none'; eb.className='explain-box'; eb.innerHTML='';
-
   const letters=['A','B','C','D','E'];
   let html='';
   if(q.type==='tf'){
-    html=`
-      <div class="option" id="opt0" onclick="selectOpt(0)">
-        <div class="opt-marker circle">○</div>
-        <div class="opt-text">✅ 正確（是）</div>
-      </div>
-      <div class="option" id="opt1" onclick="selectOpt(1)">
-        <div class="opt-marker circle">✕</div>
-        <div class="opt-text">❌ 錯誤（非）</div>
-      </div>`;
+    html=`<div class="option" id="opt0" onclick="selectOpt(0)"><div class="opt-marker circle">○</div><div class="opt-text">✅ 正確（是）</div></div>
+      <div class="option" id="opt1" onclick="selectOpt(1)"><div class="opt-marker circle">✕</div><div class="opt-text">❌ 錯誤（非）</div></div>`;
   } else if(q.type==='single'){
-    html=q.opts.map((opt,i)=>`
-      <div class="option" id="opt${i}" onclick="selectOpt(${i})">
-        <div class="opt-marker circle">${letters[i]}</div>
-        <div class="opt-text">${opt}</div>
-      </div>`).join('');
+    html=q.opts.map((opt,i)=>`<div class="option" id="opt${i}" onclick="selectOpt(${i})"><div class="opt-marker circle">${letters[i]}</div><div class="opt-text">${opt}</div></div>`).join('');
   } else {
-    html=q.opts.map((opt,i)=>`
-      <div class="option" id="opt${i}" onclick="toggleMulti(${i})">
-        <div class="opt-marker">${letters[i]}</div>
-        <div class="opt-text">${opt}</div>
-      </div>`).join('');
+    html=q.opts.map((opt,i)=>`<div class="option" id="opt${i}" onclick="toggleMulti(${i})"><div class="opt-marker">${letters[i]}</div><div class="opt-text">${opt}</div></div>`).join('');
     html+=`<button class="btn btn-blue" style="margin-top:14px" onclick="submitMulti()">✔ 確認作答</button>`;
   }
   document.getElementById('options').innerHTML=html;
-
   const btn=document.getElementById('btn-next');
   btn.disabled=true;
   btn.textContent=(cur<total-1)?'下一題 →':'查看結果 🎯';
-
   S.answered=false;
   S._multiSelected=new Set();
 }
@@ -566,10 +462,8 @@ function selectOpt(i){
   const correct=q.type==='tf'?(q.ans?0:1):q.ans[0];
   const isRight=i===correct;
   const pts=isRight?1:0;
-
   S.answers.push({type:q.type,chosen:i,correct:correct,pts,maxPts:1});
   S.earnedPts+=pts;
-
   document.querySelectorAll('.option').forEach((el,idx)=>{
     el.classList.add('disabled');
     if(idx===correct) el.classList.add('show-correct');
@@ -599,10 +493,8 @@ function submitMulti(){
   chosen.forEach(ci=>{ if(!correctSet.has(ci)) pts=Math.max(0,pts-1); });
   const isAllRight=pts===maxPts && chosen.size===correctSet.size;
   const isPartial=pts>0 && !isAllRight;
-
   S.answers.push({type:'multi',chosen:new Set(chosen),correct:correctSet,pts,maxPts});
   S.earnedPts+=pts;
-
   document.querySelectorAll('.option').forEach((el,idx)=>{
     el.classList.add('disabled');
     if(correctSet.has(idx)) el.classList.add('show-correct');
@@ -610,7 +502,6 @@ function submitMulti(){
   });
   const confirmBtn=document.getElementById('options').querySelector('.btn-blue');
   if(confirmBtn) confirmBtn.style.display='none';
-
   showExplain(q, isAllRight?'ok':isPartial?'partial':'ng', pts, maxPts);
   document.getElementById('btn-next').disabled=false;
 }
@@ -630,40 +521,30 @@ function nextQ(){
   else { renderQ(); }
 }
 
-// ══════════════════════════════
-//  Result
-// ══════════════════════════════
 function showResult(){
   show('screen-result');
   const score=S.totalPts>0?Math.round((S.earnedPts/S.totalPts)*100):0;
   const pass=score>=85;
-
   document.getElementById('result-emoji').textContent=score===100?'🏆':pass?'🎉':'📚';
   document.getElementById('result-name').textContent=S.name+'（'+S.city+'）';
-
   const scoreEl=document.getElementById('result-score');
   scoreEl.textContent=score+' 分';
   scoreEl.className='result-score-big '+(pass?'pass':'fail');
-
   const verdictEl=document.getElementById('result-verdict');
   verdictEl.textContent=pass?'✅ 恭喜通過！':'❌ 未達及格標準（85分），建議複習後重考';
   verdictEl.className='result-verdict '+(pass?'verdict-pass':'verdict-fail');
-
   let fullCorrect=0,partial=0,wrong=0;
   S.answers.forEach(a=>{
     if(a.type==='multi'){
       if(a.pts===a.maxPts && a.chosen.size===a.correct.size) fullCorrect++;
       else if(a.pts>0) partial++;
       else wrong++;
-    } else {
-      if(a.pts===1) fullCorrect++; else wrong++;
-    }
+    } else { if(a.pts===1) fullCorrect++; else wrong++; }
   });
   document.getElementById('sc-correct').textContent=fullCorrect;
   document.getElementById('sc-partial').textContent=partial;
   document.getElementById('sc-wrong').textContent=wrong;
   document.getElementById('sc-total').textContent=S.questions.length;
-
   const letters=['A','B','C','D','E'];
   const html=S.answers.map((a,i)=>{
     const q=S.questions[i];
@@ -672,62 +553,36 @@ function showResult(){
       const allRight=a.pts===a.maxPts && a.chosen.size===a.correct.size;
       if(!allRight && a.pts>0){cls='r-partial';mark='⭕';}
       else if(a.pts===0){cls='r-wrong';mark='❌';}
-    } else {
-      if(a.pts===0){cls='r-wrong';mark='❌';}
-    }
-
+    } else { if(a.pts===0){cls='r-wrong';mark='❌';} }
     let ansDetail='';
     if(a.type==='tf'){
       const chLabel=a.chosen===0?'正確（是）':'錯誤（非）';
       const corLabel=a.correct===0?'正確（是）':'錯誤（非）';
-      ansDetail=`您的答案：<span class="${a.pts?'r-correct-ans':'r-wrong-ans'}">${chLabel}</span>`
-        +(a.pts===0?`　正確答案：<span class="r-correct-ans">${corLabel}</span>`:'');
+      ansDetail=`您的答案：<span class="${a.pts?'r-correct-ans':'r-wrong-ans'}">${chLabel}</span>`+(a.pts===0?`　正確答案：<span class="r-correct-ans">${corLabel}</span>`:'');
     } else if(a.type==='single'){
-      ansDetail=`您的答案：<span class="${a.pts?'r-correct-ans':'r-wrong-ans'}">${letters[a.chosen]} ${q.opts[a.chosen]}</span>`
-        +(a.pts===0?`<br>正確答案：<span class="r-correct-ans">${letters[a.correct]} ${q.opts[a.correct]}</span>`:'');
+      ansDetail=`您的答案：<span class="${a.pts?'r-correct-ans':'r-wrong-ans'}">${letters[a.chosen]} ${q.opts[a.chosen]}</span>`+(a.pts===0?`<br>正確答案：<span class="r-correct-ans">${letters[a.correct]} ${q.opts[a.correct]}</span>`:'');
     } else {
       const chosenStr=[...a.chosen].sort().map(c=>letters[c]+' '+q.opts[c]).join('、');
       const correctStr=[...a.correct].sort().map(c=>letters[c]+' '+q.opts[c]).join('、');
-      ansDetail=`您選：<span class="${a.pts===a.maxPts?'r-correct-ans':'r-wrong-ans'}">${chosenStr||'（未選）'}</span>`
-        +`<br>正解：<span class="r-correct-ans">${correctStr}</span>`
-        +`（得 ${a.pts}/${a.maxPts} 分）`;
+      ansDetail=`您選：<span class="${a.pts===a.maxPts?'r-correct-ans':'r-wrong-ans'}">${chosenStr||'（未選）'}</span><br>正解：<span class="r-correct-ans">${correctStr}</span>（得 ${a.pts}/${a.maxPts} 分）`;
     }
-
     const typeLabel=a.type==='tf'?'是非題':a.type==='single'?'單選題':'複選題';
-    return `<div class="review-item ${cls}">
-      <div class="r-type">${mark} 第${i+1}題 · ${typeLabel}</div>
-      <div class="r-q">${q.q}</div>
-      <div class="r-detail">${ansDetail}</div>
-    </div>`;
+    return `<div class="review-item ${cls}"><div class="r-type">${mark} 第${i+1}題 · ${typeLabel}</div><div class="r-q">${q.q}</div><div class="r-detail">${ansDetail}</div></div>`;
   }).join('');
   document.getElementById('review-list').innerHTML=html;
-
-  // 按鈕
   const btns=document.getElementById('result-btns');
   if(pass){
-    btns.innerHTML=`
-      <button class="btn btn-outline" onclick="resetQuiz()">🔄 再測一次</button>
-      <button class="btn btn-green" onclick="sendReport(${score})">📧 寄送成績給主管</button>`;
+    btns.innerHTML=`<button class="btn btn-outline" onclick="resetQuiz()">🔄 再測一次</button><button class="btn btn-green" onclick="sendReport(${score})">📧 寄送成績給主管</button>`;
   } else {
-    btns.innerHTML=`
-      <button class="btn btn-orange" onclick="retakeQuiz()">🔁 重新考試</button>
-      <button class="btn btn-green" onclick="sendReport(${score})">📧 仍要寄送成績</button>`;
+    btns.innerHTML=`<button class="btn btn-orange" onclick="retakeQuiz()">🔁 重新考試</button><button class="btn btn-green" onclick="sendReport(${score})">📧 仍要寄送成績</button>`;
   }
-
   document.getElementById('email-status').style.display='none';
-
-  // 自動寄送
   autoSendReport(score);
 }
 
-// ══════════════════════════════
-//  EmailJS 寄信
-// ══════════════════════════════
 async function autoSendReport(score){
-  const pass=score>=80;
+  const pass=score>=85;
   const now=new Date().toLocaleString('zh-TW');
-
-  // 整理答題明細
   const letters=['A','B','C','D','E'];
   const detail=S.answers.map((a,i)=>{
     const q=S.questions[i];
@@ -738,35 +593,25 @@ async function autoSendReport(score){
     else ans=[...a.chosen].map(c=>letters[c]).join('+');
     return `${mark} Q${i+1}. ${q.q}\n   作答：${ans}`;
   }).join('\n');
-
   try {
     await emailjs.send(CONFIG.EMAILJS_SERVICE_ID, CONFIG.EMAILJS_TEMPLATE_ID, {
-      name: S.name,
-      city: S.city,
-      time: now,
-      score: score+' 分',
+      name: S.name, city: S.city, time: now, score: score+' 分',
       result: pass?'✅ 通過（'+score+'分）':'❌ 未通過（'+score+'分）',
-      detail: detail,
-      to_email: CONFIG.MANAGER_EMAIL
+      detail: detail, to_email: CONFIG.MANAGER_EMAIL
     });
-
     const es=document.getElementById('email-status');
-    es.style.display='block';
-    es.className='email-status sent';
+    es.style.display='block'; es.className='email-status sent';
     es.innerHTML=`✅ 成績已自動寄出！<br><small>${S.name}（${S.city}）${now}　${score}分　${pass?'通過':'未通過'}</small>`;
   } catch(err) {
-    console.error('Email 寄送失敗:', err);
     const es=document.getElementById('email-status');
-    es.style.display='block';
-    es.className='email-status error';
+    es.style.display='block'; es.className='email-status error';
     es.innerHTML=`⚠️ 自動寄送失敗，請點下方按鈕手動寄送`;
   }
 }
 
 async function sendReport(score){
   const es=document.getElementById('email-status');
-  es.style.display='block';
-  es.className='email-status sending';
+  es.style.display='block'; es.className='email-status sending';
   es.textContent='📤 正在寄送中…';
   await autoSendReport(score);
 }
@@ -777,9 +622,7 @@ function retakeQuiz(){
   startQuiz();
 }
 
-function resetQuiz(){
-  show('screen-start');
-}
+function resetQuiz(){ show('screen-start'); }
 </script>
 </body>
 </html>
