@@ -36,10 +36,10 @@ body{font-family:"Noto Sans TC","Microsoft JhengHei",sans-serif;background:var(-
 @keyframes mqs{from{transform:translateX(100%)}to{transform:translateX(-100%)}}
 
 /* ══ Banner（縣市色） ══ */
+#topStick{position:sticky;top:0;z-index:200}
 #banner{
   background:var(--cc);
   padding:20px 32px 24px;
-  position:sticky;top:0;z-index:200;
   transition:background .3s;
 }
 .banner-top{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:16px}
@@ -77,7 +77,6 @@ body{font-family:"Noto Sans TC","Microsoft JhengHei",sans-serif;background:var(-
   border-bottom:2px solid var(--border);
   padding:0 32px;
   display:flex;gap:0;
-  position:sticky;top:0;z-index:190;
   transition:border-color .3s;
 }
 .c-tab{
@@ -273,7 +272,8 @@ mark{background:#FFF9C4;border-radius:2px;padding:0 2px}
 <!-- 跑馬燈 -->
 <div id="mqSec"></div>
 
-<!-- Banner -->
+<!-- 固定區：橫幅＋搜尋＋縣市分頁 -->
+<div id="topStick">
 <div id="banner">
   <div class="banner-top">
     <div class="brand">
@@ -300,8 +300,9 @@ mark{background:#FFF9C4;border-radius:2px;padding:0 2px}
   </div>
 </div>
 
-<!-- 縣市 Tab 列 -->
 <nav id="cityNav"></nav>
+</div>
+<!-- 固定區結束 -->
 
 <!-- 主內容 -->
 <div id="mainArea" style="display:block">
