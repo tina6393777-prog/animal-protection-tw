@@ -368,7 +368,8 @@ const CONFIG = {
   EMAILJS_PUBLIC_KEY: 'GL2bE8A4d3jSItIUJ',
   EMAILJS_SERVICE_ID: 'service_xuahpmn',
   EMAILJS_TEMPLATE_ID: 'template_xpitx4k',
-  MANAGER_EMAIL: 'khnpduty@chainsea.com.tw'
+  MANAGER_EMAIL: 'khnpduty@chainsea.com.tw',
+  SHEET_URL: 'https://script.google.com/macros/s/AKfycbyhuGFvsAVaPzn45xiM380sM3s1a_L-tv5zw0eSSt-pUbaQaBppubkHotocrOjWG97p/exec'
 };
 
 const CITY_QA = {
@@ -578,6 +579,19 @@ function showResult(){
   }
   document.getElementById('email-status').style.display='none';
   autoSendReport(score);
+  sendToSheet(score);
+}
+
+// 考完自動把成績寫進 Google 試算表
+function sendToSheet(score){
+  try{
+    var data = new URLSearchParams();
+    data.append('name', S.name);
+    data.append('city', S.city);
+    data.append('score', score);
+    data.append('passed', score>=85 ? 'true' : 'false');
+    fetch(CONFIG.SHEET_URL, {method:'POST', mode:'no-cors', body:data});
+  }catch(e){ console.log('sheet error', e); }
 }
 
 async function autoSendReport(score){
