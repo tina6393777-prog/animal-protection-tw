@@ -187,22 +187,33 @@ mark{background:#FFF9C4;border-radius:2px;padding:0 2px}
 #aiBox{position:fixed;bottom:24px;right:24px;z-index:500;display:flex;flex-direction:column;align-items:flex-end;gap:10px}
 #aiToggle{width:52px;height:52px;border-radius:50%;background:var(--cc);border:none;cursor:pointer;font-size:22px;box-shadow:0 4px 18px rgba(0,0,0,.18);transition:all .3s;display:flex;align-items:center;justify-content:center;color:#fff}
 #aiToggle:hover{transform:scale(1.1)}
-#aiPanel{width:340px;background:#fff;border-radius:14px;box-shadow:0 8px 40px rgba(0,0,0,.14);display:none;flex-direction:column;overflow:hidden;max-height:500px}
+#aiPanel{width:340px;background:#fff;border-radius:14px;box-shadow:0 8px 40px rgba(0,0,0,.14);display:none;flex-direction:column;overflow:hidden;max-height:520px}
 #aiPanel.open{display:flex}
 #aiPHdr{background:var(--cc);color:#fff;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;transition:background .3s}
 #aiPHdr span{font-size:13px;font-weight:800;letter-spacing:.3px}
 #aiPHdr button{background:none;border:none;color:rgba(255,255,255,.7);cursor:pointer;font-size:18px;line-height:1;padding:0}
-#aiMsgs{flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:10px;min-height:200px}
-.ai-msg{padding:10px 13px;border-radius:12px;font-size:13px;line-height:1.7;max-width:90%;word-break:break-word}
-.ai-msg.bot{background:var(--bg);align-self:flex-start;border-radius:4px 12px 12px 12px}
-.ai-msg.user{background:var(--cc);color:#fff;align-self:flex-end;border-radius:12px 4px 12px 12px;transition:background .3s}
-.ai-msg.loading{color:var(--muted);font-style:italic}
-#aiInputRow{display:flex;gap:8px;padding:12px;border-top:1px solid var(--border);flex-shrink:0}
-#aiInput{flex:1;padding:8px 13px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;font-family:inherit;outline:none;transition:border-color .2s}
-#aiInput:focus{border-color:var(--cc)}
-#aiSend{width:36px;height:36px;background:var(--cc);border:none;border-radius:8px;cursor:pointer;color:#fff;font-size:16px;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:background .3s}
-#aiSend:hover{opacity:.85}
-#aiSend:disabled{background:#ccc;cursor:not-allowed}
+#hlSearch{padding:12px;border-bottom:1px solid var(--border);flex-shrink:0}
+#hlInput{width:100%;padding:9px 13px;border:1.5px solid var(--border);border-radius:9px;font-size:13px;font-family:inherit;outline:none;transition:border-color .2s}
+#hlInput:focus{border-color:var(--cc)}
+#hlQuick{padding:8px 12px;border-bottom:1px solid var(--border);display:flex;flex-wrap:wrap;gap:6px;align-items:center;flex-shrink:0}
+.hlq-lbl{font-size:11px;font-weight:800;color:var(--muted)}
+.hlq-btn{background:var(--cl);border:1px solid var(--cm);color:var(--cc);border-radius:999px;padding:5px 12px;font-size:12px;font-weight:800;cursor:pointer;font-family:inherit;transition:filter .15s}
+.hlq-btn:hover{filter:brightness(.97)}
+.hl-imgs{display:flex;flex-wrap:wrap;gap:6px;margin-top:7px}
+.hl-imgs img{max-width:100%;border-radius:6px;cursor:pointer;border:1px solid var(--border)}
+#hlNote{padding:6px 14px;font-size:11px;color:var(--muted);background:var(--cl);border-bottom:1px solid var(--border);flex-shrink:0}
+#hlNote b{color:var(--cc)}
+#hlResults{flex:1;overflow-y:auto;padding:10px;display:flex;flex-direction:column;gap:9px;min-height:180px}
+.hl-empty{color:var(--muted);font-size:12.5px;text-align:center;padding:32px 12px;line-height:1.8}
+.hl-hit{border:1px solid var(--border);border-left:4px solid var(--cc);border-radius:9px;padding:9px 11px;background:#fff}
+.hl-hit-top{display:flex;align-items:center;gap:6px;margin-bottom:4px}
+.hl-rank{width:18px;height:18px;border-radius:50%;background:var(--cc);color:#fff;font-size:10px;font-weight:900;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.hl-crumb{font-size:10.5px;color:var(--muted);font-weight:700}
+.hl-rel{margin-left:auto;font-size:9.5px;font-weight:800;color:var(--cc);background:var(--cl);border-radius:999px;padding:1px 7px}
+.hl-q{font-size:13px;font-weight:800;line-height:1.5;margin-bottom:3px}
+.hl-a{font-size:12.5px;line-height:1.75;white-space:pre-wrap;word-break:break-word;color:var(--text)}
+.hl-cp{margin-top:7px;background:var(--cl);color:var(--cc);border:none;border-radius:6px;padding:5px 11px;font-size:11.5px;font-weight:800;cursor:pointer;font-family:inherit}
+.hl-cp:hover{filter:brightness(.96)}
 
 /* Modal */
 .overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.42);z-index:1000;align-items:center;justify-content:center;padding:14px}
@@ -315,22 +326,21 @@ mark{background:#FFF9C4;border-radius:2px;padding:0 2px}
 <!-- 搜尋結果 -->
 <div id="srchPanel" style="display:none"></div>
 
-<!-- AI -->
+<!-- 話術快找 -->
 <div id="aiBox">
   <div id="aiPanel">
     <div id="aiPHdr">
-      <span>🤖 AI 智慧問答</span>
+      <span>🔎 話術快找</span>
       <button onclick="toggleAI()">✕</button>
     </div>
-    <div id="aiMsgs">
-      <div class="ai-msg bot">您好！我是 AI 助理，可以協助查詢動保相關問題，請直接輸入問題。</div>
+    <div id="hlSearch">
+      <input id="hlInput" type="text" placeholder="輸入民眾的問題（白話就好）…" oninput="runHL()" autocomplete="off">
     </div>
-    <div id="aiInputRow">
-      <input id="aiInput" type="text" placeholder="輸入問題…" onkeydown="if(event.key==='Enter')askAI()">
-      <button id="aiSend" onclick="askAI()">➤</button>
-    </div>
+    <div id="hlQuick"><span class="hlq-lbl">📌 常用</span><button class="hlq-btn" onclick="hlFixed('addr')">說不出地址／報座標</button><button class="hlq-btn" onclick="hlFixed('body')">路殺屍體通報</button><button class="hlq-btn" onclick="hlFixed('kitten')">奶貓處理</button><button class="hlq-btn" onclick="hlFixed('bird')">幼鳥學飛</button></div>
+    <div id="hlNote">只找目前縣市：<b id="hlCity">桃園</b> 的話術（切換上方縣市即可更換）</div>
+    <div id="hlResults"><div class="hl-empty">輸入民眾的問題，<br>自動幫你找出對應的話術與流程 🐾</div></div>
   </div>
-  <button id="aiToggle" onclick="toggleAI()" title="AI 智慧問答">🤖</button>
+  <button id="aiToggle" onclick="toggleAI()" title="話術快找">🔎</button>
 </div>
 
 <!-- 登入 -->
@@ -509,6 +519,7 @@ function switchCity(c){
   E('srchPanel').style.display='none';
   E('mainArea').style.display='block';
   renderTabs();renderChips();renderContent();
+  if(aiOpen)runHL();
 }
 
 // ── Chip 分類 ──
@@ -659,28 +670,95 @@ E('qaA').addEventListener('input',updPrev);
 // ── 測驗 ──
 function goQuiz(){var m={'桃園':'quiz-taoyuan.html','南投':'quiz-nantou.html','嘉義':'quiz-chiayi.html','彰化':'quiz-changhua.html'};var u=m[city];if(u)window.open(u,'_blank');else alert('找不到測驗頁面');}
 
-// ── AI ──
-var AI_KEY='AIzaSyA_TEZRDSuqg3_v0PWWNpukxGrs06szETI';
-function toggleAI(){aiOpen=!aiOpen;if(aiOpen){E('aiPanel').classList.add('open');setTimeout(function(){E('aiInput').focus();},100);}else{E('aiPanel').classList.remove('open');}}
-function getCtx(){var lines=[];if(!db||!db[city])return'';db[city].topics.forEach(function(t){t.items.forEach(function(item){if(item.q)lines.push('Q: '+item.q);if(item.a)lines.push('A: '+item.a);});});return lines.slice(0,80).join('\n');}
-async function askAI(){
-  var inp=E('aiInput');var q=inp.value.trim();if(!q)return;
-  var msgs=E('aiMsgs');
-  var u=document.createElement('div');u.className='ai-msg user';u.textContent=q;msgs.appendChild(u);
-  inp.value='';
-  var ld=document.createElement('div');ld.className='ai-msg bot loading';ld.textContent='⏳ 查詢中…';msgs.appendChild(ld);
-  msgs.scrollTop=msgs.scrollHeight;E('aiSend').disabled=true;
-  try{
-    var res=await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key='+AI_KEY,
-      {method:'POST',headers:{'Content-Type':'application/json'},
-       body:JSON.stringify({contents:[{parts:[{text:'你是1959動物保護專線客服協助系統（'+city+'縣市）。根據以下知識庫，用親切繁體中文回答，不超過120字。知識庫沒有的請建議轉介適當單位。\n\n【知識庫】\n'+getCtx()+'\n\n【問題】'+q}]}],generationConfig:{temperature:0.3,maxOutputTokens:300}})});
-    if(!res.ok)throw new Error('API錯誤 '+res.status);
-    var data=await res.json();
-    var ans=data.candidates&&data.candidates[0]&&data.candidates[0].content.parts[0].text;
-    if(!ans)throw new Error('回應格式錯誤');
-    ld.className='ai-msg bot';ld.textContent=ans;
-  }catch(err){ld.className='ai-msg bot';ld.textContent='⚠ 查詢失敗：'+err.message;}
-  E('aiSend').disabled=false;msgs.scrollTop=msgs.scrollHeight;
+// ── 話術快找（本地聰明媒合，不用 AI 金鑰，不外連）──
+var HL_SYN=[
+ ["狗","犬","浪犬","流浪狗","流浪犬","土狗","毛小孩","狗狗","犬隻"],
+ ["貓","喵","浪貓","流浪貓","幼貓","奶貓","貓咪","貓隻"],
+ ["撿到","拾獲","撿","發現","看到","遇到"],
+ ["屍體","大體","遺體","往生","死亡","死掉","過世","路殺"],
+ ["受傷","受困","卡住","掉入","掉到","困住","脫困","夾到","被夾"],
+ ["誘捕籠","捕籠","籠子","借籠","捕捉籠"],
+ ["晶片","寵物登記","寵登","植晶片","登記"],
+ ["認養","領養","送養","認領養"],
+ ["棄養","不想養","不養","丟棄","不擬飼養","不要了"],
+ ["咬人","攻擊","兇","追人","追咬","攻擊性","危險"],
+ ["通報","陳情","檢舉","投訴","申訴","反映","舉報"],
+ ["絕育","結紮","節育","tnvr"],
+ ["狂犬病","疫苗","預防注射","打針","注射"],
+ ["收容所","動物之家","園區","收容處所","教育園區"],
+ ["八哥","雛鳥","鳥","野鳥","鳥類","幼鳥"],
+ ["蛇","蜂","野生動物","保育類","保育動物"],
+ ["噪音","吵","很吵","叫聲","擾民"],
+ ["髒亂","環境差","衛生","惡臭","臭"],
+ ["捕犬","抓狗","抓犬","捕捉"],
+ ["送醫","看醫生","動物醫院","獸醫","急診"],
+ ["補助","申請補助","經費"],
+ ["路上","路邊","馬路","街上","路口"],
+ ["水溝","排水溝","大排","溝裡"],
+ ["引擎蓋","車底","車子裡"],
+ ["高速公路","國道","快速道路","交流道"]
+];
+function hlNrm(s){return String(s||'').replace(/\[\[\w+:([^\]]*)\]\]/g,'$1').replace(/[\s　,，。、？?！!：:（）()「」『』…\.\-~〜/#]/g,'').toLowerCase();}
+var HL_G=HL_SYN.map(function(g){return g.map(hlNrm);});
+function hlTerms(q){
+  var nq=hlNrm(q),terms=[];
+  HL_G.forEach(function(g){for(var i=0;i<g.length;i++){if(g[i]&&nq.indexOf(g[i])>=0){terms.push({g:g,w:3});break;}}});
+  var seen={};
+  for(var n=2;n<=3;n++){for(var i=0;i+n<=nq.length;i++){var gm=nq.substr(i,n);if(!seen[gm]){seen[gm]=1;terms.push({g:[gm],w:1});}}}
+  return terms;
+}
+function hlScore(item,terms){
+  var q=hlNrm(item.q),a=hlNrm(item.a||''),s=0,hitQ=0,used={};
+  terms.forEach(function(t){
+    var key=t.g.join('|');if(used[key])return;
+    var inQ=t.g.some(function(w){return w&&q.indexOf(w)>=0;});
+    var inA=t.g.some(function(w){return w&&a.indexOf(w)>=0;});
+    if(inQ){s+=t.w*3;hitQ++;used[key]=1;}
+    else if(inA){s+=t.w*1;used[key]=1;}
+  });
+  if(hitQ>=2)s+=hitQ*1.5;
+  return s;
+}
+var hlWin=[];
+function toggleAI(){aiOpen=!aiOpen;if(aiOpen){E('aiPanel').classList.add('open');E('hlCity').textContent=city;runHL();setTimeout(function(){E('hlInput').focus();},100);}else{E('aiPanel').classList.remove('open');}}
+function runHL(){
+  var q=(E('hlInput').value||'').trim();var box=E('hlResults');E('hlCity').textContent=city;
+  if(!q){box.innerHTML='<div class="hl-empty">輸入民眾的問題，<br>自動幫你找出對應的話術與流程 🐾</div>';hlWin=[];return;}
+  if(!db||!db[city]){box.innerHTML='<div class="hl-empty">資料載入中…</div>';return;}
+  var terms=hlTerms(q),hits=[];
+  db[city].topics.forEach(function(tp){tp.items.forEach(function(item){var sf=hlScore(item,terms);if(sf>0)hits.push({it:item,t:tp.name,s:sf});});});
+  hits.sort(function(a,b){return b.s-a.s;});hits=hits.slice(0,5);hlWin=hits.map(function(h){return h.it;});
+  if(!hits.length){box.innerHTML='<div class="hl-empty">找不到「'+esc(q)+'」的相關話術<br>換個講法，或到下方主題瀏覽</div>';return;}
+  var max=hits[0].s,h='';
+  hits.forEach(function(hit,i){
+    var it=hit.it,rel=Math.round(hit.s/max*100);
+    var body=it.a?lfy(rc(it.a)):((it.imgs&&it.imgs.length)?'（此題含流程圖，請至下方主題查看圖片）':'');
+    h+='<div class="hl-hit"><div class="hl-hit-top"><span class="hl-rank">'+(i+1)+'</span>'
+      +'<span class="hl-crumb">'+esc(hit.t)+'</span><span class="hl-rel">相關度 '+rel+'%</span></div>'
+      +'<div class="hl-q">'+rc(it.q)+'</div>'
+      +(body?'<div class="hl-a">'+body+'</div>':'')
+      +(it.a?'<button class="hl-cp" onclick="hlCopy('+i+')">📋 複製話術</button>':'')
+      +'</div>';
+  });
+  box.innerHTML=h;
+}
+function hlCopy(i){var it=hlWin[i];if(!it)return;var txt=sc(it.a||'');if(navigator.clipboard){navigator.clipboard.writeText(txt).then(function(){toast('📋 已複製話術');});}else{var ta=document.createElement('textarea');ta.value=txt;document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);toast('📋 已複製話術');}}
+var HL_FIXED={
+  addr:function(it){return ((it.a||'').indexOf('TPCToMap')>=0)||((it.q||'').indexOf('報座標')>=0);},
+  body:function(it){return (it.q||'').indexOf('通報路上')>=0;},
+  kitten:function(it){return (it.q||'').indexOf('拾獲身上乾淨')>=0;},
+  bird:function(it){return (it.q||'').indexOf('拾獲學飛')>=0;}
+};
+function hlFixed(key){
+  E('hlInput').value='';var box=E('hlResults');E('hlCity').textContent=city;
+  var test=HL_FIXED[key];if(!test)return;
+  var found=null,ft='';
+  if(db&&db[city]){db[city].topics.forEach(function(tp){tp.items.forEach(function(item){if(!found&&test(item)){found=item;ft=tp.name;}});});}
+  if(!found){box.innerHTML='<div class="hl-empty">目前縣市（'+city+'）沒有這筆常用資料</div>';hlWin=[];return;}
+  hlWin=[found];
+  var body=found.a?lfy(rc(found.a)):'';
+  var imgs=(found.imgs&&found.imgs.length)?'<div class="hl-imgs">'+found.imgs.map(function(s){return '<img src="'+s+'" onclick="E(\'lbImg\').src=this.src;E(\'lb\').classList.add(\'open\')" alt="附圖">';}).join('')+'</div>':'';
+  box.innerHTML='<div class="hl-hit"><div class="hl-hit-top"><span class="hl-rank">📌</span><span class="hl-crumb">'+esc(ft)+' · 常用</span></div><div class="hl-q">'+rc(found.q)+'</div>'+(body?'<div class="hl-a">'+body+'</div>':'')+imgs+'<button class="hl-cp" onclick="hlCopy(0)">📋 複製話術</button></div>';
 }
 
 init();
