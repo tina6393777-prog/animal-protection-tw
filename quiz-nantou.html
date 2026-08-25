@@ -1,0 +1,797 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>1959 動保測驗 · 南投</title>
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap');
+
+:root {
+  --green: #4CAF7D;
+  --green-dark: #3a9a68;
+  --green-light: #e8f5ee;
+  --orange: #E8763A;
+  --red: #e53e3e;
+  --blue: #3182CE;
+  --blue-light: #EBF8FF;
+  --yellow: #D69E2E;
+  --yellow-light: #FFFFF0;
+  --bg: #F5F7FA;
+  --card: #ffffff;
+  --text: #2D3748;
+  --muted: #718096;
+  --border: #E2E8F0;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Noto Sans TC', 'Microsoft JhengHei', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  font-size: 15px;
+}
+
+.header {
+  background: #2D3748;
+  color: #fff;
+  padding: 14px 24px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.15);
+  position: sticky; top: 0; z-index: 10;
+}
+.header-icon {
+  width: 44px; height: 44px;
+  background: linear-gradient(135deg, var(--green), var(--green-dark));
+  border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px; flex-shrink: 0;
+}
+.header h1 { font-size: 17px; font-weight: 900; }
+.header p { font-size: 12px; color: rgba(255,255,255,0.6); margin-top: 2px; }
+
+.container { max-width: 700px; margin: 28px auto; padding: 0 16px 60px; }
+
+.card {
+  background: var(--card);
+  border-radius: 16px;
+  padding: 28px;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+  margin-bottom: 16px;
+  animation: fadeIn 0.3s ease;
+}
+
+/* Start */
+.start-emoji { font-size: 52px; text-align: center; margin-bottom: 12px; }
+.start-title { font-size: 22px; font-weight: 900; text-align: center; margin-bottom: 6px; }
+.start-sub { color: var(--muted); text-align: center; font-size: 14px; margin-bottom: 24px; line-height: 1.7; }
+
+.info-row { display: flex; gap: 10px; margin-bottom: 24px; flex-wrap: wrap; }
+.info-chip {
+  flex: 1; min-width: 100px;
+  background: var(--green-light);
+  border-radius: 10px;
+  padding: 12px 10px; text-align: center;
+}
+.info-chip .num { font-size: 18px; font-weight: 900; color: var(--green-dark); }
+.info-chip .lbl { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+.form-group { margin-bottom: 16px; }
+.form-group label {
+  display: block; font-size: 12px; font-weight: 700;
+  color: var(--muted); margin-bottom: 6px;
+  text-transform: uppercase; letter-spacing: 0.5px;
+}
+.form-group input, .form-group select {
+  width: 100%; padding: 11px 14px;
+  border: 2px solid var(--border); border-radius: 10px;
+  font-size: 14px; font-family: inherit; color: var(--text);
+  outline: none; transition: border-color 0.2s;
+}
+.form-group input:focus, .form-group select:focus { border-color: var(--green); }
+
+/* Buttons */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  gap: 6px; padding: 12px 24px; border-radius: 999px;
+  border: none; cursor: pointer; font-size: 14px; font-weight: 700;
+  font-family: inherit; transition: all 0.2s; width: 100%;
+}
+.btn-green { background: var(--green); color: #fff; }
+.btn-green:hover { background: var(--green-dark); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(76,175,125,0.4); }
+.btn-green:disabled { opacity: 0.4; cursor: not-allowed; transform: none; box-shadow: none; }
+.btn-outline { background: transparent; color: var(--green-dark); border: 2px solid var(--green); }
+.btn-outline:hover { background: var(--green-light); }
+.btn-orange { background: var(--orange); color: #fff; }
+.btn-orange:hover { background: #c9622e; }
+.btn-blue { background: var(--blue); color: #fff; }
+.btn-blue:hover { background: #2b6cb0; }
+
+/* Progress */
+.quiz-progress { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; }
+.progress-bar-wrap { flex: 1; height: 8px; background: var(--border); border-radius: 999px; overflow: hidden; }
+.progress-bar {
+  height: 100%;
+  background: linear-gradient(90deg, var(--green), var(--green-dark));
+  border-radius: 999px; transition: width 0.4s ease;
+}
+.progress-txt { font-size: 12px; font-weight: 700; color: var(--muted); white-space: nowrap; }
+
+.live-score { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--muted); margin-bottom: 16px; }
+.live-score-bar { flex: 1; height: 6px; background: var(--border); border-radius: 999px; overflow: hidden; }
+.live-score-fill { height: 100%; background: var(--green); border-radius: 999px; transition: width 0.4s; }
+
+/* Type badge */
+.type-badge {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 4px 12px; border-radius: 999px;
+  font-size: 12px; font-weight: 700; margin-bottom: 10px;
+}
+.type-tf { background: #EBF8FF; color: #2B6CB0; }
+.type-single { background: var(--green-light); color: var(--green-dark); }
+.type-multi { background: #FAF5FF; color: #553C9A; }
+
+.q-text { font-size: 16px; font-weight: 700; line-height: 1.6; margin-bottom: 8px; }
+.q-hint { font-size: 12px; color: var(--muted); margin-bottom: 16px; }
+
+/* Options */
+.options { display: flex; flex-direction: column; gap: 10px; }
+.option {
+  display: flex; align-items: center; gap: 12px;
+  padding: 13px 16px; border: 2px solid var(--border);
+  border-radius: 12px; cursor: pointer; transition: all 0.18s; user-select: none;
+}
+.option:hover:not(.disabled) { border-color: var(--green); background: var(--green-light); }
+.option.selected { border-color: var(--green); background: var(--green-light); }
+.option.correct { border-color: #38a169 !important; background: #f0fff4 !important; }
+.option.wrong { border-color: var(--red) !important; background: #fff5f5 !important; }
+.option.show-correct { border-color: #38a169 !important; background: #f0fff4 !important; }
+.option.disabled { cursor: default; }
+
+.opt-marker {
+  width: 28px; height: 28px; flex-shrink: 0;
+  border-radius: 6px; background: var(--bg);
+  border: 2px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 900; transition: all 0.18s;
+}
+.opt-marker.circle { border-radius: 50%; }
+.option.selected .opt-marker { background: var(--green); border-color: var(--green); color: #fff; }
+.option.correct .opt-marker { background: #38a169 !important; border-color: #38a169 !important; color: #fff !important; }
+.option.wrong .opt-marker { background: var(--red) !important; border-color: var(--red) !important; color: #fff !important; }
+.option.show-correct .opt-marker { background: #38a169 !important; border-color: #38a169 !important; color: #fff !important; }
+.opt-text { font-size: 14px; line-height: 1.5; flex: 1; }
+
+.explain-box {
+  display: none; margin-top: 14px; padding: 14px 16px;
+  border-radius: 10px; font-size: 13px; line-height: 1.7;
+}
+.explain-box.ok { background: #f0fff4; border-left: 4px solid #38a169; color: #276749; }
+.explain-box.ng { background: #fff5f5; border-left: 4px solid var(--red); color: #c53030; }
+.explain-box.partial { background: #FFFFF0; border-left: 4px solid var(--yellow); color: #744210; }
+
+.quiz-nav { display: flex; gap: 10px; margin-top: 20px; }
+.quiz-nav .btn { flex: 1; }
+
+/* Result */
+.result-top { text-align: center; padding-bottom: 24px; border-bottom: 1px solid var(--border); margin-bottom: 24px; }
+.result-emoji { font-size: 60px; margin-bottom: 8px; }
+.result-name { font-size: 17px; font-weight: 900; margin-bottom: 4px; }
+.result-score-big { font-size: 64px; font-weight: 900; line-height: 1; margin: 12px 0 6px; }
+.result-score-big.pass { color: var(--green-dark); }
+.result-score-big.fail { color: var(--red); }
+.result-verdict {
+  display: inline-block; padding: 6px 20px;
+  border-radius: 999px; font-size: 14px; font-weight: 700; margin-top: 8px;
+}
+.verdict-pass { background: var(--green-light); color: var(--green-dark); }
+.verdict-fail { background: #fff5f5; color: var(--red); }
+
+.score-breakdown { display: flex; gap: 10px; margin-top: 20px; }
+.score-chip { flex: 1; padding: 14px 10px; border-radius: 12px; text-align: center; }
+.score-chip .sc-num { font-size: 22px; font-weight: 900; }
+.score-chip .sc-lbl { font-size: 11px; color: var(--muted); margin-top: 3px; }
+.chip-correct { background: #f0fff4; }
+.chip-correct .sc-num { color: #38a169; }
+.chip-wrong { background: #fff5f5; }
+.chip-wrong .sc-num { color: var(--red); }
+.chip-partial { background: #FFFFF0; }
+.chip-partial .sc-num { color: var(--yellow); }
+.chip-total { background: var(--bg); }
+
+.section-title { font-size: 12px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 12px; }
+
+.review-item { padding: 14px 16px; border-radius: 12px; margin-bottom: 10px; font-size: 13px; line-height: 1.6; }
+.review-item.r-correct { background: #f0fff4; border-left: 3px solid #38a169; }
+.review-item.r-wrong { background: #fff5f5; border-left: 3px solid var(--red); }
+.review-item.r-partial { background: #FFFFF0; border-left: 3px solid var(--yellow); }
+.review-item .r-q { font-weight: 700; margin-bottom: 6px; }
+.review-item .r-type { font-size: 11px; opacity: 0.7; margin-bottom: 4px; }
+.review-item .r-detail { color: var(--muted); font-size: 12px; }
+.r-correct-ans { color: #38a169; font-weight: 700; }
+.r-wrong-ans { color: var(--red); font-weight: 700; }
+
+.email-status {
+  display: none; margin-top: 14px; padding: 14px 16px;
+  border-radius: 10px; font-size: 13px; text-align: center; line-height: 1.8;
+}
+.email-status.sending { background: #EBF8FF; color: #2B6CB0; }
+.email-status.sent { background: var(--green-light); color: var(--green-dark); }
+.email-status.error { background: #fff5f5; color: var(--red); }
+
+/* Loading */
+.loading-screen { text-align: center; padding: 50px 20px; }
+.spinner {
+  width: 44px; height: 44px; border: 4px solid var(--border);
+  border-top-color: var(--green); border-radius: 50%;
+  animation: spin 0.8s linear infinite; margin: 0 auto 20px;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.loading-screen p { color: var(--muted); font-size: 14px; line-height: 1.8; }
+.loading-screen .sub { font-size: 12px; margin-top: 8px; color: #a0aec0; }
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.btn-row { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 20px; }
+.btn-row .btn { flex: 1; min-width: 140px; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-icon">🐾</div>
+  <div>
+    <h1>1959 動保測驗 · 南投</h1>
+    <p>動物保護專線內部教育訓練</p>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- Screen: 開始 -->
+  <div id="screen-start" class="card">
+    <div class="start-emoji">📋</div>
+    <div class="start-title">動保專線知識測驗</div>
+    <div class="start-sub">AI 從知識庫自動出題，混合是非、單選、複選<br>85 分以上通過，成績自動寄送主管群組</div>
+
+    <div class="info-row">
+      <div class="info-chip">
+        <div class="num">20</div>
+        <div class="lbl">固定題數</div>
+      </div>
+      <div class="info-chip">
+        <div class="num">85</div>
+        <div class="lbl">及格分數</div>
+      </div>
+      <div class="info-chip">
+        <div class="num">三種</div>
+        <div class="lbl">題型</div>
+      </div>
+      <div class="info-chip">
+        <div class="num">即時</div>
+        <div class="lbl">Email 回報</div>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>您的姓名</label>
+      <input type="text" id="inp-name" placeholder="請輸入真實姓名">
+    </div>
+    <div class="form-group">
+      <label>所屬縣市</label>
+      <select id="inp-city" disabled style="background:#f0fff4;color:#3a9a68;font-weight:700;cursor:default">
+        <option value="南投" selected>南投</option>
+      </select>
+    </div>
+
+    <button class="btn btn-green" onclick="startQuiz()">🚀 開始測驗</button>
+  </div>
+
+  <!-- Screen: Loading -->
+  <div id="screen-loading" class="card" style="display:none">
+    <div class="loading-screen">
+      <div class="spinner"></div>
+      <p>🤖 AI 正在從知識庫出題中…</p>
+      <p class="sub">根據您所在縣市的 QA 內容生成題目<br>請稍候約 10~20 秒</p>
+    </div>
+  </div>
+
+  <!-- Screen: 測驗 -->
+  <div id="screen-quiz" class="card" style="display:none">
+    <div class="quiz-progress">
+      <div class="progress-bar-wrap">
+        <div class="progress-bar" id="progress-bar" style="width:0%"></div>
+      </div>
+      <div class="progress-txt" id="progress-txt">1 / 15</div>
+    </div>
+    <div class="live-score">
+      <span id="live-score-txt">目前得分 0 分</span>
+      <div class="live-score-bar">
+        <div class="live-score-fill" id="live-score-fill" style="width:0%"></div>
+      </div>
+    </div>
+    <div class="type-badge" id="type-badge">是非題</div>
+    <div class="q-text" id="q-text"></div>
+    <div class="q-hint" id="q-hint"></div>
+    <div class="options" id="options"></div>
+    <div class="explain-box" id="explain-box"></div>
+    <div class="quiz-nav">
+      <button class="btn btn-green" id="btn-next" onclick="nextQ()" disabled>下一題 →</button>
+    </div>
+  </div>
+
+  <!-- Screen: 結果 -->
+  <div id="screen-result" class="card" style="display:none">
+    <div class="result-top">
+      <div class="result-emoji" id="result-emoji">🎉</div>
+      <div class="result-name" id="result-name"></div>
+      <div class="result-score-big" id="result-score"></div>
+      <div class="result-verdict" id="result-verdict"></div>
+      <div class="score-breakdown">
+        <div class="score-chip chip-correct">
+          <div class="sc-num" id="sc-correct">0</div>
+          <div class="sc-lbl">全對</div>
+        </div>
+        <div class="score-chip chip-partial">
+          <div class="sc-num" id="sc-partial">0</div>
+          <div class="sc-lbl">部分對</div>
+        </div>
+        <div class="score-chip chip-wrong">
+          <div class="sc-num" id="sc-wrong">0</div>
+          <div class="sc-lbl">答錯</div>
+        </div>
+        <div class="score-chip chip-total">
+          <div class="sc-num" id="sc-total">0</div>
+          <div class="sc-lbl">總題數</div>
+        </div>
+      </div>
+    </div>
+    <div class="section-title">📝 詳細解析</div>
+    <div id="review-list"></div>
+    <div class="email-status" id="email-status"></div>
+    <div class="btn-row" id="result-btns"></div>
+  </div>
+
+</div>
+
+<script>
+// ══════════════════════════════
+//  設定區（你的 API Keys）
+// ══════════════════════════════
+const CONFIG = {
+  GEMINI_KEY: 'AIzaSyBGcmbFrg_I2dqZvFxJoDKqLVYfUMUPt9Y',
+  EMAILJS_PUBLIC_KEY: 'GL2bE8A4d3jSItIUJ',
+  EMAILJS_SERVICE_ID: 'service_xuahpmn',
+  EMAILJS_TEMPLATE_ID: 'template_xpitx4k',
+  MANAGER_EMAIL: 'khnpduty@chainsea.com.tw',
+  SHEET_URL: 'https://script.google.com/macros/s/AKfycbyhuGFvsAVaPzn45xiM380sM3s1a_L-tv5zw0eSSt-pUbaQaBppubkHotocrOjWG97p/exec'
+};
+
+// ══════════════════════════════
+//  各縣市知識庫（正式版請替換成真實 data.json 內容）
+// ══════════════════════════════
+const CITY_QA = {
+  '桃園': `
+【桃園縣市動保QA知識庫】
+Q: 救援人員接獲通報後多久內應抵達現場？A: 2小時內。
+Q: 民眾在道路上發現動物屍體應聯繫哪個單位？A: 清潔隊。
+Q: 發現幼貓外觀乾淨肚子微凸應如何建議？A: 放回原處，母貓會回來照顧，不要帶走。
+Q: 私人圍籬農地內發現動物屍體1959可以進入嗎？A: 不行，私人領域公權力完全無法介入。
+Q: 1959主要受理哪些動物？A: 犬和貓，野生動物不在受理範圍。
+Q: 發現野生鳥類受傷應如何處理？A: 請民眾轉介農業部生物多樣性研究所，1959不受理野生動物。
+Q: 收費停車場屬於哪種場域？A: 公眾得出入之場所，1959可介入處置。
+Q: 幼鳥在地上有羽毛且健康應如何處理？A: 不要撿走，是離巢學飛期，鳥媽媽會回來照顧。
+Q: 民眾通報狗狗有傷人紀錄應如何處理？A: 需帶回，有傷人紀錄不可就地野放。
+Q: 通報案件需要提供哪些資訊？A: 發現時間、地點、動物狀況描述、通報人真實姓名及電話。
+  `,
+  '南投': `
+【南投縣市動保QA知識庫】
+Q: 南投上班時間聯絡電話為何？A: 049-2222542，週一至週五8:30~17:00。
+Q: 南投假日或非上班時間備援電話為何？A: 02-87928781。
+Q: 救援人員接獲通報後多久內應抵達現場？A: 2小時內。
+Q: 道路上發現動物屍體應聯繫哪個單位？A: 清潔隊處理。
+Q: 保育類動物如石虎穿山甲通報哪個單位？A: 農業部生物多樣性研究所，電話049-2761331。
+Q: 1959主要受理哪些動物？A: 犬和貓。
+Q: 私人土地發現受傷動物可以進入嗎？A: 不行，需要地主同意才可進入私人領域。
+Q: 幼貓外觀乾淨精神好應如何建議？A: 放回原處等母貓回來，不要帶走。
+Q: 通報案件需要提供哪些資訊？A: 發現時間、地點、動物狀況、通報人姓名電話。
+Q: 動物無傷病且有剪耳代表什麼？A: 已結紮，可就地野放。
+  `,
+  '嘉義': `
+【嘉義縣市動保QA知識庫】
+Q: 嘉義動保園區收容哪些情況的犬貓？A: 受傷犬貓及飼主棄養（需預約）。
+Q: 嘉義園區棄養預約時間為何？A: 週二至週六上午下午特定時段。
+Q: 未滿6個月幼犬貓可以送到嘉義園區嗎？A: 不行，未滿6月齡無法收容。
+Q: 救援人員接獲通報後多久內應抵達？A: 2小時內。
+Q: 道路上發現動物屍體應聯繫哪個單位？A: 清潔隊。
+Q: 發現幼貓外觀乾淨肚子微凸應如何建議？A: 放回原處，有母貓照顧不要帶走。
+Q: 1959主要受理哪些動物？A: 犬和貓。
+Q: 野生動物受傷應聯繫哪個單位？A: 農業部生物多樣性研究所。
+Q: 通報案件需要提供哪些基本資訊？A: 時間、地點、狀況描述、通報人姓名電話。
+Q: 有剪耳記號的動物代表什麼？A: 已完成TNVR結紮，可就地野放。
+  `,
+  '彰化': `
+【彰化縣市動保QA知識庫】
+Q: 彰化捕犬專線電話為何？A: 04-8590010，上班時間專用。
+Q: 彰化有提供民眾貓隻捕捉服務嗎？A: 目前無貓隻捕捉服務，但有誘捕籠外借，需上班時間預約。
+Q: 救援人員接獲通報後多久內應抵達？A: 2小時內。
+Q: 道路上發現動物屍體應聯繫哪個單位？A: 清潔隊。
+Q: 拾獲健康品種犬貓應如何建議？A: 協助送往動物醫院掃晶片確認是否有飼主。
+Q: 1959主要受理哪些動物？A: 犬和貓。
+Q: 私人土地上發現動物屍體可以進入清理嗎？A: 不行，私人領域公權力無法介入。
+Q: 發現幼貓外觀乾淨精神好應如何建議？A: 放回原處等母貓，不要帶走。
+Q: 通報案件需要提供哪些基本資訊？A: 時間、地點、動物狀況、通報人姓名電話。
+Q: 動物有傷人紀錄可以就地野放嗎？A: 不行，有傷人紀錄必須帶回處置。
+  `
+};
+
+// ══════════════════════════════
+//  State
+// ══════════════════════════════
+let S = {
+  name:'', city:'',
+  questions:[], current:0,
+  answers:[],
+  totalPts:0, earnedPts:0,
+  answered:false,
+  _multiSelected: new Set()
+};
+
+// EmailJS 初始化
+emailjs.init(CONFIG.EMAILJS_PUBLIC_KEY);
+
+function show(id){
+  ['screen-start','screen-loading','screen-quiz','screen-result'].forEach(s=>{
+    const el=document.getElementById(s);
+    if(el) el.style.display=(s===id?'block':'none');
+  });
+}
+
+// ══════════════════════════════
+//  題庫（來自真實 data.json）
+// ══════════════════════════════
+const QUESTION_BANK = [{"type": "tf", "q": "1959動物保護專線受理時間為週一至週五上班時間，非上班時間無法受理案件。", "ans": false, "explain": "錯誤。1959專線受理時間為「全年無休、24小時」受理，包含假日及夜間均可通報。"}, {"type": "single", "q": "民眾來電反應在路上看到貓狗屍體，南投縣上班時間應由哪個單位負責處理？", "opts": ["1959委外救援隊", "清潔隊", "警察局", "消防局"], "ans": [1], "explain": "南投縣除私人領域外，屍體上班時間由清潔隊處理；非上班時間則直接通知1959處理，不需要請民眾等清潔隊上班再打。"}, {"type": "single", "q": "民眾來電說無法提供明確地址，只能提供大概地標，客服人員應如何處理？", "opts": ["請民眾確認地址後再來電，無法受理", "請民眾等到能提供確切地址再通報", "仍需派案給救援，並在通報中補充「通報人無法詳述地點，請再與其聯絡確認」", "直接結案，無法派遣"], "ans": [2], "explain": "即使位置不明確，仍可通報讓救援去確認，但需在通報及通話紀錄中補上「通報人無法詳述地點，請再與其聯絡確認」，讓救援知悉。"}, {"type": "single", "q": "南投縣1959專線在上班時間無法接通時，應撥哪個電話？", "opts": ["049-2225440", "049-2222542", "02-87928781", "049-2220644"], "ans": [1], "explain": "上班時間（週一至週五8:30~17:00）請撥049-2222542；假日或非上班時間請撥備援電話。"}, {"type": "tf", "q": "南投縣民眾送交不擬飼養的犬貓至收容所，只需直接帶去即可，不需要事先申請登錄。", "ans": false, "explain": "錯誤。飼主送交不擬飼養之犬貓，需先向動物收容處所申請登錄，並完成晶片植入、施打狂犬病疫苗及絕育手術，自行尋找認養人，媒合期30天後仍無人認養才可送交。"}, {"type": "single", "q": "民眾撿到犬貓要送交南投縣公立動物收容所，需繳交多少規費？", "opts": ["免費", "每隻500元", "每隻1000元", "每隻2000元"], "ans": [3], "explain": "撿到犬貓如要送交南投縣公立動物收容所需繳交規費，每隻每次新臺幣二千元。但走失或野外遊蕩犬貓為具寵物登記者免收。"}, {"type": "single", "q": "南投縣公立動物收容所的開放時間為何？", "opts": ["週一至週五 上午9:00~下午5:00", "週二至週六 上午9:00~11:30、下午13:30~16:00", "每天 上午8:00~下午6:00", "週一至週六 上午10:00~下午4:00"], "ans": [1], "explain": "收容所開放時間：週二至週六，上午9時至11時30分、下午13時30分至16時。週六需事先連絡預約，週日及週一為休假日。"}, {"type": "single", "q": "民眾家附近出現會追咬人車的流浪狗，客服應如何處理？", "opts": ["告知民眾這不在服務範圍內", "請民眾自行與警察局聯繫", "詳加記錄後轉交防治所，請民眾上班時間電洽049-2222542，並詢問出沒時間點、數量、花色等特徵", "直接派委外救援隊立即前往捕捉"], "ans": [2], "explain": "應詳加記錄於通報案件表單後轉交防治所辦理，並請民眾於平日上班時間電洽南投縣家畜疾病防治所（049-2222542）通報，同時需詢問大概出沒時間點、數量、花色等方便辨識的特徵。"}, {"type": "tf", "q": "發現疑似受傷石虎或石虎屍體，應通報南投縣1959動保專線受理處置。", "ans": false, "explain": "錯誤。發現疑似受傷石虎或石虎屍體，應電洽集集特有生物中心通報，電話049-2761331，石虎屬保育類動物不由1959受理。"}, {"type": "single", "q": "民眾反應鄰居養的狗很吵亂叫，影響生活，應建議聯繫哪個單位？", "opts": ["南投縣1959動保專線", "環保局", "當地警察機關", "消防局"], "ans": [2], "explain": "動物噪音依噪音管制法第六條規定，屬於製造妨害他人生活安寧之聲音者，由當地警察機關依相關法規處理。"}, {"type": "single", "q": "民眾詢問家中犬貓絕育補助，以下哪項敘述正確？", "opts": ["只有南投縣戶籍居民才能申請", "凡南投縣縣民或犬貓飼養於南投縣即可申請，但名額有限", "需先完成寵物登記滿一年才可申請", "補助全額，飼主完全不用付費"], "ans": [1], "explain": "凡南投縣縣民或犬貓飼養於南投縣即可提出絕育補助申請。但提醒補助活動名額有限，額滿截止不再受理，請儘速提出申請。"}, {"type": "tf", "q": "南投縣民眾飼養的狗貓可前往19家合約動物醫院免費注射狂犬病疫苗。", "ans": true, "explain": "正確。飼主可前往本縣19家動物醫院免費注射狂犬病疫苗，亦可攜帶家中犬貓至本縣狂犬病下鄉巡迴活動現場施打。"}, {"type": "single", "q": "民眾在汽車引擎蓋內聽到貓叫聲，客服人員應建議如何處理？", "opts": ["立即啟動引擎讓貓自行逃離", "大力拍打引擎蓋驅趕貓咪", "關閉引擎打開引擎蓋，保持安靜等待貓自行離去，若卡住請聯繫汽車修配廠", "直接撥打119請消防局協助"], "ans": [2], "explain": "應關閉引擎並將引擎蓋打開後，保持安靜待貓咪自行離去。拍打恐造成貓咪往更深處躲藏。若貓咪卡住，請聯繫汽車修配廠，切勿啟動車輛。"}, {"type": "single", "q": "民眾詢問家中用剩的跳蚤、心絲蟲等寵物藥品可否轉賣給鄰居，客服應如何回答？", "opts": ["可以，只要藥品未過期即可", "可以，但需告知對方正確用法", "不可以，未具動物用藥品販賣業許可證販售可依法處9萬至45萬元以下罰鍰", "可以，少量轉讓不受法律限制"], "ans": [2], "explain": "不可以。未具動物用藥品販賣業許可證販售動物用藥品，可依動物用藥品管理法處新台幣9萬元至45萬元以下罰鍰。"}, {"type": "tf", "q": "非洲豬瘟病毒會感染人類，人吃了染病豬肉可能導致生病。", "ans": false, "explain": "錯誤。非洲豬瘟不會感染人類，目前資料顯示非洲豬瘟僅會造成豬隻感染，並不會傳染給其他動物，本病亦非人畜共通傳染病。"}, {"type": "single", "q": "民眾在戶外發現正在咬人且具攻擊性的犬隻，客服應如何處理？", "opts": ["記錄案件，請民眾上班時間再撥防治所", "立刻通知委外救援隊前往帶回安置，並說明犬隻有攻擊性", "請民眾自行聯繫警察局處理", "告知民眾這屬於私人糾紛，請自行處理"], "ans": [1], "explain": "若為「正在咬人有攻擊性」的犬隻，須立刻通知委外救援隊前往帶回安置，通報時需說明犬隻有攻擊性。若為「之前曾經咬人」的犬隻，則記錄並通報防治所，回覆民眾上班時間由防治所安排捕捉。"}, {"type": "multi", "q": "民眾發現海蟾蜍，應向哪個單位通報？（複選，可多選）", "opts": ["台灣兩棲類保育志工臉書社團", "縣府1999專線", "南投縣1959動保專線", "消防局119"], "ans": [0, 1], "explain": "發現海蟾蜍可向以下兩個單位通報：1.台灣兩棲類保育志工臉書社團；2.縣府1999專線。並提醒民眾保持安全距離，不要徒手接觸。"}, {"type": "multi", "q": "哪些情況的野生動物「不需要」人為介入救援？（複選，可多選）", "opts": ["靠近觀察後動物能立刻飛走或逃離", "健康、無外傷、精神好的幼鳥或幼獸", "有明顯受傷或精神不佳無法逃離", "誤闖民宅但一陣子後可自行脫困"], "ans": [0, 1, 3], "explain": "不需介入的情況：1.靠近觀察能立刻逃離；2.健康無外傷的幼鳥幼獸；3.無明顯外傷但行動緩慢如烏龜、穿山甲；4.誤闖但可自行脫困。需介入的情況：處於危險環境（如馬路上）或有明顯受傷無法逃離。"}, {"type": "tf", "q": "派勤案件請第一時間外撥派出，並須留意群組回報進度", "ans": true, "explain": "正確。派勤案件請第一時間外撥派出（包含路殺收拾都請不要拖太久），並須幫忙留意群組內是否有回覆已出發或回報處理的進度， 若二小時內若派勤單位無回報進度，請幫忙於群組內關切進度，避免救援隊漏案 【動物有晶片但聯絡不上飼主】 1.先詢問民眾/寵物醫院是否方便幫忙安置一晚，上班時段防治所聯繫協助 2.不勉強民眾/寵物醫院，只要民眾/寵物醫院不方便安置，就派勤接回 3.遇到警察局/消防局來電表示有犬貓需安置，若員"}, {"type": "single", "q": "南投案件通報LINE群組的使用方式，下列何者正確？", "opts": ["諮詢用「南投1959專線委外群組」，派勤用「南投1959緊急救援群組」，通報後需追蹤是否有人回應", "所有案件都丟同一個群組即可", "派勤丟委外群組，諮詢丟緊急救援群組", "通報後不需要追蹤有沒有回應"], "ans": [0], "explain": "南投1959專線委外群組(外部)→諮詢；南投1959緊急救援群組→派勤。群組通報後請追蹤留意是否有回應，避免案件通報錯誤群組或無人接收資訊，延誤救援需求。"}, {"type": "tf", "q": "南投縣民眾於非上班時間通報貓狗屍體（非私人領域），應請民眾等清潔隊上班後再打電話。", "ans": false, "explain": "錯誤。屍體依所在場域區分「公共場所」「公眾得出入之場所」「私人領域」三種。南投縣除私人領域外，上班時間由清潔隊處理，非上班時間則直接通知1959處理，不用請民眾等清潔隊上班再打電話。"}, {"type": "tf", "q": "來電者無法回到原地點、只能提供大概地標時，因位置不明確，不需派案給救援。", "ans": false, "explain": "錯誤。即使位置不明確仍需派案讓救援前往確認，但請於通報及通話紀錄中補上「通報人無法詳述地點，請再與其聯絡確認」。並務必留下聯絡人及電話，若10分鐘後未再來電，需主動去電關心。"}, {"type": "tf", "q": "南投派勤單位（南投葬儀社 049-2220644）出勤時會穿著防治所背心，服務以協助民眾為優先，民眾覺得有需要即可派勤。", "ans": true, "explain": "正確。派勤單位為南投葬儀社（049-2220644），出勤會穿著防治所背心。以有服務民眾為上，勿過度推辭；如非緊急需求可嘗試引導上班時段洽防治所，可群組諮詢。"}, {"type": "single", "q": "民眾反映野狗跑進家中無法驅趕離開，正確的處理方式為何？", "opts": ["可建議先請鄰居或親友以掃把、紙板等協助驅離；民眾無法處理時，派員前往協助", "一律不派員，請民眾自行想辦法", "請民眾PO網找愛心人士幫忙", "請民眾直接抓起來送收容所"], "ans": [0], "explain": "1.可請鄰居或親友以適當物品（如掃把、紙板等）協助驅離犬隻。2.專線電話通知外勤救援人員前往驅離。如民眾可以自行處理則無需派員，如無法處理，仍請派員前往協助。"}, {"type": "single", "q": "南投動物收容所的開放時間，下列何者正確？", "opts": ["平日（週二至週六）上午9:00-11:30、下午13:30-16:00，週六需事先預約", "每天24小時開放", "僅週日開放", "週一至週五 8:00-17:00"], "ans": [0], "explain": "收容所開放時間：平日（週二至週六）上午9時至11時30分、下午13時30分至16時，週六需事先連絡預約時間參觀。電話：049-2225440。"}, {"type": "tf", "q": "民眾通報八哥受傷，若鳥隻特徵為「黃嘴、黃腳、眼周黃色」，屬於本土保育類八哥，應立即通報專案救傷。", "ans": false, "explain": "錯誤。「黃嘴、黃腳、眼周黃色」是外來入侵種（白尾八哥/家八哥），政府依法不投入救傷資源、不予收容；本土原生八哥的特徵是「象牙白色嘴巴、額頭有黑毛冠羽」，屬二級珍貴稀有保育類，才需通報救傷。"}, {"type": "single", "q": "民眾通報保育類野生動物（如黑面琵鷺、領角鴞、台灣藍鵲、本土原生八哥）受傷，正確處理方式為何？", "opts": ["委婉告知就地釋放即可", "立刻通報並轉交生物多樣性研究所或南投縣政府農業處林務保育科啟動專案救傷（1999）", "告知本機關不受理", "轉介至民間鳥會"], "ans": [1], "explain": "保育類為法定必須介入對象，一旦確認應立刻通報並轉交生物多樣性研究所或南投縣政府農業處林務保育科啟動專案救傷（1999）。"}, {"type": "single", "q": "民眾通報一般野鳥（如麻雀、斑鳩、白頭翁）受傷需要醫療，接線同仁應如何回應？", "opts": ["立即派委外救援隊前往", "委婉告知因缺乏野鳥專用醫療與野化場地，建議讓鳥留在原地或安置於高處安全處，亦可自行洽詢野鳥救傷協會", "請民眾送到流浪犬貓收容所", "請民眾撥打119"], "ans": [1], "explain": "一般類野生動物為本機關未受理項目。收容所犬吠聲大、犬貓傳染病多，野鳥會因過度驚恐（緊迫）而休克，所內也缺乏野鳥專業醫療設備。建議讓其留在原地或安置於高處安全處，或維持原地環境不予干預，亦可自行搜尋野鳥救傷協會詢問是否提供救援。"}, {"type": "tf", "q": "民眾發現雛鳥掉在地上不會飛，應建議民眾將雛鳥帶回家照顧，避免被貓狗攻擊。", "ans": false, "explain": "錯誤。雛鳥很可能正在練飛階段，親鳥通常就在附近觀察，強行帶走反而剝奪牠學習生存的機會。正確做法是將雛鳥放到旁邊較高的樹枝或草叢等貓狗抓不到的地方，然後離開現場，親鳥聽到叫聲就會帶牠回家。"}, {"type": "multi", "q": "下列哪些屬於「絕對不受理救傷」且具生態破壞性的外來種？（複選，可多選）", "opts": ["白尾八哥", "台灣藍鵲", "埃及聖䴉", "綠鬣蜥"], "ans": [0, 2, 3], "explain": "外來種（白尾八哥、家八哥、黑領椋鳥、輝椋鳥、埃及聖䴉、綠鬣蜥等）嚴重破壞台灣本土生態，公部門絕不投入救傷資源，可委婉告知生態危害、不予收容。台灣藍鵲是本土保育類，必須通報救傷。"}, {"type": "single", "q": "民眾通報大型野生動物或猛禽（如老鷹、貓頭鷹、山羌）受傷，應轉請哪個單位派員救援？", "opts": ["清潔隊", "農業部生物多樣性研究所－野生動物急救站", "民間鳥會", "流浪犬貓收容所"], "ans": [1], "explain": "保育類或中大型野生動物受傷，政府責無旁貸，會轉請「農業部生物多樣性研究所－野生動物急救站」派員救援，並請民眾在現場拉開安全距離、留意動物動向。亦可提供生多所電話請民眾自行通報。"}];
+
+// ══════════════════════════════
+//  Start → 從題庫隨機抽題
+// ══════════════════════════════
+function startQuiz(){
+  const name = document.getElementById('inp-name').value.trim();
+  const city = document.getElementById('inp-city').value;
+  if(!name){ alert('請輸入姓名！'); return; }
+
+  S.name=name; S.city=city;
+  S.current=0; S.answers=[];
+  S.totalPts=0; S.earnedPts=0;
+
+  show('screen-loading');
+
+  setTimeout(()=>{
+    
+    // 固定出 20 題
+    const count = 20;
+    const shuffled = [...QUESTION_BANK].sort(()=>Math.random()-0.5);
+    S.questions = shuffled.slice(0, Math.min(count, shuffled.length));
+    S.questions.forEach(q=>{
+      S.totalPts += (q.type==='multi') ? q.ans.length : 1;
+    });
+    show('screen-quiz');
+    renderQ();
+  }, 1000);
+}
+
+// 題目由本地題庫產生，不需要 API
+
+// ══════════════════════════════
+//  Render Question
+// ══════════════════════════════
+function renderQ(){
+  const q = S.questions[S.current];
+  const total = S.questions.length;
+  const cur = S.current;
+
+  document.getElementById('progress-bar').style.width=((cur/total)*100)+'%';
+  document.getElementById('progress-txt').textContent=(cur+1)+' / '+total;
+
+  const pct = S.totalPts>0 ? Math.round((S.earnedPts/S.totalPts)*100) : 0;
+  document.getElementById('live-score-txt').textContent='目前得分 '+pct+' 分';
+  document.getElementById('live-score-fill').style.width=pct+'%';
+
+  const badge = document.getElementById('type-badge');
+  if(q.type==='tf'){
+    badge.className='type-badge type-tf'; badge.textContent='🔵 是非題';
+  } else if(q.type==='single'){
+    badge.className='type-badge type-single'; badge.textContent='🟢 單選題';
+  } else {
+    badge.className='type-badge type-multi'; badge.textContent='🟣 複選題（可多選）';
+  }
+
+  document.getElementById('q-text').textContent=q.q;
+  document.getElementById('q-hint').textContent=
+    q.type==='multi'?'⚠️ 此題為複選，請選出所有正確答案後按「確認作答」':
+    q.type==='single'?'請選擇一個最正確的答案':'請判斷對或錯';
+
+  const eb=document.getElementById('explain-box');
+  eb.style.display='none'; eb.className='explain-box'; eb.innerHTML='';
+
+  const letters=['A','B','C','D','E'];
+  let html='';
+  if(q.type==='tf'){
+    html=`
+      <div class="option" id="opt0" onclick="selectOpt(0)">
+        <div class="opt-marker circle">○</div>
+        <div class="opt-text">✅ 正確（是）</div>
+      </div>
+      <div class="option" id="opt1" onclick="selectOpt(1)">
+        <div class="opt-marker circle">✕</div>
+        <div class="opt-text">❌ 錯誤（非）</div>
+      </div>`;
+  } else if(q.type==='single'){
+    html=q.opts.map((opt,i)=>`
+      <div class="option" id="opt${i}" onclick="selectOpt(${i})">
+        <div class="opt-marker circle">${letters[i]}</div>
+        <div class="opt-text">${opt}</div>
+      </div>`).join('');
+  } else {
+    html=q.opts.map((opt,i)=>`
+      <div class="option" id="opt${i}" onclick="toggleMulti(${i})">
+        <div class="opt-marker">${letters[i]}</div>
+        <div class="opt-text">${opt}</div>
+      </div>`).join('');
+    html+=`<button class="btn btn-blue" style="margin-top:14px" onclick="submitMulti()">✔ 確認作答</button>`;
+  }
+  document.getElementById('options').innerHTML=html;
+
+  const btn=document.getElementById('btn-next');
+  btn.disabled=true;
+  btn.textContent=(cur<total-1)?'下一題 →':'查看結果 🎯';
+
+  S.answered=false;
+  S._multiSelected=new Set();
+}
+
+function selectOpt(i){
+  if(S.answered) return;
+  S.answered=true;
+  const q=S.questions[S.current];
+  const correct=q.type==='tf'?(q.ans?0:1):q.ans[0];
+  const isRight=i===correct;
+  const pts=isRight?1:0;
+
+  S.answers.push({type:q.type,chosen:i,correct:correct,pts,maxPts:1});
+  S.earnedPts+=pts;
+
+  document.querySelectorAll('.option').forEach((el,idx)=>{
+    el.classList.add('disabled');
+    if(idx===correct) el.classList.add('show-correct');
+    if(idx===i && !isRight) el.classList.add('wrong');
+    if(idx===i && isRight) el.classList.add('correct');
+  });
+  showExplain(q, isRight?'ok':'ng');
+  document.getElementById('btn-next').disabled=false;
+}
+
+function toggleMulti(i){
+  if(S.answered) return;
+  const el=document.getElementById('opt'+i);
+  if(S._multiSelected.has(i)){ S._multiSelected.delete(i); el.classList.remove('selected'); }
+  else { S._multiSelected.add(i); el.classList.add('selected'); }
+}
+
+function submitMulti(){
+  if(S.answered) return;
+  S.answered=true;
+  const q=S.questions[S.current];
+  const chosen=S._multiSelected;
+  const correctSet=new Set(q.ans);
+  let pts=0;
+  const maxPts=q.ans.length;
+  q.ans.forEach(ci=>{ if(chosen.has(ci)) pts++; });
+  chosen.forEach(ci=>{ if(!correctSet.has(ci)) pts=Math.max(0,pts-1); });
+  const isAllRight=pts===maxPts && chosen.size===correctSet.size;
+  const isPartial=pts>0 && !isAllRight;
+
+  S.answers.push({type:'multi',chosen:new Set(chosen),correct:correctSet,pts,maxPts});
+  S.earnedPts+=pts;
+
+  document.querySelectorAll('.option').forEach((el,idx)=>{
+    el.classList.add('disabled');
+    if(correctSet.has(idx)) el.classList.add('show-correct');
+    if(chosen.has(idx) && !correctSet.has(idx)) el.classList.add('wrong');
+  });
+  const confirmBtn=document.getElementById('options').querySelector('.btn-blue');
+  if(confirmBtn) confirmBtn.style.display='none';
+
+  showExplain(q, isAllRight?'ok':isPartial?'partial':'ng', pts, maxPts);
+  document.getElementById('btn-next').disabled=false;
+}
+
+function showExplain(q, mood, pts, maxPts){
+  const eb=document.getElementById('explain-box');
+  eb.style.display='block';
+  eb.className='explain-box '+mood;
+  const icon=mood==='ok'?'✅':mood==='partial'?'⭕':'❌';
+  const label=mood==='ok'?'完全正確！':mood==='partial'?`部分正確（得 ${pts}/${maxPts} 分）`:'答錯了！';
+  eb.innerHTML=`<strong>${icon} ${label}</strong><br>${q.explain}`;
+}
+
+function nextQ(){
+  S.current++;
+  if(S.current>=S.questions.length){ showResult(); }
+  else { renderQ(); }
+}
+
+// ══════════════════════════════
+//  Result
+// ══════════════════════════════
+function showResult(){
+  show('screen-result');
+  const score=S.totalPts>0?Math.round((S.earnedPts/S.totalPts)*100):0;
+  const pass=score>=85;
+
+  document.getElementById('result-emoji').textContent=score===100?'🏆':pass?'🎉':'📚';
+  document.getElementById('result-name').textContent=S.name+'（'+S.city+'）';
+
+  const scoreEl=document.getElementById('result-score');
+  scoreEl.textContent=score+' 分';
+  scoreEl.className='result-score-big '+(pass?'pass':'fail');
+
+  const verdictEl=document.getElementById('result-verdict');
+  verdictEl.textContent=pass?'✅ 恭喜通過！':'❌ 未達及格標準（85分），建議複習後重考';
+  verdictEl.className='result-verdict '+(pass?'verdict-pass':'verdict-fail');
+
+  let fullCorrect=0,partial=0,wrong=0;
+  S.answers.forEach(a=>{
+    if(a.type==='multi'){
+      if(a.pts===a.maxPts && a.chosen.size===a.correct.size) fullCorrect++;
+      else if(a.pts>0) partial++;
+      else wrong++;
+    } else {
+      if(a.pts===1) fullCorrect++; else wrong++;
+    }
+  });
+  document.getElementById('sc-correct').textContent=fullCorrect;
+  document.getElementById('sc-partial').textContent=partial;
+  document.getElementById('sc-wrong').textContent=wrong;
+  document.getElementById('sc-total').textContent=S.questions.length;
+
+  const letters=['A','B','C','D','E'];
+  const html=S.answers.map((a,i)=>{
+    const q=S.questions[i];
+    let cls='r-correct',mark='✅';
+    if(a.type==='multi'){
+      const allRight=a.pts===a.maxPts && a.chosen.size===a.correct.size;
+      if(!allRight && a.pts>0){cls='r-partial';mark='⭕';}
+      else if(a.pts===0){cls='r-wrong';mark='❌';}
+    } else {
+      if(a.pts===0){cls='r-wrong';mark='❌';}
+    }
+
+    let ansDetail='';
+    if(a.type==='tf'){
+      const chLabel=a.chosen===0?'正確（是）':'錯誤（非）';
+      const corLabel=a.correct===0?'正確（是）':'錯誤（非）';
+      ansDetail=`您的答案：<span class="${a.pts?'r-correct-ans':'r-wrong-ans'}">${chLabel}</span>`
+        +(a.pts===0?`　正確答案：<span class="r-correct-ans">${corLabel}</span>`:'');
+    } else if(a.type==='single'){
+      ansDetail=`您的答案：<span class="${a.pts?'r-correct-ans':'r-wrong-ans'}">${letters[a.chosen]} ${q.opts[a.chosen]}</span>`
+        +(a.pts===0?`<br>正確答案：<span class="r-correct-ans">${letters[a.correct]} ${q.opts[a.correct]}</span>`:'');
+    } else {
+      const chosenStr=[...a.chosen].sort().map(c=>letters[c]+' '+q.opts[c]).join('、');
+      const correctStr=[...a.correct].sort().map(c=>letters[c]+' '+q.opts[c]).join('、');
+      ansDetail=`您選：<span class="${a.pts===a.maxPts?'r-correct-ans':'r-wrong-ans'}">${chosenStr||'（未選）'}</span>`
+        +`<br>正解：<span class="r-correct-ans">${correctStr}</span>`
+        +`（得 ${a.pts}/${a.maxPts} 分）`;
+    }
+
+    const typeLabel=a.type==='tf'?'是非題':a.type==='single'?'單選題':'複選題';
+    return `<div class="review-item ${cls}">
+      <div class="r-type">${mark} 第${i+1}題 · ${typeLabel}</div>
+      <div class="r-q">${q.q}</div>
+      <div class="r-detail">${ansDetail}</div>
+    </div>`;
+  }).join('');
+  document.getElementById('review-list').innerHTML=html;
+
+  // 按鈕
+  const btns=document.getElementById('result-btns');
+  if(pass){
+    btns.innerHTML=`
+      <button class="btn btn-outline" onclick="resetQuiz()">🔄 再測一次</button>
+      <button class="btn btn-green" onclick="sendReport(${score})">📧 寄送成績給主管</button>`;
+  } else {
+    btns.innerHTML=`
+      <button class="btn btn-orange" onclick="retakeQuiz()">🔁 重新考試</button>
+      <button class="btn btn-green" onclick="sendReport(${score})">📧 仍要寄送成績</button>`;
+  }
+
+  document.getElementById('email-status').style.display='none';
+
+  // 自動寄送
+  autoSendReport(score);
+  sendToSheet(score);
+}
+
+// ══════════════════════════════
+//  EmailJS 寄信
+// ══════════════════════════════
+// 考完自動把成績寫進 Google 試算表
+function sendToSheet(score){
+  try{
+    var data = new URLSearchParams();
+    data.append('name', S.name);
+    data.append('city', S.city);
+    data.append('score', score);
+    data.append('passed', score>=85 ? 'true' : 'false');
+    fetch(CONFIG.SHEET_URL, {method:'POST', mode:'no-cors', body:data});
+  }catch(e){ console.log('sheet error', e); }
+}
+
+async function autoSendReport(score){
+  const pass=score>=85;
+  const now=new Date().toLocaleString('zh-TW');
+
+  // 整理答題明細
+  const letters=['A','B','C','D','E'];
+  const detail=S.answers.map((a,i)=>{
+    const q=S.questions[i];
+    const mark=a.pts===a.maxPts?'✅':a.pts>0?'⭕':'❌';
+    let ans='';
+    if(a.type==='tf') ans=a.chosen===0?'正確':'錯誤';
+    else if(a.type==='single') ans=letters[a.chosen]+' '+q.opts[a.chosen];
+    else ans=[...a.chosen].map(c=>letters[c]).join('+');
+    return `${mark} Q${i+1}. ${q.q}\n   作答：${ans}`;
+  }).join('\n');
+
+  try {
+    await emailjs.send(CONFIG.EMAILJS_SERVICE_ID, CONFIG.EMAILJS_TEMPLATE_ID, {
+      name: S.name,
+      city: S.city,
+      time: now,
+      score: score+' 分',
+      result: pass?'✅ 通過（'+score+'分）':'❌ 未通過（'+score+'分）',
+      detail: detail,
+      to_email: CONFIG.MANAGER_EMAIL
+    });
+
+    const es=document.getElementById('email-status');
+    es.style.display='block';
+    es.className='email-status sent';
+    es.innerHTML=`✅ 成績已自動寄出！<br><small>${S.name}（${S.city}）${now}　${score}分　${pass?'通過':'未通過'}</small>`;
+  } catch(err) {
+    console.error('Email 寄送失敗:', err);
+    const es=document.getElementById('email-status');
+    es.style.display='block';
+    es.className='email-status error';
+    es.innerHTML=`⚠️ 自動寄送失敗，請點下方按鈕手動寄送`;
+  }
+}
+
+async function sendReport(score){
+  const es=document.getElementById('email-status');
+  es.style.display='block';
+  es.className='email-status sending';
+  es.textContent='📤 正在寄送中…';
+  await autoSendReport(score);
+}
+
+function retakeQuiz(){
+  const name=S.name,city=S.city;
+  S={name,city,questions:[],current:0,answers:[],totalPts:0,earnedPts:0,answered:false,_multiSelected:new Set()};
+  startQuiz();
+}
+
+function resetQuiz(){
+  show('screen-start');
+}
+</script>
+</body>
+</html>
