@@ -246,6 +246,9 @@ mark{background:#FFF9C4;border-radius:2px;padding:0 2px}
 .cc-greet{background:var(--cl);border-radius:8px;padding:7px 10px}
 .cc-cp{margin-top:6px;background:#fff;color:var(--cc);border:1.5px solid var(--cm);border-radius:6px;padding:3px 10px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit}
 .cc-cp:hover{background:var(--cl)}
+.cc-links{grid-column:1/-1;border-top:1px dashed var(--cm);padding-top:10px;display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.cc-link{display:inline-flex;align-items:center;gap:5px;background:var(--cl);color:var(--cc);border:1.5px solid var(--cm);border-radius:999px;padding:4px 12px;font-size:12.5px;font-weight:800;text-decoration:none}
+.cc-link:hover{background:var(--cc);color:#fff}
 .cc-edit{position:absolute;top:8px;right:10px;background:#E3F2FD;color:#1565C0;border:none;border-radius:5px;padding:3px 9px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit}
 @media(max-width:680px){#cityCard{grid-template-columns:1fr}}
 #quickBar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:14px 0 2px}
@@ -636,6 +639,7 @@ var DEFAULT_INFO={
   '嘉義':{hours:'全年 24 小時',phone:'1959（嘉義市當地直撥）\n05-255-0005、05-255-0006',greet:'嘉義市1959動物保護專線您好，敝姓○，很高興為您服務。\n因立案需要登記資料，請您提供全名、電話、地址。'},
   '彰化':{hours:'上班日 17:00～隔日 08:30\n例假日 00:00～24:00',phone:'1959（彰化當地直撥）\n動防所 04-7620774（下班、假日轉接至本專線）',greet:'彰化縣1959動物保護專線您好，敝姓○，很高興為您服務。\n因立案需要登記資料，請您提供全名、電話、地址。'}
 };
+var PROTECTED_LINK={t:'📖 保育類野生動物名錄（玉山國家公園）',u:'https://www.ysnp.gov.tw/StaticPage/Directory'};
 function getInfo(c){var i=(db&&db[c]&&db[c].info)||{};var d=DEFAULT_INFO[c]||{};return{hours:i.hours||d.hours||'',phone:i.phone||d.phone||'',greet:i.greet||d.greet||''};}
 function renderCityCard(){
   var el=E('cityCard');if(!el)return;
@@ -645,7 +649,8 @@ function renderCityCard(){
     +'<div class="cc-item"><div class="cc-lbl">🕘 服務時間</div><div class="cc-val">'+rc(i.hours)+'</div></div>'
     +'<div class="cc-item"><div class="cc-lbl">📞 電話</div><div class="cc-val">'+rc(i.phone)+'</div></div>'
     +'<div class="cc-item"><div class="cc-lbl">💬 開頭語</div><div class="cc-val cc-greet">'+rc(i.greet)+'</div>'
-    +'<button class="cc-cp" onclick="cpGreet()">📋 複製開頭語</button></div>';
+    +'<button class="cc-cp" onclick="cpGreet()">📋 複製開頭語</button></div>'
+    +'<div class="cc-links"><a class="cc-link" href="'+PROTECTED_LINK.u+'" target="_blank" rel="noopener">'+PROTECTED_LINK.t+'</a><span style="font-size:11.5px;color:var(--muted)">不確定是不是保育類時查詢（分一、二、三級）</span></div>';
 }
 function cpGreet(){var t=sc(getInfo(city).greet);if(navigator.clipboard){navigator.clipboard.writeText(t).then(function(){toast('📋 已複製');});}else{var ta=document.createElement('textarea');ta.value=t;document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);toast('📋 已複製');}}
 function openInfo(){var i=getInfo(city);E('infoTitle').textContent='✏ 編輯'+city+'資訊卡';E('infoHours').value=i.hours;E('infoPhone').value=i.phone;E('infoGreet').value=i.greet;E('infoOv').classList.add('open');}
@@ -689,7 +694,8 @@ function animSuggest(){
     E('animAsk').innerHTML='<div class="an-msg">名單裡沒有「'+esc(q)+'」，請先判斷是不是保育類：</div><div class="an-chips">'
       +'<button class="an-chip" onclick="animPickCat(\''+esc(q)+'\',\'protected\')">是保育類</button>'
       +'<button class="an-chip" onclick="animPickCat(\''+esc(q)+'\',\'unknown\')">不是保育類（一般野生動物）</button>'
-      +'<button class="an-chip" onclick="closeAnim();openWild()">🦉 看流程圖判斷</button></div>';
+      +'<button class="an-chip" onclick="closeAnim();openWild()">🦉 看流程圖判斷</button>'
+      +'<a class="an-chip" style="text-decoration:none" href="'+PROTECTED_LINK.u+'" target="_blank" rel="noopener">📖 查保育類名錄</a></div>';
     return;
   }
   E('animSug').innerHTML=list.map(function(x,i){var lab=x.c&&CAT_LABEL[x.c]?CAT_LABEL[x.c][0]:(x.c==='dogcat'?'犬貓':'');return'<button class="an-chip" onclick="animPick('+ANIMALS.indexOf(x)+')">'+esc(x.n)+(lab?'<small>'+esc(lab)+'</small>':'')+'</button>';}).join('');
