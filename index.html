@@ -182,6 +182,17 @@ body{font-family:"Noto Sans TC","Microsoft JhengHei",sans-serif;background:var(-
 .hit-a{font-size:12px;color:var(--muted);margin-top:3px;max-height:44px;overflow:hidden;white-space:pre-wrap}
 mark{background:#FFF9C4;border-radius:2px;padding:0 2px}
 .no-res{text-align:center;color:var(--muted);padding:48px 20px;font-size:13px}
+.srch-tip{font-size:11.5px;color:var(--muted);background:var(--cl);border:1px solid var(--cm);border-radius:8px;padding:7px 12px;margin-bottom:12px;line-height:1.6}
+.srch-tok{margin-top:10px;font-size:12.5px;color:var(--text);font-weight:700}
+.hit{padding:0;overflow:hidden}
+.hit-head{padding:14px 18px;cursor:pointer}
+.hit-chev{margin-left:auto;font-size:12px;transition:transform .2s}
+.hit.open{border-color:var(--cc)}
+.hit.open .hit-chev{transform:rotate(180deg)}
+.hit.open .hit-a{display:none}
+.hit-body{display:none;padding:0 18px 14px;background:var(--bg);border-top:1px solid var(--border);cursor:default}
+.hit.open .hit-body{display:block}
+.hit-btns{display:flex;gap:8px;flex-wrap:wrap}
 
 /* AI 浮動 */
 #aiBox{position:fixed;bottom:24px;right:24px;z-index:500;display:flex;flex-direction:column;align-items:flex-end;gap:10px}
@@ -310,7 +321,7 @@ mark{background:#FFF9C4;border-radius:2px;padding:0 2px}
   <div class="srch-row">
     <div class="srch">
       <span class="srch-icon">🔍</span>
-      <input id="srchInput" type="text" placeholder="輸入關鍵字搜尋…例如：動物咬傷、流浪狗、寵物登記" oninput="doSearch(this.value)" autocomplete="off">
+      <input id="srchInput" type="text" placeholder="搜尋目前縣市…多個關鍵字用空白隔開，例如：幼貓 夜間" oninput="doSearch(this.value)" onkeydown="srchKey(event)" autocomplete="off">
     </div>
   </div>
 </div>
@@ -520,10 +531,10 @@ function renderTabs(){
 function switchCity(c){
   city=c;curChip=-1;
   setTheme(c);
-  E('srchInput').value='';
-  E('srchPanel').style.display='none';
-  E('mainArea').style.display='block';
   renderTabs();renderChips();renderContent();
+  // 切換縣市時，如果搜尋框有字，就改搜新縣市
+  var q=E('srchInput').value.trim();
+  if(q){doSearch(q);}else{E('srchPanel').style.display='none';E('mainArea').style.display='block';}
   if(aiOpen)runHL();
 }
 
@@ -617,27 +628,103 @@ function openLb(ti,ii,si){E('lbImg').src=db[city].topics[ti].items[ii].imgs[si];
 function closeLb(){E('lb').classList.remove('open');}
 function moveQa(ti,ii,dir){var items=db[city].topics[ti].items;var dest=ii+dir;if(dest<0||dest>=items.length)return;var tmp=items[ii];items[ii]=items[dest];items[dest]=tmp;saveDB();renderContent();toast(dir<0?'▲ 上移':'▼ 下移');}
 
-// ── 搜尋 ──
+// ── 搜尋（只搜目前縣市；空白隔開＝每個關鍵字都要有；電話號碼不分有無「-」）──
+var srchHits=[],srchToks=[];
+function digitsOnly(s){return (s||'').replace(/[^0-9]/g,'');}
+function isPhoneTok(t){return /^[0-9０-９\-－()（）#＃\s]+$/.test(t)&&digitsOnly(toHalf(t)).length>=3;}
+function toHalf(s){return (s||'').replace(/[０-９]/g,function(ch){return String.fromCharCode(ch.charCodeAt(0)-65248);});}
+function tokMatch(tok,low,dig){
+  if(low.indexOf(tok)>=0)return true;
+  if(isPhoneTok(tok)){var d=digitsOnly(toHalf(tok));return d.length>=3&&dig.indexOf(d)>=0;}
+  return false;
+}
+function countOcc(s,t){var n=0,i=0;if(!t)return 0;while((i=s.indexOf(t,i))>=0){n++;i+=t.length;}return n;}
+// 只在文字部分加黃底，不動到 HTML 標籤
+function hlHtml(html,toks){
+  if(!toks.length)return html;
+  var parts=toks.filter(function(t){return t&&!isPhoneTok(t);}).map(function(t){return esc(t).replace(/[.*+?^${}()|[\]\\]/g,'\\$&');});
+  if(!parts.length)return html;
+  var re=new RegExp('('+parts.join('|')+')','gi');
+  return html.split(/(<[^>]+>)/).map(function(seg){return seg.charAt(0)==='<'?seg:seg.replace(re,'<mark>$1</mark>');}).join('');
+}
 function doSearch(q){
-  q=q.trim();
-  if(!q){E('srchPanel').style.display='none';E('mainArea').style.display='block';return;}
+  q=(q||'').trim();
+  if(!q){E('srchPanel').style.display='none';E('mainArea').style.display='block';srchHits=[];return;}
+  if(!db||!db[city])return;
   E('mainArea').style.display='none';E('srchPanel').style.display='block';
-  var ql=q.toLowerCase(),hits=[];
-  CITIES.forEach(function(c){db[c].topics.forEach(function(t,ti){t.items.forEach(function(item,ii){
-    var qp=sc(item.q),ap=sc(item.a||'');
-    if(qp.toLowerCase().indexOf(ql)>=0||ap.toLowerCase().indexOf(ql)>=0||(item.url&&item.url.toLowerCase().indexOf(ql)>=0))
-      hits.push({c:c,t:t.name,ti:ti,ii:ii,item:item,qp:qp,ap:ap});
-  });});});
-  if(!hits.length){E('srchPanel').innerHTML='<div class="no-res">🔍 未找到「'+esc(q)+'」<br><span style="font-size:12px;display:block;margin-top:6px">建議換個關鍵字，或直接瀏覽各縣市主題</span></div>';return;}
-  var h='<div class="srch-hdr">搜尋「'+esc(q)+'」，共 '+hits.length+' 筆結果</div>';
-  hits.forEach(function(hit){
-    var col=COLORS[hit.c];
-    h+='<div class="hit" onclick="gotoRes(\''+hit.c+'\','+hit.ti+','+hit.ii+')">'
-      +'<div class="hit-meta"><span class="hit-city" style="background:'+col+'">'+hit.c+'</span>› '+esc(hit.t)+'</div>'
-      +'<div class="hit-q">'+hl(esc(hit.qp),q)+'</div>'
-      +(hit.ap?'<div class="hit-a">'+hl(esc(hit.ap.substring(0,130)),q)+(hit.ap.length>130?'…':'')+'</div>':'')+'</div>';
+  var toks=q.toLowerCase().split(/[\s　]+/).filter(Boolean);
+  srchToks=toks;
+  var hits=[],perTok=toks.map(function(){return 0;});
+  db[city].topics.forEach(function(t,ti){
+    var isScript=/話術|流程圖|情境/.test(t.name);
+    t.items.forEach(function(item,ii){
+      var qp=sc(item.q||''),ap=sc(item.a||''),ul=(item.url||'');
+      var qL=qp.toLowerCase(),aL=(ap+' '+ul).toLowerCase(),all=qL+' '+aL,dig=digitsOnly(qp+' '+ap);
+      var ok=true;
+      toks.forEach(function(tok,k){if(tokMatch(tok,all,dig))perTok[k]++;else ok=false;});
+      if(!ok)return;
+      var score=0;
+      toks.forEach(function(tok){
+        if(qL.indexOf(tok)>=0)score+=10;
+        else if(isPhoneTok(tok)&&digitsOnly(qp).indexOf(digitsOnly(toHalf(tok)))>=0)score+=10;
+        score+=Math.min(3,countOcc(aL,tok))*2;
+      });
+      if(toks.length>1&&qL.indexOf(q.toLowerCase())>=0)score+=8;
+      if(isScript)score+=5;
+      hits.push({ti:ti,ii:ii,t:t.name,item:item,qp:qp,ap:ap,score:score,ord:hits.length});
+    });
+  });
+  hits.sort(function(a,b){return b.score-a.score||a.ord-b.ord;});
+  srchHits=hits;
+  var tip='<div class="srch-tip">💡 多個關鍵字用空白隔開，例如「幼貓 夜間」；電話號碼有沒有打「-」都可以。按 Enter 打開第一筆，按 Esc 清除。</div>';
+  if(!hits.length){
+    var detail='';
+    if(toks.length>1){
+      detail='<div class="srch-tok">'+toks.map(function(tok,k){return'「'+esc(tok)+'」'+perTok[k]+' 筆';}).join('、')+'</div>'
+        +'<div style="font-size:12px;margin-top:6px">每個關鍵字都要出現才會列出，可以減少關鍵字再試試</div>';
+    }else{
+      detail='<div style="font-size:12px;margin-top:6px">換個說法，或減少字數再試試</div>';
+    }
+    E('srchPanel').innerHTML='<div class="srch-hdr">在【'+esc(city)+'】搜尋</div><div class="no-res">🔍 '+esc(city)+'找不到「'+esc(q)+'」'+detail+'</div>'+tip;
+    return;
+  }
+  var h='<div class="srch-hdr">在【'+esc(city)+'】搜尋「'+esc(q)+'」，共 '+hits.length+' 筆（越相關排越前面）</div>'+tip;
+  hits.forEach(function(hit,k){
+    var prev=hit.ap?hit.ap.replace(/\s+/g,' ').substring(0,120):'';
+    h+='<div class="hit" id="hit'+k+'">'
+      +'<div class="hit-head" onclick="togHit('+k+')">'
+      +'<div class="hit-meta"><span class="hit-city" style="background:var(--cc)">'+esc(city)+'</span>› '+esc(hit.t)+'<span class="hit-chev" id="hitchev'+k+'">▾</span></div>'
+      +'<div class="hit-q">'+hlHtml(esc(hit.qp),toks)+'</div>'
+      +(prev?'<div class="hit-a" id="hitprev'+k+'">'+hlHtml(esc(prev),toks)+(hit.ap.length>120?'…':'')+'</div>':'')
+      +'</div><div class="hit-body" id="hitbody'+k+'"></div></div>';
   });
   E('srchPanel').innerHTML=h;
+}
+function togHit(k){
+  var hit=srchHits[k];if(!hit)return;
+  var body=E('hitbody'+k),box=E('hit'+k);
+  if(box.classList.contains('open')){box.classList.remove('open');body.innerHTML='';return;}
+  var it=hit.item,ti=hit.ti,ii=hit.ii;
+  var aH=it.a?hlHtml(lfy(rc(it.a)),srchToks):'';
+  var uH=it.url?'<a class="url-chip a-link" href="'+esc(it.url)+'" target="_blank" rel="noopener" onclick="event.stopPropagation()">🔗 '+esc(it.url)+'</a>':'';
+  var iH=(it.imgs&&it.imgs.length)?'<div class="img-wrap">'+it.imgs.map(function(s,si){return'<img src="'+s+'" onclick="event.stopPropagation();openLb('+ti+','+ii+','+si+')" alt="附圖">';}).join('')+'</div>':'';
+  body.innerHTML=(aH?'<div class="a-txt">'+aH+'</div>':'')+uH+iH
+    +'<div class="hit-btns">'+(it.a?'<button class="copy-btn" onclick="event.stopPropagation();cpTxt('+ti+','+ii+')">📋 複製回答</button>':'')
+    +'<button class="copy-btn" onclick="event.stopPropagation();gotoRes(\''+city+'\','+ti+','+ii+')">📂 到原分類看</button></div>';
+  box.classList.add('open');
+}
+function srchKey(e){
+  if(e.key==='Escape'){E('srchInput').value='';doSearch('');E('srchInput').blur();return;}
+  if(e.key==='Enter'){
+    e.preventDefault();
+    if(srchHits.length){
+      if(!E('hit0').classList.contains('open'))togHit(0);
+      // 扣掉上方固定區的高度，避免卡片被擋住
+      var stick=E('topStick'),off=stick?stick.getBoundingClientRect().bottom:0;
+      var y=E('hit0').getBoundingClientRect().top+window.pageYOffset-off-10;
+      window.scrollTo({top:Math.max(0,y),behavior:'smooth'});
+    }
+  }
 }
 function gotoRes(c,ti,ii){
   E('srchInput').value='';E('srchPanel').style.display='none';E('mainArea').style.display='block';
