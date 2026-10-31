@@ -373,7 +373,7 @@ mark{background:#FFF9C4;border-radius:2px;padding:0 2px}
 <!-- 主內容 -->
 <div id="mainArea" style="display:block">
   <div id="cityCard"></div>
-  <div id="quickBar"><span class="qbar-lbl">📌 常用</span><button class="qbar-btn qbar-anim" onclick="openAnim()">🐾 動物快查</button><button class="qbar-btn qbar-wild" onclick="openWild()">🦉 野生動物處理流程</button><button class="qbar-btn qbar-prot" onclick="openProtList()">📖 保育類名錄</button><button class="qbar-btn" onclick="mainFixed('addr')">說不出地址／報座標</button><button class="qbar-btn" onclick="mainFixed('body')">路殺屍體通報</button><button class="qbar-btn" onclick="mainFixed('kitten')">奶貓處理</button><button class="qbar-btn" onclick="mainFixed('bird')">幼鳥學飛</button></div>
+  <div id="quickBar"><span class="qbar-lbl">📌 常用</span><button class="qbar-btn qbar-anim" onclick="openAnim()">🐾 處理方式快查</button><button class="qbar-btn qbar-wild" onclick="openWild()">🦉 野生動物處理流程</button><button class="qbar-btn qbar-prot" onclick="openProtList()">📖 保育類名錄</button><button class="qbar-btn" onclick="mainFixed('addr')">說不出地址／報座標</button><button class="qbar-btn" onclick="mainFixed('body')">路殺屍體通報</button><button class="qbar-btn" onclick="mainFixed('kitten')">奶貓處理</button><button class="qbar-btn" onclick="mainFixed('bird')">幼鳥學飛</button></div>
   <!-- Chip 分類列 -->
   <div id="chipBar"></div>
   <div class="res-meta" id="resMeta"></div>
@@ -465,7 +465,7 @@ mark{background:#FFF9C4;border-radius:2px;padding:0 2px}
 <!-- QA 編輯 -->
 <div class="overlay" id="animOv">
   <div class="modal">
-    <h3>🐾 動物快查　<span id="animCity" style="color:var(--cc)"></span></h3>
+    <h3>🐾 處理方式快查　<span id="animCity" style="color:var(--cc)"></span></h3>
     <div class="an-step">① 輸入動物名稱</div>
     <input id="animInput" type="text" placeholder="例如：白鼻心、老鷹、鴿子、松鼠" oninput="animSuggest()" onkeydown="animKey(event)" autocomplete="off">
     <div class="an-chips" id="animSug"></div>
