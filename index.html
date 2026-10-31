@@ -212,6 +212,17 @@ mark{background:#FFF9C4;border-radius:2px;padding:0 2px}
 .hlq-btn:hover{filter:brightness(.97)}
 .hl-imgs{display:flex;flex-wrap:wrap;gap:6px;margin-top:7px}
 .hl-imgs img{max-width:100%;border-radius:6px;cursor:pointer;border:1px solid var(--border)}
+/* 縣市資訊卡 */
+#cityCard{background:#fff;border:1.5px solid var(--cm);border-left:6px solid var(--cc);border-radius:12px;padding:14px 18px;margin-top:16px;display:grid;grid-template-columns:1.1fr 1fr 1.6fr;gap:14px 22px;position:relative}
+#cityCard:empty{display:none}
+.cc-item{min-width:0}
+.cc-lbl{font-size:12px;font-weight:800;color:var(--cc);margin-bottom:5px;letter-spacing:.3px}
+.cc-val{font-size:14px;line-height:1.7;white-space:pre-wrap;word-break:break-word;color:var(--text);font-weight:600}
+.cc-greet{background:var(--cl);border-radius:8px;padding:7px 10px}
+.cc-cp{margin-top:6px;background:#fff;color:var(--cc);border:1.5px solid var(--cm);border-radius:6px;padding:3px 10px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit}
+.cc-cp:hover{background:var(--cl)}
+.cc-edit{position:absolute;top:8px;right:10px;background:#E3F2FD;color:#1565C0;border:none;border-radius:5px;padding:3px 9px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit}
+@media(max-width:680px){#cityCard{grid-template-columns:1fr}}
 #quickBar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:14px 0 2px}
 .qbar-lbl{font-size:13px;font-weight:900;color:var(--cc)}
 .qbar-btn{background:var(--cc);color:#fff;border:none;border-radius:999px;padding:8px 16px;font-size:14px;font-weight:800;cursor:pointer;transition:filter .15s;box-shadow:0 2px 6px rgba(0,0,0,.10)}
@@ -332,6 +343,7 @@ mark{background:#FFF9C4;border-radius:2px;padding:0 2px}
 
 <!-- 主內容 -->
 <div id="mainArea" style="display:block">
+  <div id="cityCard"></div>
   <div id="quickBar"><span class="qbar-lbl">📌 常用</span><button class="qbar-btn" onclick="mainFixed('addr')">說不出地址／報座標</button><button class="qbar-btn" onclick="mainFixed('body')">路殺屍體通報</button><button class="qbar-btn" onclick="mainFixed('kitten')">奶貓處理</button><button class="qbar-btn" onclick="mainFixed('bird')">幼鳥學飛</button></div>
   <!-- Chip 分類列 -->
   <div id="chipBar"></div>
@@ -422,6 +434,20 @@ mark{background:#FFF9C4;border-radius:2px;padding:0 2px}
 </div>
 
 <!-- QA 編輯 -->
+<div class="overlay" id="infoOv">
+  <div class="modal">
+    <h3 id="infoTitle">✏ 編輯縣市資訊卡</h3>
+    <div class="fg"><label>服務時間</label><textarea id="infoHours" style="min-height:70px"></textarea></div>
+    <div class="fg"><label>電話</label><textarea id="infoPhone" style="min-height:70px"></textarea></div>
+    <div class="fg"><label>開頭語</label><textarea id="infoGreet" style="min-height:90px"></textarea></div>
+    <div style="font-size:11px;color:var(--muted)">儲存後記得到後台「下載 data.json」，再上傳到 GitHub。</div>
+    <div class="modal-btns">
+      <button class="mmbtn mm-ghost" onclick="closeInfo()">取消</button>
+      <button class="mmbtn mm-solid" onclick="saveInfo()">💾 儲存</button>
+    </div>
+  </div>
+</div>
+
 <div class="overlay" id="qaOv">
   <div class="modal">
     <h3 id="qaTitle">✏ Q&A</h3>
@@ -562,9 +588,33 @@ function updateMeta(){
   }
 }
 
+// ── 縣市資訊卡（服務時間／電話／開頭語）──
+var DEFAULT_INFO={
+  '桃園':{hours:'上班日 17:00～隔日 08:00\n例假日 00:00～24:00',phone:'1959（桃園當地直撥）',greet:'桃園1959動物保護專線您好，敝姓○，很高興為您服務。\n因立案需要登記資料，請您提供全名、電話、地址。'},
+  '南投':{hours:'上班日 17:00～隔日 08:00\n例假日 00:00～24:00',phone:'1959（南投當地直撥）',greet:'南投縣1959動物保護專線您好，敝姓○，很高興為您服務。\n因立案需要登記資料，請您提供全名、電話、地址。'},
+  '嘉義':{hours:'全年 24 小時',phone:'1959（嘉義市當地直撥）\n05-255-0005、05-255-0006',greet:'嘉義市1959動物保護專線您好，敝姓○，很高興為您服務。\n因立案需要登記資料，請您提供全名、電話、地址。'},
+  '彰化':{hours:'上班日 17:00～隔日 08:30\n例假日 00:00～24:00',phone:'1959（彰化當地直撥）\n動防所 04-7620774（下班、假日轉接至本專線）',greet:'彰化縣1959動物保護專線您好，敝姓○，很高興為您服務。\n因立案需要登記資料，請您提供全名、電話、地址。'}
+};
+function getInfo(c){var i=(db&&db[c]&&db[c].info)||{};var d=DEFAULT_INFO[c]||{};return{hours:i.hours||d.hours||'',phone:i.phone||d.phone||'',greet:i.greet||d.greet||''};}
+function renderCityCard(){
+  var el=E('cityCard');if(!el)return;
+  if(!db||!db[city]){el.innerHTML='';return;}
+  var i=getInfo(city);
+  el.innerHTML=(adminMode?'<button class="cc-edit" onclick="openInfo()">✏ 編輯</button>':'')
+    +'<div class="cc-item"><div class="cc-lbl">🕘 服務時間</div><div class="cc-val">'+rc(i.hours)+'</div></div>'
+    +'<div class="cc-item"><div class="cc-lbl">📞 電話</div><div class="cc-val">'+rc(i.phone)+'</div></div>'
+    +'<div class="cc-item"><div class="cc-lbl">💬 開頭語</div><div class="cc-val cc-greet">'+rc(i.greet)+'</div>'
+    +'<button class="cc-cp" onclick="cpGreet()">📋 複製開頭語</button></div>';
+}
+function cpGreet(){var t=sc(getInfo(city).greet);if(navigator.clipboard){navigator.clipboard.writeText(t).then(function(){toast('📋 已複製');});}else{var ta=document.createElement('textarea');ta.value=t;document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);toast('📋 已複製');}}
+function openInfo(){var i=getInfo(city);E('infoTitle').textContent='✏ 編輯'+city+'資訊卡';E('infoHours').value=i.hours;E('infoPhone').value=i.phone;E('infoGreet').value=i.greet;E('infoOv').classList.add('open');}
+function closeInfo(){E('infoOv').classList.remove('open');}
+function saveInfo(){db[city].info={hours:E('infoHours').value.trim(),phone:E('infoPhone').value.trim(),greet:E('infoGreet').value.trim()};saveDB();closeInfo();renderCityCard();toast('✅ 已儲存，記得下載 data.json 上傳 GitHub');}
+
 // ── 主內容 ──
 function renderContent(){
   if(!db||!db[city]){return;}
+  renderCityCard();
   var topics=db[city].topics;
   updateMeta();
   // 決定要顯示哪些主題
