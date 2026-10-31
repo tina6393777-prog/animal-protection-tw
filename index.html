@@ -168,6 +168,8 @@ body{font-family:"Noto Sans TC","Microsoft JhengHei",sans-serif;background:var(-
 .img-wrap{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
 .img-wrap img{max-width:180px;border-radius:8px;cursor:pointer;border:2px solid var(--border)}
 .img-wrap img:hover{border-color:var(--cc)}
+.img-wrap.wide img{max-width:100%;width:100%;max-width:900px;border-radius:10px}
+.qbar-btn.qbar-wild{background:#8E5BC9}
 .info-card{padding:12px 18px;font-size:13px;line-height:1.8;border-top:1px solid var(--border);background:#fff;white-space:pre-wrap;word-break:break-word}
 .info-card:first-child{border-top:none}
 
@@ -344,7 +346,7 @@ mark{background:#FFF9C4;border-radius:2px;padding:0 2px}
 <!-- 主內容 -->
 <div id="mainArea" style="display:block">
   <div id="cityCard"></div>
-  <div id="quickBar"><span class="qbar-lbl">📌 常用</span><button class="qbar-btn" onclick="mainFixed('addr')">說不出地址／報座標</button><button class="qbar-btn" onclick="mainFixed('body')">路殺屍體通報</button><button class="qbar-btn" onclick="mainFixed('kitten')">奶貓處理</button><button class="qbar-btn" onclick="mainFixed('bird')">幼鳥學飛</button></div>
+  <div id="quickBar"><span class="qbar-lbl">📌 常用</span><button class="qbar-btn qbar-wild" onclick="openWild()">🦉 野生動物處理流程</button><button class="qbar-btn" onclick="mainFixed('addr')">說不出地址／報座標</button><button class="qbar-btn" onclick="mainFixed('body')">路殺屍體通報</button><button class="qbar-btn" onclick="mainFixed('kitten')">奶貓處理</button><button class="qbar-btn" onclick="mainFixed('bird')">幼鳥學飛</button></div>
   <!-- Chip 分類列 -->
   <div id="chipBar"></div>
   <div class="res-meta" id="resMeta"></div>
@@ -641,7 +643,7 @@ function renderContent(){
       if(hasDet){
         var aH=item.a?lfy(rc(item.a)):'';
         var uH=item.url?'<a class="url-chip a-link" href="'+esc(item.url)+'" target="_blank" rel="noopener" onclick="event.stopPropagation()">🔗 '+esc(item.url)+'</a>':'';
-        var iH=(item.imgs&&item.imgs.length)?'<div class="img-wrap">'+item.imgs.map(function(s,si){return'<img src="'+s+'" onclick="openLb('+ti+','+ii+','+si+')" alt="附圖">';}).join('')+'</div>':'';
+        var iH=(item.imgs&&item.imgs.length)?'<div class="img-wrap'+(item.wide?' wide':'')+'">'+item.imgs.map(function(s,si){return'<img src="'+s+'" onclick="openLb('+ti+','+ii+','+si+')" alt="附圖">';}).join('')+'</div>':'';
         var cB=item.a?'<button class="copy-btn" onclick="event.stopPropagation();cpTxt('+ti+','+ii+')">📋 複製回答</button>':'';
         var adm=adminMode?'<div class="qa-acts" style="display:flex">'
           +'<button class="mv-btn" onclick="event.stopPropagation();moveQa('+ti+','+ii+',-1)" '+(ii===0?'disabled':'')+'>▲</button>'
@@ -671,6 +673,14 @@ function mainFixed(key){
   var topics=db[city].topics;
   for(var ti=0;ti<topics.length;ti++){for(var ii=0;ii<topics[ti].items.length;ii++){if(test(topics[ti].items[ii])){gotoRes(city,ti,ii);return;}}}
   toast('目前縣市找不到這筆常用資料');
+}
+function openWild(){
+  if(!db||!db[city])return;
+  var ti=-1;db[city].topics.forEach(function(t,i){if(ti<0&&t.name.indexOf('野生動物處理流程')>=0)ti=i;});
+  if(ti<0){toast('目前縣市還沒有野生動物處理流程');return;}
+  curChip=ti;renderChips();renderContent();
+  setTimeout(function(){var a=E('qaa'+ti+'_0');if(a&&!a.classList.contains('open'))togQA(ti,0);
+    var el=E('topic'+ti);if(el){var stick=E('topStick'),off=stick?stick.getBoundingClientRect().bottom:0;window.scrollTo({top:Math.max(0,el.getBoundingClientRect().top+window.pageYOffset-off-10),behavior:'smooth'});}},80);
 }
 function togQA(ti,ii){var a=E('qaa'+ti+'_'+ii);var c=E('chev'+ti+'_'+ii);a.classList.toggle('open');c.classList.toggle('open');}
 function cpTxt(ti,ii){var t=sc(db[city].topics[ti].items[ii].a||'');if(navigator.clipboard){navigator.clipboard.writeText(t).then(function(){toast('📋 已複製');});}else{var ta=document.createElement('textarea');ta.value=t;document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);toast('📋 已複製');}}
@@ -757,7 +767,7 @@ function togHit(k){
   var it=hit.item,ti=hit.ti,ii=hit.ii;
   var aH=it.a?hlHtml(lfy(rc(it.a)),srchToks):'';
   var uH=it.url?'<a class="url-chip a-link" href="'+esc(it.url)+'" target="_blank" rel="noopener" onclick="event.stopPropagation()">🔗 '+esc(it.url)+'</a>':'';
-  var iH=(it.imgs&&it.imgs.length)?'<div class="img-wrap">'+it.imgs.map(function(s,si){return'<img src="'+s+'" onclick="event.stopPropagation();openLb('+ti+','+ii+','+si+')" alt="附圖">';}).join('')+'</div>':'';
+  var iH=(it.imgs&&it.imgs.length)?'<div class="img-wrap'+(it.wide?' wide':'')+'">'+it.imgs.map(function(s,si){return'<img src="'+s+'" onclick="event.stopPropagation();openLb('+ti+','+ii+','+si+')" alt="附圖">';}).join('')+'</div>':'';
   body.innerHTML=(aH?'<div class="a-txt">'+aH+'</div>':'')+uH+iH
     +'<div class="hit-btns">'+(it.a?'<button class="copy-btn" onclick="event.stopPropagation();cpTxt('+ti+','+ii+')">📋 複製回答</button>':'')
     +'<button class="copy-btn" onclick="event.stopPropagation();gotoRes(\''+city+'\','+ti+','+ii+')">📂 到原分類看</button></div>';
@@ -808,7 +818,7 @@ function openAddQa(ti){editCtx=null;pImgs=[];E('qaTitle').textContent='➕ 新�
 function openEdit(ti,ii){var item=db[city].topics[ti].items[ii];editCtx={city:city,ti:ti,ii:ii};pImgs=(item.imgs||[]).slice();E('qaTitle').textContent='✏ 編輯 Q&A';E('qaCity').value=city;updQaTopic(ti);E('qaQ').value=item.q||'';E('qaA').value=item.a||'';E('qaUrl').value=item.url||'';renderImgPrev();updPrev();E('qaOv').classList.add('open');}
 function updQaTopic(sel){var c=E('qaCity').value;E('qaTopic').innerHTML=db[c].topics.map(function(t,i){return'<option value="'+i+'"'+(i===sel?' selected':'')+'>'+esc(t.name)+'</option>';}).join('');}
 function closeQa(){E('qaOv').classList.remove('open');editCtx=null;pImgs=[];E('aPrev').style.display='none';}
-function saveQa(){var c=E('qaCity').value;var ti=parseInt(E('qaTopic').value);var q=E('qaQ').value.trim();var a=E('qaA').value.trim();var url=E('qaUrl').value.trim();if(!q){toast('⚠ 請輸入問題');return;}var item={q:q};if(a)item.a=a;if(url)item.url=url;if(pImgs.length)item.imgs=pImgs;if(editCtx&&editCtx.ii>=0)db[c].topics[ti].items[editCtx.ii]=item;else db[c].topics[ti].items.push(item);saveDB();closeQa();if(c===city){renderChips();renderContent();}toast('✅ 已儲存');}
+function saveQa(){var c=E('qaCity').value;var ti=parseInt(E('qaTopic').value);var q=E('qaQ').value.trim();var a=E('qaA').value.trim();var url=E('qaUrl').value.trim();if(!q){toast('⚠ 請輸入問題');return;}var item={q:q};if(a)item.a=a;if(url)item.url=url;if(pImgs.length)item.imgs=pImgs;if(editCtx&&editCtx.ii>=0){var _old=db[editCtx.city]&&db[editCtx.city].topics[editCtx.ti]&&db[editCtx.city].topics[editCtx.ti].items[editCtx.ii];if(_old&&_old.wide)item.wide=true;db[c].topics[ti].items[editCtx.ii]=item;}else db[c].topics[ti].items.push(item);saveDB();closeQa();if(c===city){renderChips();renderContent();}toast('✅ 已儲存');}
 function delQa(ti,ii){if(!confirm('確定刪除？'))return;db[city].topics[ti].items.splice(ii,1);saveDB();renderChips();renderContent();toast('🗑 已刪除');}
 function handleImgs(inp){Array.from(inp.files).forEach(function(f){var r=new FileReader();r.onload=function(e){pImgs.push(e.target.result);renderImgPrev();};r.readAsDataURL(f);});inp.value='';}
 function renderImgPrev(){E('imgPrev').innerHTML=pImgs.map(function(s){return'<img src="'+s+'" onclick="E(\'lbImg\').src=this.src;E(\'lb\').classList.add(\'open\')" alt="">';}).join('');}
