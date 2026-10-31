@@ -170,6 +170,29 @@ body{font-family:"Noto Sans TC","Microsoft JhengHei",sans-serif;background:var(-
 .img-wrap img:hover{border-color:var(--cc)}
 .img-wrap.wide img{max-width:100%;width:100%;max-width:900px;border-radius:10px}
 .qbar-btn.qbar-wild{background:#8E5BC9}
+.qbar-btn.qbar-anim{background:#2E9C8F}
+#animOv .modal{max-width:580px}
+.an-step{font-size:12px;font-weight:800;color:var(--cc);margin:14px 0 6px;letter-spacing:.3px}
+#animInput{width:100%;padding:10px 13px;border:1.5px solid var(--border);border-radius:9px;font-size:15px;font-family:inherit;outline:none}
+#animInput:focus{border-color:var(--cc)}
+.an-chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.an-chip{background:var(--cl);border:1.5px solid var(--cm);color:var(--text);border-radius:999px;padding:5px 12px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit}
+.an-chip:hover,.an-chip.on{background:var(--cc);border-color:var(--cc);color:#fff}
+.an-chip small{font-weight:400;opacity:.75;margin-left:4px;font-size:11px}
+.an-conds{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.an-cond{padding:12px 6px;border-radius:10px;border:2px solid var(--cm);background:#fff;font-size:15px;font-weight:800;cursor:pointer;font-family:inherit;color:var(--text)}
+.an-cond:hover,.an-cond.on{border-color:var(--cc);background:var(--cc);color:#fff}
+.an-res{margin-top:14px;border:1.5px solid var(--cm);border-left:6px solid var(--cc);border-radius:10px;padding:12px 14px;background:#fff}
+.an-res h4{font-size:15px;font-weight:800;margin-bottom:8px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.an-badge{font-size:11px;font-weight:800;color:#fff;border-radius:999px;padding:2px 9px}
+.an-sec{margin-top:8px}
+.an-lbl{font-size:11.5px;font-weight:800;color:var(--muted);margin-bottom:2px}
+.an-val{font-size:14px;line-height:1.75;white-space:pre-wrap;word-break:break-word}
+.an-act{font-weight:700}
+.an-say{background:var(--cl);border-radius:8px;padding:7px 10px}
+.an-warn{color:#C62828;font-weight:700;font-size:13px;line-height:1.7}
+.an-msg{margin-top:10px;font-size:13px;line-height:1.7;background:#FFF8E1;border-radius:8px;padding:9px 12px}
+
 .info-card{padding:12px 18px;font-size:13px;line-height:1.8;border-top:1px solid var(--border);background:#fff;white-space:pre-wrap;word-break:break-word}
 .info-card:first-child{border-top:none}
 
@@ -346,7 +369,7 @@ mark{background:#FFF9C4;border-radius:2px;padding:0 2px}
 <!-- 主內容 -->
 <div id="mainArea" style="display:block">
   <div id="cityCard"></div>
-  <div id="quickBar"><span class="qbar-lbl">📌 常用</span><button class="qbar-btn qbar-wild" onclick="openWild()">🦉 野生動物處理流程</button><button class="qbar-btn" onclick="mainFixed('addr')">說不出地址／報座標</button><button class="qbar-btn" onclick="mainFixed('body')">路殺屍體通報</button><button class="qbar-btn" onclick="mainFixed('kitten')">奶貓處理</button><button class="qbar-btn" onclick="mainFixed('bird')">幼鳥學飛</button></div>
+  <div id="quickBar"><span class="qbar-lbl">📌 常用</span><button class="qbar-btn qbar-anim" onclick="openAnim()">🐾 動物快查</button><button class="qbar-btn qbar-wild" onclick="openWild()">🦉 野生動物處理流程</button><button class="qbar-btn" onclick="mainFixed('addr')">說不出地址／報座標</button><button class="qbar-btn" onclick="mainFixed('body')">路殺屍體通報</button><button class="qbar-btn" onclick="mainFixed('kitten')">奶貓處理</button><button class="qbar-btn" onclick="mainFixed('bird')">幼鳥學飛</button></div>
   <!-- Chip 分類列 -->
   <div id="chipBar"></div>
   <div class="res-meta" id="resMeta"></div>
@@ -436,6 +459,22 @@ mark{background:#FFF9C4;border-radius:2px;padding:0 2px}
 </div>
 
 <!-- QA 編輯 -->
+<div class="overlay" id="animOv">
+  <div class="modal">
+    <h3>🐾 動物快查　<span id="animCity" style="color:var(--cc)"></span></h3>
+    <div class="an-step">① 輸入動物名稱</div>
+    <input id="animInput" type="text" placeholder="例如：白鼻心、老鷹、鴿子、松鼠" oninput="animSuggest()" onkeydown="animKey(event)" autocomplete="off">
+    <div class="an-chips" id="animSug"></div>
+    <div id="animAsk"></div>
+    <div id="animCondBox"></div>
+    <div id="animResult"></div>
+    <div class="modal-btns">
+      <button class="mmbtn mm-ghost" onclick="animReset()">重新查詢</button>
+      <button class="mmbtn mm-solid" onclick="closeAnim()">關閉</button>
+    </div>
+  </div>
+</div>
+
 <div class="overlay" id="infoOv">
   <div class="modal">
     <h3 id="infoTitle">✏ 編輯縣市資訊卡</h3>
@@ -612,6 +651,79 @@ function cpGreet(){var t=sc(getInfo(city).greet);if(navigator.clipboard){navigat
 function openInfo(){var i=getInfo(city);E('infoTitle').textContent='✏ 編輯'+city+'資訊卡';E('infoHours').value=i.hours;E('infoPhone').value=i.phone;E('infoGreet').value=i.greet;E('infoOv').classList.add('open');}
 function closeInfo(){E('infoOv').classList.remove('open');}
 function saveInfo(){db[city].info={hours:E('infoHours').value.trim(),phone:E('infoPhone').value.trim(),greet:E('infoGreet').value.trim()};saveDB();closeInfo();renderCityCard();toast('✅ 已儲存，記得下載 data.json 上傳 GitHub');}
+
+// ── 動物快查（動物 → 狀況 → 處理方式）──
+var ANIMALS=[
+ {n:'白鼻心',a:['果子狸'],c:'civet'},{n:'鼬獾',a:['鼬貛'],c:'civet'},
+ {n:'石虎',a:[],c:'shihu'},
+ {n:'穿山甲',a:[],c:'protected'},{n:'臺灣狐蝠',a:['台灣狐蝠','狐蝠'],c:'protected'},{n:'食蛇龜',a:[],c:'protected'},{n:'柴棺龜',a:[],c:'protected'},
+ {n:'老鷹',a:['鷹','黑鳶','猛禽'],c:'protected'},{n:'大冠鷲',a:[],c:'protected'},{n:'鳳頭蒼鷹',a:['蒼鷹'],c:'protected'},{n:'黑翅鳶',a:[],c:'protected'},
+ {n:'紅隼',a:['隼'],c:'protected'},{n:'貓頭鷹',a:['鴞'],c:'protected'},{n:'領角鴞',a:[],c:'protected'},{n:'草鴞',a:[],c:'protected'},
+ {n:'國慶鳥',a:['八色鳥'],c:'protected'},{n:'台灣藍鵲',a:['藍鵲','臺灣藍鵲'],c:'protected'},{n:'彩鷸',a:[],c:'protected'},
+ {n:'八哥',a:['八哥鳥'],c:'',ask:{q:'請民眾看嘴巴顏色：',opts:[{l:'黃嘴、黃腳、眼周黃色（外來種）',c:'alien'},{l:'白嘴、額頭有黑冠羽（本土八哥・保育類）',c:'protected'}]}},
+ {n:'白尾八哥',a:['家八哥','黃嘴八哥'],c:'alien'},{n:'本土八哥',a:['白嘴八哥','台灣八哥','冠八哥'],c:'protected'},
+ {n:'鴿子',a:['賽鴿','野鴿','鴿'],c:'pigeon'},
+ {n:'麻雀',a:[],c:'bird'},{n:'斑鳩',a:['紅鳩','珠頸斑鳩'],c:'bird'},{n:'白頭翁',a:[],c:'bird'},{n:'綠繡眼',a:[],c:'bird'},{n:'燕子',a:[],c:'bird'},
+ {n:'白鷺鷥',a:['鷺鷥','鷺'],c:'bird'},{n:'黑冠麻鷺',a:['大笨鳥'],c:'bird'},{n:'夜鷹',a:[],c:'bird'},{n:'夜鷺',a:['暗光鳥'],c:'bird'},
+ {n:'五色鳥',a:[],c:'bird'},{n:'紅冠水雞',a:['水雞'],c:'bird'},{n:'鳥',a:['小鳥','野鳥','雛鳥','幼鳥','鳥類'],c:'bird'},
+ {n:'松鼠',a:[],c:'small'},{n:'蝙蝠',a:[],c:'small'},{n:'烏龜',a:['斑龜','龜','鱉'],c:'small'},
+ {n:'山羌',a:['羌'],c:'large'},{n:'水鹿',a:['鹿'],c:'large'},{n:'猴子',a:['獼猴','台灣獼猴','猴'],c:'monkey'},
+ {n:'巴西龜',a:['紅耳龜'],c:'alien'},{n:'綠鬣蜥',a:['鬣蜥','蜥蜴'],c:'iguana'},
+ {n:'蛇',a:['蛇類','毒蛇','龜殼花','眼鏡蛇','雨傘節'],c:'snake'},{n:'蜂',a:['蜂窩','虎頭蜂','蜜蜂','蜂巢'],c:'bee'},
+ {n:'狗',a:['犬','狗狗','流浪狗','小狗'],c:'dogcat'},{n:'貓',a:['貓咪','流浪貓','小貓','奶貓'],c:'dogcat'}
+];
+var CAT_LABEL={unknown:['一般野生動物','#3FAE6B'],civet:['白鼻心／鼬獾','#E8953A'],shihu:['保育類（石虎）','#D9534F'],protected:['保育類','#D9534F'],bird:['一般野生動物','#3FAE6B'],pigeon:['一般野生（鴿子）','#3FAE6B'],small:['一般野生動物','#3FAE6B'],large:['大型野生動物','#3FAE6B'],monkey:['野生動物（猴子）','#3FAE6B'],alien:['外來種','#888'],iguana:['外來種（綠鬣蜥）','#888'],snake:['蛇','#6D4C41'],bee:['蜂','#6D4C41']};
+var CAT_FALL={unknown:['unknown','default'],shihu:['shihu','protected','default'],protected:['protected','default'],civet:['civet','default'],bird:['bird','default'],pigeon:['pigeon','bird','default'],alien:['alien','bird','default'],small:['small','default'],large:['large','default'],monkey:['monkey','default'],iguana:['iguana','default'],snake:['snake','default'],bee:['bee','default']};
+var COND_LABEL={hurt:'受傷',dead:'死亡',ok:'沒受傷（闖入、幼鳥）'};
+var animSel=null,animCat='',animCond='';
+function animMatch(q){q=q.trim();if(!q)return[];var hit=[];ANIMALS.forEach(function(x){var names=[x.n].concat(x.a);var sc=-1;names.forEach(function(nm){if(nm===q)sc=Math.max(sc,3);else if(nm.indexOf(q)===0)sc=Math.max(sc,2);else if(nm.indexOf(q)>=0||q.indexOf(nm)>=0&&nm.length>=2)sc=Math.max(sc,1);});if(sc>=0)hit.push({x:x,sc:sc});});hit.sort(function(a,b){return b.sc-a.sc;});return hit.slice(0,12).map(function(h){return h.x;});}
+function openAnim(){if(!db||!db[city])return;E('animCity').textContent=city;animReset();E('animOv').classList.add('open');setTimeout(function(){E('animInput').focus();},80);}
+function closeAnim(){E('animOv').classList.remove('open');}
+function animReset(){animSel=null;animCat='';animCond='';E('animInput').value='';E('animSug').innerHTML='';E('animAsk').innerHTML='';E('animCondBox').innerHTML='';E('animResult').innerHTML='';var i=E('animInput');if(i)i.focus();}
+function animSuggest(){
+  animSel=null;animCat='';animCond='';E('animAsk').innerHTML='';E('animCondBox').innerHTML='';E('animResult').innerHTML='';
+  var q=E('animInput').value.trim();if(!q){E('animSug').innerHTML='';return;}
+  var list=animMatch(q);
+  if(!list.length){
+    E('animSug').innerHTML='';
+    E('animAsk').innerHTML='<div class="an-msg">名單裡沒有「'+esc(q)+'」，請先判斷是不是保育類：</div><div class="an-chips">'
+      +'<button class="an-chip" onclick="animPickCat(\''+esc(q)+'\',\'protected\')">是保育類</button>'
+      +'<button class="an-chip" onclick="animPickCat(\''+esc(q)+'\',\'unknown\')">不是保育類（一般野生動物）</button>'
+      +'<button class="an-chip" onclick="closeAnim();openWild()">🦉 看流程圖判斷</button></div>';
+    return;
+  }
+  E('animSug').innerHTML=list.map(function(x,i){var lab=x.c&&CAT_LABEL[x.c]?CAT_LABEL[x.c][0]:(x.c==='dogcat'?'犬貓':'');return'<button class="an-chip" onclick="animPick('+ANIMALS.indexOf(x)+')">'+esc(x.n)+(lab?'<small>'+esc(lab)+'</small>':'')+'</button>';}).join('');
+}
+function animKey(e){if(e.key==='Enter'){e.preventDefault();var l=animMatch(E('animInput').value);if(l.length)animPick(ANIMALS.indexOf(l[0]));}else if(e.key==='Escape'){closeAnim();}}
+function animPick(idx){
+  var x=ANIMALS[idx];animSel={n:x.n};E('animInput').value=x.n;E('animSug').innerHTML='<button class="an-chip on">'+esc(x.n)+'</button>';
+  E('animResult').innerHTML='';E('animCondBox').innerHTML='';
+  if(x.c==='dogcat'){E('animAsk').innerHTML='<div class="an-msg">🐶🐱 犬貓請依知識庫的犬貓流程處理（📞 客服話術、📊 案件處理流程圖）。</div>';return;}
+  if(x.ask){E('animAsk').innerHTML='<div class="an-step">② '+esc(x.ask.q)+'</div><div class="an-chips">'+x.ask.opts.map(function(o){return'<button class="an-chip" onclick="animPickCat(\''+esc(x.n)+'\',\''+o.c+'\',this)">'+esc(o.l)+'</button>';}).join('')+'</div>';return;}
+  E('animAsk').innerHTML='';animPickCat(x.n,x.c);
+}
+function animPickCat(name,cat,btn){
+  animSel={n:name};animCat=cat;
+  if(btn){btn.parentNode.querySelectorAll('.an-chip').forEach(function(b){b.classList.remove('on');});btn.classList.add('on');}
+  var step=E('animAsk').innerHTML?'③':'②';
+  E('animCondBox').innerHTML='<div class="an-step">'+step+' 動物狀況</div><div class="an-conds">'
+    +['hurt','dead','ok'].map(function(k){return'<button class="an-cond" id="ancond_'+k+'" onclick="animShow(\''+k+'\')">'+COND_LABEL[k]+'</button>';}).join('')+'</div>';
+  E('animResult').innerHTML='';
+}
+function animRule(cat,cond){var g=(db[city]&&db[city].guide)||{};var chain=CAT_FALL[cat]||[cat,'default'];for(var i=0;i<chain.length;i++){var r=g[chain[i]];if(r&&r[cond])return r[cond];}return null;}
+function animShow(cond){
+  animCond=cond;['hurt','dead','ok'].forEach(function(k){var b=E('ancond_'+k);if(b)b.classList.toggle('on',k===cond);});
+  var r=animRule(animCat,cond);var lab=CAT_LABEL[animCat]||['',''];
+  if(!r){E('animResult').innerHTML='<div class="an-msg">目前沒有這個情況的資料，請查知識庫或 LINE 群組詢問。</div>';return;}
+  var h='<div class="an-res"><h4>'+esc(animSel.n)+'・'+COND_LABEL[cond]+(lab[0]?'<span class="an-badge" style="background:'+lab[1]+'">'+esc(lab[0])+'</span>':'')+'</h4>'
+    +'<div class="an-sec"><div class="an-lbl">✅ 處理方式</div><div class="an-val an-act">'+rc(r.act)+'</div></div>'
+    +(r.tel?'<div class="an-sec"><div class="an-lbl">📞 電話</div><div class="an-val">'+rc(r.tel)+'</div></div>':'')
+    +(r.say?'<div class="an-sec"><div class="an-lbl">💬 跟民眾說</div><div class="an-val an-say">'+rc(r.say)+'</div></div>':'')
+    +(r.warn?'<div class="an-sec"><div class="an-lbl">⚠ 注意</div><div class="an-warn">'+r.warn.split('｜').map(esc).join('<br>')+'</div></div>':'')
+    +'<button class="cc-cp" style="margin-top:10px" onclick="animCopy()">📋 複製處理方式</button></div>';
+  E('animResult').innerHTML=h;
+}
+function animCopy(){var r=animRule(animCat,animCond);if(!r)return;var t=animSel.n+'・'+COND_LABEL[animCond]+'\n'+sc(r.act)+(r.tel?'\n電話：'+sc(r.tel):'')+(r.say?'\n話術：'+sc(r.say):'');if(navigator.clipboard){navigator.clipboard.writeText(t).then(function(){toast('📋 已複製');});}else{var ta=document.createElement('textarea');ta.value=t;document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);toast('📋 已複製');}}
 
 // ── 主內容 ──
 function renderContent(){
