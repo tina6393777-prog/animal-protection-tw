@@ -690,9 +690,11 @@ var PROT_LIST=[{"n": "臺灣雲豹", "a": [], "lv": "I"}, {"n": "石虎", "a": [
     ANIMALS.push(o);[o.n].concat(o.a).forEach(function(k){have[nz(k)]=o;});
   });
 })();
-var CAT_LABEL={unknown:['一般野生動物','#3FAE6B'],civet:['白鼻心／鼬獾','#E8953A'],shihu:['保育類（石虎）','#D9534F'],protected:['保育類','#D9534F'],bird:['一般野生動物','#3FAE6B'],pigeon:['一般野生（鴿子）','#3FAE6B'],small:['一般野生動物','#3FAE6B'],large:['大型野生動物','#3FAE6B'],monkey:['野生動物（猴子）','#3FAE6B'],alien:['外來種','#888'],iguana:['外來種（綠鬣蜥）','#888'],snake:['蛇','#6D4C41'],bee:['蜂','#6D4C41']};
-var CAT_FALL={unknown:['unknown','default'],shihu:['shihu','protected','default'],protected:['protected','default'],civet:['civet','default'],bird:['bird','default'],pigeon:['pigeon','bird','default'],alien:['alien','bird','default'],small:['small','default'],large:['large','default'],monkey:['monkey','default'],iguana:['iguana','default'],snake:['snake','default'],bee:['bee','default']};
+var CAT_LABEL={dogcat:['犬貓','#5B9FE8'],unknown:['一般野生動物','#3FAE6B'],civet:['白鼻心／鼬獾','#E8953A'],shihu:['保育類（石虎）','#D9534F'],protected:['保育類','#D9534F'],bird:['一般野生動物','#3FAE6B'],pigeon:['一般野生（鴿子）','#3FAE6B'],small:['一般野生動物','#3FAE6B'],large:['大型野生動物','#3FAE6B'],monkey:['野生動物（猴子）','#3FAE6B'],alien:['外來種','#888'],iguana:['外來種（綠鬣蜥）','#888'],snake:['蛇','#6D4C41'],bee:['蜂','#6D4C41']};
+var CAT_FALL={dogcat:['dogcat'],unknown:['unknown','default'],shihu:['shihu','protected','default'],protected:['protected','default'],civet:['civet','default'],bird:['bird','default'],pigeon:['pigeon','bird','default'],alien:['alien','bird','default'],small:['small','default'],large:['large','default'],monkey:['monkey','default'],iguana:['iguana','default'],snake:['snake','default'],bee:['bee','default']};
 var COND_LABEL={hurt:'受傷',dead:'死亡',ok:'沒受傷（闖入、幼鳥）'};
+var COND_DC={hurt:'受傷、受困',dead:'死亡（屍體）',ok:'沒受傷（拾獲、奶貓、遊蕩）'};
+function condLabel(k){return animCat==='dogcat'?COND_DC[k]:COND_LABEL[k];}
 var animSel=null,animCat='',animCond='';
 function animMatch(q){q=q.trim().replace(/臺/g,'台');if(!q)return[];var hit=[];ANIMALS.forEach(function(x){var names=[x.n].concat(x.a).map(function(k){return k.replace(/臺/g,'台');});var sc=-1;names.forEach(function(nm){if(nm===q)sc=Math.max(sc,3);else if(nm.indexOf(q)===0)sc=Math.max(sc,2);else if(nm.indexOf(q)>=0||q.indexOf(nm)>=0&&nm.length>=2)sc=Math.max(sc,1);});if(sc>=0)hit.push({x:x,sc:sc});});hit.sort(function(a,b){return b.sc-a.sc;});return hit.slice(0,12).map(function(h){return h.x;});}
 function openAnim(){if(!db||!db[city])return;E('animCity').textContent=city;animReset();E('animOv').classList.add('open');setTimeout(function(){E('animInput').focus();},80);}
@@ -717,7 +719,7 @@ function animKey(e){if(e.key==='Enter'){e.preventDefault();var l=animMatch(E('an
 function animPick(idx){
   var x=ANIMALS[idx];animSel={n:x.n,lv:x.lv||''};E('animInput').value=x.n;E('animSug').innerHTML='<button class="an-chip on">'+esc(x.n)+'</button>';
   E('animResult').innerHTML='';E('animCondBox').innerHTML='';
-  if(x.c==='dogcat'){E('animAsk').innerHTML='<div class="an-msg">🐶🐱 犬貓請依知識庫的犬貓流程處理（📞 客服話術、📊 案件處理流程圖）。</div>';return;}
+  if(x.c==='dogcat'){E('animAsk').innerHTML='';animPickCat(x.n,'dogcat');return;}
   if(x.ask){E('animAsk').innerHTML='<div class="an-step">② '+esc(x.ask.q)+'</div><div class="an-chips">'+x.ask.opts.map(function(o){return'<button class="an-chip" onclick="animPickCat(\''+esc(x.n)+'\',\''+o.c+'\',this)">'+esc(o.l)+'</button>';}).join('')+'</div>';return;}
   E('animAsk').innerHTML='';animPickCat(x.n,x.c);
 }
@@ -726,7 +728,7 @@ function animPickCat(name,cat,btn){
   if(btn){btn.parentNode.querySelectorAll('.an-chip').forEach(function(b){b.classList.remove('on');});btn.classList.add('on');}
   var step=E('animAsk').innerHTML?'③':'②';
   E('animCondBox').innerHTML='<div class="an-step">'+step+' 動物狀況</div><div class="an-conds">'
-    +['hurt','dead','ok'].map(function(k){return'<button class="an-cond" id="ancond_'+k+'" onclick="animShow(\''+k+'\')">'+COND_LABEL[k]+'</button>';}).join('')+'</div>';
+    +['hurt','dead','ok'].map(function(k){return'<button class="an-cond" id="ancond_'+k+'" onclick="animShow(\''+k+'\')">'+condLabel(k)+'</button>';}).join('')+'</div>';
   E('animResult').innerHTML='';
 }
 function animRule(cat,cond){var g=(db[city]&&db[city].guide)||{};var chain=CAT_FALL[cat]||[cat,'default'];for(var i=0;i<chain.length;i++){var r=g[chain[i]];if(r&&r[cond])return r[cond];}return null;}
@@ -734,15 +736,26 @@ function animShow(cond){
   animCond=cond;['hurt','dead','ok'].forEach(function(k){var b=E('ancond_'+k);if(b)b.classList.toggle('on',k===cond);});
   var r=animRule(animCat,cond);var lab=CAT_LABEL[animCat]||['',''];
   if(!r){E('animResult').innerHTML='<div class="an-msg">目前沒有這個情況的資料，請查知識庫或 LINE 群組詢問。</div>';return;}
-  var h='<div class="an-res"><h4>'+esc(animSel.n)+'・'+COND_LABEL[cond]+(lab[0]?'<span class="an-badge" style="background:'+lab[1]+'">'+esc(lab[0])+((animSel.lv&&(animCat==='protected'||animCat==='shihu'))?'（第 '+animSel.lv+' 級）':'')+'</span>':'')+'</h4>'
+  var h='<div class="an-res"><h4>'+esc(animSel.n)+'・'+condLabel(cond)+(lab[0]?'<span class="an-badge" style="background:'+lab[1]+'">'+esc(lab[0])+((animSel.lv&&(animCat==='protected'||animCat==='shihu'))?'（第 '+animSel.lv+' 級）':'')+'</span>':'')+'</h4>'
     +'<div class="an-sec"><div class="an-lbl">✅ 處理方式</div><div class="an-val an-act">'+rc(r.act)+'</div></div>'
     +(r.tel?'<div class="an-sec"><div class="an-lbl">📞 電話</div><div class="an-val">'+rc(r.tel)+'</div></div>':'')
     +(r.say?'<div class="an-sec"><div class="an-lbl">💬 跟民眾說</div><div class="an-val an-say">'+rc(r.say)+'</div></div>':'')
     +(r.warn?'<div class="an-sec"><div class="an-lbl">⚠ 注意</div><div class="an-warn">'+r.warn.split('｜').map(esc).join('<br>')+'</div></div>':'')
+    +(r.links&&r.links.length?'<div class="an-sec"><div class="an-lbl">📊 相關流程圖</div><div class="an-chips" style="margin-top:4px">'+r.links.map(function(l,i){return'<button class="an-chip" onclick="animOpenLink('+i+')">'+esc(l.replace('【流程圖】',''))+' ›</button>';}).join('')+'</div></div>':'')
     +'<button class="cc-cp" style="margin-top:10px" onclick="animCopy()">📋 複製處理方式</button></div>';
   E('animResult').innerHTML=h;
 }
-function animCopy(){var r=animRule(animCat,animCond);if(!r)return;var t=animSel.n+'・'+COND_LABEL[animCond]+'\n'+sc(r.act)+(r.tel?'\n電話：'+sc(r.tel):'')+(r.say?'\n話術：'+sc(r.say):'');if(navigator.clipboard){navigator.clipboard.writeText(t).then(function(){toast('📋 已複製');});}else{var ta=document.createElement('textarea');ta.value=t;document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);toast('📋 已複製');}}
+function animOpenLink(i){var r=animRule(animCat,animCond);if(!r||!r.links)return;closeAnim();openItemByQ(r.links[i]);}
+function openItemByQ(prefix){
+  if(!db||!db[city])return;var ti=-1,ii=-1;
+  db[city].topics.forEach(function(t,a){if(ti>=0)return;t.items.forEach(function(it,b){if(ti<0&&(it.q||'').indexOf(prefix)===0){ti=a;ii=b;}});});
+  if(ti<0){toast('找不到這張流程圖');return;}
+  E('srchInput').value='';E('srchPanel').style.display='none';E('mainArea').style.display='block';
+  curChip=ti;renderChips();renderContent();
+  setTimeout(function(){var a=E('qaa'+ti+'_'+ii);if(a&&!a.classList.contains('open'))togQA(ti,ii);
+    var el=a?a.parentNode:E('topic'+ti);if(el){var stick=E('topStick'),off=stick?stick.getBoundingClientRect().bottom:0;window.scrollTo({top:Math.max(0,el.getBoundingClientRect().top+window.pageYOffset-off-10),behavior:'smooth'});}},80);
+}
+function animCopy(){var r=animRule(animCat,animCond);if(!r)return;var t=animSel.n+'・'+condLabel(animCond)+'\n'+sc(r.act)+(r.tel?'\n電話：'+sc(r.tel):'')+(r.say?'\n話術：'+sc(r.say):'');if(navigator.clipboard){navigator.clipboard.writeText(t).then(function(){toast('📋 已複製');});}else{var ta=document.createElement('textarea');ta.value=t;document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);toast('📋 已複製');}}
 
 // ── 主內容 ──
 function renderContent(){
