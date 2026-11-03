@@ -740,11 +740,28 @@ function animShow(cond){
     +'<div class="an-sec"><div class="an-lbl">✅ 處理方式</div><div class="an-val an-act">'+rc(r.act)+'</div></div>'
     +(r.tel?'<div class="an-sec"><div class="an-lbl">📞 電話</div><div class="an-val">'+rc(r.tel)+'</div></div>':'')
     +(r.say?'<div class="an-sec"><div class="an-lbl">💬 跟民眾說</div><div class="an-val an-say">'+rc(r.say)+'</div></div>':'')
+    +(function(){var s=animScripts(cond);return s.length?'<div class="an-sec"><div class="an-lbl">📞 完整話術</div><div class="an-chips" style="margin-top:4px">'+s.map(function(q,i){return'<button class="an-chip" onclick="animOpenScript('+i+')">'+esc(q)+' ›</button>';}).join('')+'</div></div>':'';})()
     +(r.warn?'<div class="an-sec"><div class="an-lbl">⚠ 注意</div><div class="an-warn">'+r.warn.split('｜').map(esc).join('<br>')+'</div></div>':'')
     +(r.links&&r.links.length?'<div class="an-sec"><div class="an-lbl">📊 相關流程圖</div><div class="an-chips" style="margin-top:4px">'+r.links.map(function(l,i){return'<button class="an-chip" onclick="animOpenLink('+i+')">'+esc(l.replace('【流程圖】',''))+' ›</button>';}).join('')+'</div></div>':'')
     +'<button class="cc-cp" style="margin-top:10px" onclick="animCopy()">📋 複製處理方式</button></div>';
   E('animResult').innerHTML=h;
 }
+// 快查 → 對應「📞 客服話術」（資料裡的 scripts 欄位可覆蓋）
+var SCRIPT_MAP={
+  dogcat:{hurt:['【救援】民眾通報受傷犬貓，要求派員救援'],dead:['【屍體】通報路上／公共區域犬貓屍體','【屍體】私人區域內的動物屍體'],ok:['【幼貓】拾獲身上乾淨的奶貓','【拾獲】拾獲有項圈／疑似有主犬貓','【遊蕩犬】遊蕩犬追車、疑似攻擊性']},
+  bird:{ok:['【野鳥】拾獲學飛期幼鳥(無明顯外傷)','【野鳥】幼鳥反覆掉落或親鳥未出現']},
+  _other:{hurt:['【非犬貓】通報鴿子、野鳥、野生動物受傷']}
+};
+function animScripts(cond){
+  var r=animRule(animCat,cond)||{};
+  var m=SCRIPT_MAP[animCat]||{},o=SCRIPT_MAP._other;
+  var list=r.scripts||m[cond]||(animCat!=='dogcat'?o[cond]:null)||[];
+  if(!db||!db[city])return[];
+  var t=db[city].topics.filter(function(x){return x.name.indexOf('話術')>=0;})[0];
+  if(!t)return[];
+  return list.filter(function(q){return t.items.some(function(it){return(it.q||'').indexOf(q)===0;});});
+}
+function animOpenScript(i){var s=animScripts(animCond);if(!s[i])return;closeAnim();openItemByQ(s[i]);}
 function animOpenLink(i){var r=animRule(animCat,animCond);if(!r||!r.links)return;closeAnim();openItemByQ(r.links[i]);}
 function openItemByQ(prefix){
   if(!db||!db[city])return;var ti=-1,ii=-1;
